@@ -6,6 +6,7 @@ buildscript {
   }
 }
 apply plugin: 'com.android.application'
+apply plugin: 'com.google.gms.google-services'
 
 
 android {
@@ -31,7 +32,7 @@ android {
 		}
   }
   defaultConfig {
-    applicationId 'io.github.progark'
+    applicationId 'progark.app'
     minSdkVersion 23
     targetSdkVersion 34
     versionCode 1
@@ -54,6 +55,7 @@ android {
 repositories {
   // needed for AAPT2, may be needed for other tools
   google()
+  mavenCentral()
 }
 
 configurations { natives }
@@ -64,6 +66,7 @@ dependencies {
   implementation project(':core')
 
   implementation(platform("com.google.firebase:firebase-bom:33.10.0"))
+  implementation 'com.google.firebase:firebase-firestore'
   implementation 'com.google.firebase:firebase-auth'
   implementation 'com.google.firebase:firebase-database'
 
@@ -124,7 +127,7 @@ tasks.register('run', Exec) {
   }
 
   def adb = path + "/platform-tools/adb"
-  commandLine "$adb", 'shell', 'am', 'start', '-n', 'io.github.progark/io.github.progark.android.AndroidLauncher'
+  commandLine "$adb", 'shell', 'am', 'start', '-n', 'progark.app/progark.app.android.AndroidLauncher'
 }
 
 eclipse.project.name = appName + "-android"
