@@ -20,11 +20,11 @@ public class AndroidLauncher extends AndroidApplication {
             FirebaseApp.initializeApp(this);
         }
 
-        database = FirebaseDatabase.getInstance().getReference();
+        AndroidDatabaseManager dbManager = AndroidDatabaseManager.getInstance();
 
         super.onCreate(savedInstanceState);
         AndroidApplicationConfiguration configuration = new AndroidApplicationConfiguration();
         configuration.useImmersiveMode = true; // Recommended, but not required.
-        initialize(new Main(), configuration);
+        initialize(new Main(dbManager), configuration);
     }
 }
