@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "877133086241",
+    "project_id": "programvarearkitekturv25",
+    "storage_bucket": "programvarearkitekturv25.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:877133086241:android:cfd83621b436374516ed60",
+        "android_client_info": {
+          "package_name": "progark.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDh3hxxqjMRwL5pmG3R7eugKewy3wj09mo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
