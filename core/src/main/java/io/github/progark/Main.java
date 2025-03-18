@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
 
 
+import io.github.progark.Client.Views.Login.LoginView;
 import io.github.progark.Client.Views.Login.RegistrationView;
 import io.github.progark.Server.Service.AuthService;
 import io.github.progark.Server.database.FirebaseAuthManager;
@@ -39,7 +40,7 @@ public class Main extends Game {
     @Override
     public void create() {
 
-        this.setScreen(new RegistrationView(this, authService));
+        this.setScreen(new LoginView(this, authService));
     }
 }
 

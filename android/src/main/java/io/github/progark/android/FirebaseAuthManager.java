@@ -1,10 +1,12 @@
 package io.github.progark.android;
 
 import android.util.Log;
-import androidx.annotation.NonNull;
+
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import io.github.progark.Server.Service.AuthService; // Change to proper interface
+import io.github.progark.Server.Service.SignInCallback;
+
 
 public class FirebaseAuthManager implements AuthService { // Change interface
 
@@ -27,23 +29,22 @@ public class FirebaseAuthManager implements AuthService { // Change interface
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
-                    FirebaseUser user = auth.getCurrentUser();
-                    Log.d("FirebaseAuth", "User registered: " + (user != null ? user.getEmail() : "Unknown"));
+                    Log.d("FirebaseAuth", "User registered!");
                 } else {
                     Log.e("FirebaseAuth", "Registration failed", task.getException());
                 }
             });
-    }
+        }
 
     @Override
-    public void signIn(String email, String password) {
+    public void signIn(String email, String password, SignInCallback callback) {
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
                     FirebaseUser user = auth.getCurrentUser();
-                    Log.d("FirebaseAuth", "User logged in: " + (user != null ? user.getEmail() : "Unknown"));
+                    callback.onSuccess("We did it");
                 } else {
-                    Log.e("FirebaseAuth", "Login failed", task.getException());
+                    callback.onFailure(new Exception("Sign-in failed", task.getException()));
                 }
             });
     }

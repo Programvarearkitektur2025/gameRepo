@@ -34,13 +34,29 @@ public class RegistrationView implements Screen {
         table.setFillParent(true);
         stage.addActor(table);
 
+
+        // Button that takes you to LoginView
+        TextButton myButton = new TextButton("Already registered? Click here", skin);
+        myButton.getLabel().setFontScale(4f); // Makes text bigger
+        myButton.setSize(400, 200);
+        myButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                game.setScreen(new LoginView(game,authService));
+            }
+        });
+        table.add(myButton).width(400).height(200).pad(20); // Makes button larger and adds spacing
+        table.row();
+
         // Create UI elements with increased size
+        // Email input field
         Label emailLabel = new Label("Email:", skin);
         emailLabel.setFontScale(2f);
         TextField emailField = new TextField("", skin);
         emailField.setStyle(emailField.getStyle());
         emailField.getStyle().font.getData().setScale(2f);
 
+        // Password input field
         Label passwordLabel = new Label("Password:", skin);
         passwordLabel.setFontScale(2f);
         TextField passwordField = new TextField("", skin);
@@ -48,11 +64,13 @@ public class RegistrationView implements Screen {
         passwordField.setPasswordCharacter('*');
         passwordField.getStyle().font.getData().setScale(2f);
 
+        // Register button
         TextButton registerButton = new TextButton("Register", skin);
         registerButton.getLabel().setFontScale(2f);
         Label statusLabel = new Label("", skin);
         statusLabel.setFontScale(2f);
 
+        // Register button onclick logic
         registerButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -63,7 +81,7 @@ public class RegistrationView implements Screen {
                     authService.signUp(email, password);
                     statusLabel.setText("Registration Successful!");
 
-                    game.setScreen(new HomeView(game));
+                    game.setScreen(new LoginView(game, authService));
                 } else {
                     statusLabel.setText("Please enter valid credentials.");
                 }
