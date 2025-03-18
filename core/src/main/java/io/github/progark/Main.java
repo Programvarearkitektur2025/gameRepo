@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
 
 
+import io.github.progark.Client.Views.Login.RegistrationView;
 import io.github.progark.Server.Service.AuthService;
 import io.github.progark.Server.database.FirebaseAuthManager;
 import io.github.progark.Client.Views.Menu.HomeView;
@@ -17,6 +18,7 @@ import io.github.progark.Server.database.databaseManager;
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class Main extends Game {
     private databaseManager dbInstance;
+    private AuthService authService;
 
 
     public Main(databaseManager dbManager, AuthService authManager){
@@ -24,19 +26,20 @@ public class Main extends Game {
             return;
         }
         dbInstance = dbManager;
+        authService = authManager;
 
         if (authManager.isUserLoggedIn()) {
             System.out.println("Logged in as: " + authManager.getCurrentUserEmail());
         } else {
             System.out.println("No user logged in.");
         }
-
     }
 
 
     @Override
     public void create() {
-        this.setScreen(new HomeView(this)); // Start with the UI screen
+
+        this.setScreen(new RegistrationView(this, authService));
     }
 }
 
