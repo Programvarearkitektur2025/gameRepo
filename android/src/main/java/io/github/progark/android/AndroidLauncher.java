@@ -11,6 +11,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import io.github.progark.android.FirebaseAuthManager;
+import io.github.progark.Server.Service.AuthService;
 
 /** Launches the Android application. */
 public class AndroidLauncher extends AndroidApplication {
@@ -19,28 +21,18 @@ public class AndroidLauncher extends AndroidApplication {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
         if (FirebaseApp.getApps(this).isEmpty()) {
             FirebaseApp.initializeApp(this);
         }
 
         AndroidDatabaseManager dbManager = AndroidDatabaseManager.getInstance();
-        auth = FirebaseAuth.getInstance();
+        AuthService authManager = FirebaseAuthManager.getInstance();
 
-        super.onCreate(savedInstanceState);
         AndroidApplicationConfiguration configuration = new AndroidApplicationConfiguration();
-        configuration.useImmersiveMode = true; // Recommended, but not required.
-        initialize(new Main(dbManager), configuration);
-
-        checkUserLogin();
+        configuration.useImmersiveMode = true;
+        initialize(new Main(dbManager, authManager), configuration);
     }
 
-    private void checkUserLogin() {
-        FirebaseUser user = auth.getCurrentUser();
-        if (user != null) {
-            Log.d("FirebaseAuth", "User is logged in: " + user.getEmail());
-        } else {
-            Log.d("FirebaseAuth", "No user is logged in");
-        }
-    }
 }

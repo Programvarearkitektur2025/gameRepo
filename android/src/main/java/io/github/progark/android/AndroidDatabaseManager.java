@@ -40,5 +40,4 @@ public class AndroidDatabaseManager implements databaseManager{
     }
 
 
-
 }
