@@ -40,4 +40,3 @@ public class Main extends Game {
     }
 }
 
-

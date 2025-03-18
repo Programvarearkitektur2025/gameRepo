@@ -26,18 +26,21 @@ public class HomeView implements Screen {
 
         Table table = new Table();
         table.setFillParent(true);
+        table.center();
         stage.addActor(table);
 
         // Create a button
         TextButton myButton = new TextButton("Click Me!", skin);
+        myButton.getLabel().setFontScale(4f); // Makes text bigger
+        myButton.setSize(400, 200);
         myButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 System.out.println("Button Clicked!");
             }
         });
-
-        table.add(myButton).fillX().uniformX();
+        table.add(myButton).width(400).height(200).pad(20); // Makes button larger and adds spacing
+        table.row();
 
     }
 
