@@ -3,8 +3,10 @@ package io.github.progark.Client.Views.Login;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -22,6 +24,13 @@ public class RegistrationView implements Screen {
     private Skin skin;
     private AuthService authService;
 
+    private Texture backgroundTexture;
+    private Texture logoTexture;
+    private Image background;
+    private Image logo;
+
+
+
     public RegistrationView(Main game, AuthService authService) {
         this.game = game;
         this.authService = authService;
@@ -30,11 +39,33 @@ public class RegistrationView implements Screen {
 
         Gdx.input.setInputProcessor(stage);
 
+        backgroundTexture = new Texture(Gdx.files.internal("Background_1.png"));
+        logoTexture = new Texture(Gdx.files.internal("ThinkFastLogo 2.png"));
+
+        background = new Image(backgroundTexture);
+        logo = new Image(logoTexture);
+
+        background.setFillParent(true);
+
         Table table = new Table();
         table.setFillParent(true);
+        stage.addActor(background);
         stage.addActor(table);
 
+        table.add(logo).center().padBottom(100).row();
+
+        Label titleLabel = new Label("Sign up", skin);
+        titleLabel.setFontScale(2.5f);
+        table.add(titleLabel).center().padBottom(30).row();
+
+
         // Create UI elements with increased size
+        Label usernameLabel = new Label("Username:", skin);
+        usernameLabel.setFontScale(2f);
+        TextField usernameField = new TextField("", skin);
+        usernameField.setStyle(usernameField.getStyle());
+        usernameField.getStyle().font.getData().setScale(2f);
+
         Label emailLabel = new Label("Email:", skin);
         emailLabel.setFontScale(2f);
         TextField emailField = new TextField("", skin);
@@ -47,6 +78,13 @@ public class RegistrationView implements Screen {
         passwordField.setPasswordMode(true);
         passwordField.setPasswordCharacter('*');
         passwordField.getStyle().font.getData().setScale(2f);
+
+        Label confirmPasswordLabel = new Label("Confirm password:", skin);
+        confirmPasswordLabel.setFontScale(2f);
+        TextField confirmPasswordField = new TextField("", skin);
+        confirmPasswordField.setPasswordMode(true);
+        confirmPasswordField.setPasswordCharacter('*');
+        confirmPasswordField.getStyle().font.getData().setScale(2f);
 
         TextButton registerButton = new TextButton("Register", skin);
         registerButton.getLabel().setFontScale(2f);
@@ -71,11 +109,17 @@ public class RegistrationView implements Screen {
         });
 
         // Arrange UI elements in the table with increased padding
-        table.add(emailLabel).left().pad(20);
-        table.add(emailField).width(400).height(100).pad(20);
+        table.add(usernameLabel).expandX().left().pad(20);
+        table.add(usernameField).width(400).padLeft(60).height(100).pad(20);
         table.row();
-        table.add(passwordLabel).left().pad(20);
-        table.add(passwordField).width(400).height(100).pad(20);
+        table.add(emailLabel).left().padLeft(60).pad(20);
+        table.add(emailField).width(400).padLeft(60).height(100).pad(20);
+        table.row();
+        table.add(passwordLabel).left().padLeft(60).pad(20);
+        table.add(passwordField).width(400).padLeft(60).height(100).pad(20);
+        table.row();
+        table.add(confirmPasswordLabel).left().padLeft(60).pad(20);
+        table.add(confirmPasswordField).width(400).padLeft(60).height(100).pad(20);
         table.row();
         table.add(registerButton).colspan(2).center().pad(30).width(300).height(120);
         table.row();
@@ -110,5 +154,7 @@ public class RegistrationView implements Screen {
     public void dispose() {
         stage.dispose();
         skin.dispose();
+        backgroundTexture.dispose();
+        logoTexture.dispose();
     }
 }
