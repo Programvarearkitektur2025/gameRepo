@@ -35,7 +35,7 @@ public class HomeView implements Screen {
         Gdx.input.setInputProcessor(stage);
 
         backgroundTexture = new Texture(Gdx.files.internal("Background_1.png"));
-        logoTexture = new Texture(Gdx.files.internal("ThinkFastLogo 2.png"));
+        logoTexture = new Texture(Gdx.files.internal("ThinkFastLogo.png"));
 
         background = new Image(backgroundTexture);
         logo = new Image(logoTexture);
@@ -50,19 +50,12 @@ public class HomeView implements Screen {
 
         table.add(logo).padBottom(100).row(); //padding between the logo and buttons
 
-        //TextButton.TextButtonStyle textButtonStyle = new TextButton.TextButtonStyle();
-        //textButtonStyle.up = skin.newDrawable("default-round", new Color(0x9FDB83FF));
-        //textButtonStyle.down = skin.newDrawable("default-round", new Color(0x9FDB83FF));
-        //textButtonStyle.font = skin.getFont("default");
-        //textButtonStyle.fontColor = new Color(0x353535FF);
-
         // Create a buttons
-        //TextButton loginButton = new TextButton("LOG IN", textButtonStyle);
-        //TextButton signUpButton = new TextButton("SIGN UP", textButtonStyle);
-        // Create a buttons
-        TextButton loginButton = new TextButton("LOG IN", skin);
-        TextButton signUpButton = new TextButton("SIGN UP", skin);
+        //TextButton loginButton = new TextButton("LOG IN", skin,"ninepatch");
+        //TextButton signUpButton = new TextButton("SIGN UP", skin, "ninepatch");
 
+        TextButton loginButton = new TextButton("LOG IN", skin,"ninepatch");
+        TextButton signUpButton = new TextButton("SIGN UP", skin, "ninepatch");
 
         // Style the buttons
         loginButton.getLabel().setFontScale(2f);
@@ -76,7 +69,7 @@ public class HomeView implements Screen {
         loginButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                game.setScreen(new LoginView());
+                game.setScreen(new LoginView(game));
             }
         });
 

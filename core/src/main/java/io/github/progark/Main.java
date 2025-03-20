@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
 
 
+import io.github.progark.Client.Views.Login.LoginView;
 import io.github.progark.Client.Views.Login.RegistrationView;
 import io.github.progark.Server.Service.AuthService;
 import io.github.progark.Server.database.FirebaseAuthManager;
@@ -22,24 +23,18 @@ public class Main extends Game {
 
 
     public Main(databaseManager dbManager, AuthService authManager){
-        if (dbManager == null){
+        if (dbManager == null || authManager == null){
+            System.out.println("Warning: Missing databaseManager or AuthService");
             return;
         }
         dbInstance = dbManager;
         authService = authManager;
-
-        if (authManager.isUserLoggedIn()) {
-            System.out.println("Logged in as: " + authManager.getCurrentUserEmail());
-        } else {
-            System.out.println("No user logged in.");
-        }
     }
 
 
     @Override
     public void create() {
-
-        this.setScreen(new RegistrationView(this,null));
+        this.setScreen(new LoginView(this));
     }
 }
 
