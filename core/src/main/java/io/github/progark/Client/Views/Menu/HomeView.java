@@ -62,6 +62,8 @@ public class HomeView implements Screen {
         // Create a buttons
         TextButton loginButton = new TextButton("LOG IN", skin);
         TextButton signUpButton = new TextButton("SIGN UP", skin);
+
+
         // Style the buttons
         loginButton.getLabel().setFontScale(2f);
         signUpButton.getLabel().setFontScale(2f);
