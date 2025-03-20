@@ -52,11 +52,11 @@ public class RegistrationView implements Screen {
         stage.addActor(background);
         stage.addActor(table);
 
-        table.add(logo).center().padBottom(100).row();
+        table.add(logo).colspan(2).expandX().center().padBottom(100).row();
 
         Label titleLabel = new Label("Sign up", skin);
         titleLabel.setFontScale(2.5f);
-        table.add(titleLabel).center().padBottom(30).row();
+        table.add(titleLabel).colspan(2).expandX().center().padBottom(30).row();
 
 
         // Create UI elements with increased size
