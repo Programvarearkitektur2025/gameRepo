@@ -39,5 +39,10 @@ public class AndroidDatabaseManager implements databaseManager{
         });
     }
 
+    /*
+    @Override
+    public void deleteData(String key, dataCallback callback) {
+    }
+     */
 
 }

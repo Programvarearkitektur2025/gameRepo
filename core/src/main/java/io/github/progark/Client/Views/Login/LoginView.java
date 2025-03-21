@@ -4,12 +4,20 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+
+import io.github.progark.Client.Views.Menu.HomeView;
+import io.github.progark.Client.Views.View;
 import io.github.progark.Main;
+import io.github.progark.Server.Service.Callback;
+import io.github.progark.Server.Service.AuthService;
+
 
 public class LoginView implements Screen {
 
@@ -19,7 +27,7 @@ public class LoginView implements Screen {
     private Texture logoTexture, backgroundTexture;
     private Image logo, background;
 
-    public LoginView(Main game) {
+    public LoginView(Main game, AuthService authService) {
         this.game = game;
         stage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
@@ -61,10 +69,47 @@ public class LoginView implements Screen {
         // Login Button
         TextButton loginButton = new TextButton("Log in", skin); // Uses same style as HomeView
         loginButton.getLabel().setFontScale(1.5f);
+        Label statusLabel = new Label("", skin);
+        statusLabel.setFontScale(2f);
 
-        // Register Label
-        Label registerLabel = new Label("Don't have an account? Register here", skin);
-        registerLabel.setFontScale(0.9f);
+        // Login button onclick logic
+        loginButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                String email = usernameField.getText();
+                String password = passwordField.getText();
+
+                if (!email.isEmpty() && !password.isEmpty()) {
+                    authService.signIn(email, password, new Callback() {
+                        @Override
+                        public void onSuccess(String message) {
+                            System.out.println("Sign-in successful! User: " + message);
+                            View.safeSetScreen(game, () -> new RegistrationView(game, authService));
+
+                        }
+
+                        @Override
+                        public void onFailure(Exception e) {
+                            System.out.println("Sign-in failed: " + e.getMessage());
+                        }
+                    });
+                } else {
+                    statusLabel.setText("Please enter valid credentials.");
+                }
+            }
+        });
+        // Button that takes you to RegistrationView
+        TextButton registerButton = new TextButton("New? Register user here", skin);
+        registerButton.getLabel().setFontScale(4f); // Makes text bigger
+        registerButton.setSize(400, 200);
+        registerButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                game.setScreen(new RegistrationView(game,authService));
+            }
+        });
+        table.add(registerButton).width(400).height(200).pad(20); // Makes button larger and adds spacing
+        table.row();
 
         // Add UI Elements to Table
         table.add(logo).size(200, 200).padBottom(20).row();
@@ -72,7 +117,7 @@ public class LoginView implements Screen {
         table.add(usernameField).width(350).height(50).padBottom(20).row();
         table.add(passwordField).width(350).height(50).padBottom(30).row();
         table.add(loginButton).width(350).height(60).padBottom(20).row();
-        table.add(registerLabel).padBottom(20).row();
+        table.add(registerButton).padBottom(20).row();
     }
 
     @Override

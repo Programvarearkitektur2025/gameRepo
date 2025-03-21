@@ -23,19 +23,24 @@ public class Main extends Game {
 
 
     public Main(databaseManager dbManager, AuthService authManager){
-        if (dbManager == null || authManager == null){
-            System.out.println("Warning: Missing databaseManager or AuthService");
+        if (dbManager == null){
             return;
         }
         dbInstance = dbManager;
         authService = authManager;
+
+        if (authManager.isUserLoggedIn()) {
+            System.out.println("Logged in as: " + authManager.getCurrentUserEmail());
+        } else {
+            System.out.println("No user logged in.");
+        }
     }
 
 
     @Override
     public void create() {
-        this.setScreen(new HomeView(this));
+
+        this.setScreen(new LoginView(this, authService));
     }
 }
-
 
