@@ -3,8 +3,10 @@ package io.github.progark.Client.Views.Login;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -22,6 +24,13 @@ public class RegistrationView implements Screen {
     private Skin skin;
     private AuthService authService;
 
+    private Texture backgroundTexture;
+    private Texture logoTexture;
+    private Image background;
+    private Image logo;
+
+
+
     public RegistrationView(Main game, AuthService authService) {
         this.game = game;
         this.authService = authService;
@@ -30,33 +39,39 @@ public class RegistrationView implements Screen {
 
         Gdx.input.setInputProcessor(stage);
 
+        backgroundTexture = new Texture(Gdx.files.internal("Background_1.png"));
+        logoTexture = new Texture(Gdx.files.internal("ThinkFastLogo 2.png"));
+
+        background = new Image(backgroundTexture);
+        logo = new Image(logoTexture);
+
+        background.setFillParent(true);
+
         Table table = new Table();
         table.setFillParent(true);
+        stage.addActor(background);
         stage.addActor(table);
 
+        table.add(logo).colspan(2).expandX().center().padBottom(100).row();
 
-        // Button that takes you to LoginView
-        TextButton myButton = new TextButton("Already registered? Click here", skin);
-        myButton.getLabel().setFontScale(4f); // Makes text bigger
-        myButton.setSize(400, 200);
-        myButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                game.setScreen(new LoginView(game,authService));
-            }
-        });
-        table.add(myButton).width(400).height(200).pad(20); // Makes button larger and adds spacing
-        table.row();
+        Label titleLabel = new Label("Sign up", skin);
+        titleLabel.setFontScale(2.5f);
+        table.add(titleLabel).colspan(2).expandX().center().padBottom(30).row();
+
 
         // Create UI elements with increased size
-        // Email input field
+        Label usernameLabel = new Label("Username:", skin);
+        usernameLabel.setFontScale(2f);
+        TextField usernameField = new TextField("", skin);
+        usernameField.setStyle(usernameField.getStyle());
+        usernameField.getStyle().font.getData().setScale(2f);
+
         Label emailLabel = new Label("Email:", skin);
         emailLabel.setFontScale(2f);
         TextField emailField = new TextField("", skin);
         emailField.setStyle(emailField.getStyle());
         emailField.getStyle().font.getData().setScale(2f);
 
-        // Password input field
         Label passwordLabel = new Label("Password:", skin);
         passwordLabel.setFontScale(2f);
         TextField passwordField = new TextField("", skin);
@@ -64,13 +79,18 @@ public class RegistrationView implements Screen {
         passwordField.setPasswordCharacter('*');
         passwordField.getStyle().font.getData().setScale(2f);
 
-        // Register button
+        Label confirmPasswordLabel = new Label("Confirm password:", skin);
+        confirmPasswordLabel.setFontScale(2f);
+        TextField confirmPasswordField = new TextField("", skin);
+        confirmPasswordField.setPasswordMode(true);
+        confirmPasswordField.setPasswordCharacter('*');
+        confirmPasswordField.getStyle().font.getData().setScale(2f);
+
         TextButton registerButton = new TextButton("Register", skin);
         registerButton.getLabel().setFontScale(2f);
         Label statusLabel = new Label("", skin);
         statusLabel.setFontScale(2f);
 
-        // Register button onclick logic
         registerButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -81,7 +101,7 @@ public class RegistrationView implements Screen {
                     authService.signUp(email, password);
                     statusLabel.setText("Registration Successful!");
 
-                    game.setScreen(new LoginView(game, authService));
+                    game.setScreen(new HomeView(game));
                 } else {
                     statusLabel.setText("Please enter valid credentials.");
                 }
@@ -89,11 +109,17 @@ public class RegistrationView implements Screen {
         });
 
         // Arrange UI elements in the table with increased padding
-        table.add(emailLabel).left().pad(20);
-        table.add(emailField).width(400).height(100).pad(20);
+        table.add(usernameLabel).expandX().left().pad(20);
+        table.add(usernameField).width(400).padLeft(60).height(100).pad(20);
         table.row();
-        table.add(passwordLabel).left().pad(20);
-        table.add(passwordField).width(400).height(100).pad(20);
+        table.add(emailLabel).left().padLeft(60).pad(20);
+        table.add(emailField).width(400).padLeft(60).height(100).pad(20);
+        table.row();
+        table.add(passwordLabel).left().padLeft(60).pad(20);
+        table.add(passwordField).width(400).padLeft(60).height(100).pad(20);
+        table.row();
+        table.add(confirmPasswordLabel).left().padLeft(60).pad(20);
+        table.add(confirmPasswordField).width(400).padLeft(60).height(100).pad(20);
         table.row();
         table.add(registerButton).colspan(2).center().pad(30).width(300).height(120);
         table.row();
@@ -128,5 +154,7 @@ public class RegistrationView implements Screen {
     public void dispose() {
         stage.dispose();
         skin.dispose();
+        backgroundTexture.dispose();
+        logoTexture.dispose();
     }
 }
