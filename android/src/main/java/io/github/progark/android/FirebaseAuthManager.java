@@ -5,7 +5,7 @@ import android.util.Log;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import io.github.progark.Server.Service.AuthService; // Change to proper interface
-import io.github.progark.Server.Service.SignInCallback;
+import io.github.progark.Server.Service.Callback;
 
 
 public class FirebaseAuthManager implements AuthService { // Change interface
@@ -37,7 +37,7 @@ public class FirebaseAuthManager implements AuthService { // Change interface
         }
 
     @Override
-    public void signIn(String email, String password, SignInCallback callback) {
+    public void signIn(String email, String password, Callback callback) {
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {

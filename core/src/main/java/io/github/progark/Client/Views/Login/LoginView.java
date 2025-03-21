@@ -15,7 +15,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import io.github.progark.Client.Views.Menu.HomeView;
 import io.github.progark.Main;
 import io.github.progark.Server.Service.AuthService;
-import io.github.progark.Server.Service.SignInCallback;
+import io.github.progark.Server.Service.Callback;
+
 
 public class LoginView implements Screen {
     private Main game;
@@ -78,10 +79,11 @@ public class LoginView implements Screen {
                 String password = passwordField.getText();
 
                 if (!email.isEmpty() && !password.isEmpty()) {
-                    authService.signIn(email, password, new SignInCallback() {
+                    authService.signIn(email, password, new Callback() {
                         @Override
                         public void onSuccess(String message) {
                             System.out.println("Sign-in successful! User: " + message);
+                            game.setScreen(new HomeView(game));
                         }
 
                         @Override
