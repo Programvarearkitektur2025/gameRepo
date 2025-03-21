@@ -1,10 +1,15 @@
 package io.github.progark.Client.Views;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+
+import java.util.function.Supplier;
+
+import io.github.progark.Main;
 
 public abstract class View {
     protected SpriteBatch spriteBatch;
@@ -62,5 +67,9 @@ public abstract class View {
         stage.act();
 
          */
+    }
+
+    public static void safeSetScreen(Main game, Supplier<Screen> screenSupplier) {
+        Gdx.app.postRunnable(() -> game.setScreen(screenSupplier.get()));
     }
 }

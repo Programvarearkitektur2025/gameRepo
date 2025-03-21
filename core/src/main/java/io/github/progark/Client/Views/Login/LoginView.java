@@ -13,6 +13,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 import io.github.progark.Client.Views.Menu.HomeView;
+import io.github.progark.Client.Views.View;
 import io.github.progark.Main;
 import io.github.progark.Server.Service.Callback;
 import io.github.progark.Server.Service.AuthService;
@@ -83,7 +84,8 @@ public class LoginView implements Screen {
                         @Override
                         public void onSuccess(String message) {
                             System.out.println("Sign-in successful! User: " + message);
-                            game.setScreen(new RegistrationView(game, authService));
+                            View.safeSetScreen(game, () -> new RegistrationView(game, authService));
+
                         }
 
                         @Override
