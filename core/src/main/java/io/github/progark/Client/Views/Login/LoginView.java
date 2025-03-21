@@ -83,7 +83,7 @@ public class LoginView implements Screen {
                         @Override
                         public void onSuccess(String message) {
                             System.out.println("Sign-in successful! User: " + message);
-                            game.setScreen(new HomeView(game));
+                            game.setScreen(new RegistrationView(game, authService));
                         }
 
                         @Override
