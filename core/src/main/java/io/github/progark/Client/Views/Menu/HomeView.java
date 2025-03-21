@@ -54,8 +54,8 @@ public class HomeView implements Screen {
         //TextButton loginButton = new TextButton("LOG IN", skin,"ninepatch");
         //TextButton signUpButton = new TextButton("SIGN UP", skin, "ninepatch");
 
-        TextButton loginButton = new TextButton("LOG IN", skin,"ninepatch");
-        TextButton signUpButton = new TextButton("SIGN UP", skin, "ninepatch");
+        TextButton loginButton = new TextButton("LOG IN", skin);// "ninepatch");
+        TextButton signUpButton = new TextButton("SIGN UP", skin); //, "ninepatch");
 
         // Style the buttons
         loginButton.getLabel().setFontScale(2f);

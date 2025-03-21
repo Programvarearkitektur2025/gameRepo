@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
 
 
+import io.github.progark.Client.Views.Game.GameView;
 import io.github.progark.Client.Views.Login.LoginView;
 import io.github.progark.Client.Views.Login.RegistrationView;
 import io.github.progark.Server.Service.AuthService;
@@ -34,7 +35,8 @@ public class Main extends Game {
 
     @Override
     public void create() {
-        this.setScreen(new HomeView(this));
+        this.setScreen(new GameView());
+        //this.setScreen(new HomeView(this));
     }
 }
 
