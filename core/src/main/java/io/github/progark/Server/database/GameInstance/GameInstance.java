@@ -1,20 +1,27 @@
 package io.github.progark.Server.database.GameInstance;
 
-import io.github.progark.Server.database.dataCallback;
-import io.github.progark.Server.database.databaseManager;
+import java.util.Map;
 
-public class GameInstance implements databaseManager{
+import io.github.progark.Server.database.DataCallback;
+import io.github.progark.Server.database.DatabaseManager;
 
-    private databaseManager db;
+public class GameInstance implements DatabaseManager {
 
+    private DatabaseManager db;
+
+
+    /*@Override
+    public void writeData(String key, String value) {
+
+    } */
 
     @Override
-    public void writeData(String key, String value) {
+    public void writeData(String key, Map<String, Object> value) {
 
     }
 
     @Override
-    public void readData(String key, dataCallback callback) {
+    public void readData(String key, DataCallback callback) {
 
     }
 
