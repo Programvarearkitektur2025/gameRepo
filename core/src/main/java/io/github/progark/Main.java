@@ -1,28 +1,20 @@
 package io.github.progark;
 
-import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Game;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.utils.ScreenUtils;
 
 
 import io.github.progark.Client.Views.Login.LoginView;
-import io.github.progark.Client.Views.Login.RegistrationView;
+import io.github.progark.Client.Views.Menu.CreateGameView;
 import io.github.progark.Server.Service.AuthService;
-import io.github.progark.Server.database.FirebaseAuthManager;
-import io.github.progark.Client.Views.Menu.HomeView;
-import io.github.progark.Server.database.databaseManager;
+import io.github.progark.Server.database.DatabaseManager;
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class Main extends Game {
-    private databaseManager dbInstance;
+    private DatabaseManager dbInstance;
     private AuthService authService;
 
 
-    public Main(databaseManager dbManager, AuthService authManager){
+    public Main(DatabaseManager dbManager, AuthService authManager){
         if (dbManager == null){
             return;
         }
@@ -39,8 +31,12 @@ public class Main extends Game {
 
     @Override
     public void create() {
-
         this.setScreen(new LoginView(this, authService));
     }
+
+    public DatabaseManager getDbInstance() {
+        return dbInstance;
+    }
+
 }
 
