@@ -12,6 +12,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 
+
 import io.github.progark.Client.Views.Login.RegistrationView;
 import io.github.progark.Main;
 
@@ -51,8 +52,8 @@ public class LandingView implements Screen {
         //TextButton loginButton = new TextButton("LOG IN", skin,"ninepatch");
         //TextButton signUpButton = new TextButton("SIGN UP", skin, "ninepatch");
 
-        TextButton loginButton = new TextButton("LOG IN", skin,"ninepatch");
-        TextButton signUpButton = new TextButton("SIGN UP", skin, "ninepatch");
+        TextButton loginButton = new TextButton("LOG IN", skin);
+        TextButton signUpButton = new TextButton("SIGN UP", skin);
 
         // Style the buttons
         loginButton.getLabel().setFontScale(2f);
