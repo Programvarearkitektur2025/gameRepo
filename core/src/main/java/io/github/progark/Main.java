@@ -11,6 +11,8 @@ import com.badlogic.gdx.utils.ScreenUtils;
 
 import io.github.progark.Client.Views.Login.LoginView;
 import io.github.progark.Client.Views.Login.RegistrationView;
+import io.github.progark.Client.Views.Menu.CreateGameView;
+import io.github.progark.Client.Views.Menu.JoinGameView;
 import io.github.progark.Server.Service.AuthService;
 import io.github.progark.Server.database.FirebaseAuthManager;
 import io.github.progark.Client.Views.Menu.HomeView;
@@ -40,7 +42,7 @@ public class Main extends Game {
     @Override
     public void create() {
 
-        this.setScreen(new LoginView(this, authService));
+        this.setScreen(new JoinGameView(this));
     }
 }
 
