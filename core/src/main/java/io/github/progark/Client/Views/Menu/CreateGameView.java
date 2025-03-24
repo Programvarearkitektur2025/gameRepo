@@ -15,6 +15,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import io.github.progark.Main;
 
@@ -48,7 +49,7 @@ public class CreateGameView implements Screen {
         // Last inn stor font
         FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("OpenSans.ttf"));
         FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
-        parameter.size = 48; // Ønsket størrelse
+        parameter.size = 100; // Ønsket størrelse
         bigFont = generator.generateFont(parameter);
         generator.dispose();
 
@@ -61,9 +62,15 @@ public class CreateGameView implements Screen {
         Label pinLabel = new Label(generatedPin, labelStyle);
 
         // Start Game-knapp
+
         startGameButtonTexture = new Texture(Gdx.files.internal("StartGameButton.png"));
         TextureRegionDrawable startGameDrawable = new TextureRegionDrawable(new TextureRegion(startGameButtonTexture));
         ImageButton startGameButton = new ImageButton(startGameDrawable);
+
+        startGameButton.getImage().setScaling(Scaling.stretch);         // Strekk bildet så det fyller
+        startGameButton.getImage().setSize(3000, 600);     // Sett eksplisitt størrelse
+        startGameButton.setSize(3000, 600);
+        startGameButton.invalidateHierarchy();                          // Oppdater layout
 
         // Layout
         Table table = new Table();
@@ -73,7 +80,7 @@ public class CreateGameView implements Screen {
 
         table.add(titleLabel).padBottom(20).row();
         table.add(pinLabel).padBottom(40).row();
-        table.add(startGameButton).width(400).height(100); // Større knapp
+        table.add(startGameButton).size(3000,600);
     }
 
     @Override

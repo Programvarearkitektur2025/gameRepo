@@ -42,7 +42,7 @@ public class Main extends Game {
     @Override
     public void create() {
 
-        this.setScreen(new CreateGameView(this));
+        this.setScreen(new JoinGameView(this));
     }
 }
 
