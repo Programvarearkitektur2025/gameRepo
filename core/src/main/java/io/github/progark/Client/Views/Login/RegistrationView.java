@@ -14,7 +14,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 
-import io.github.progark.Client.Views.Menu.HomeView;
+import io.github.progark.Client.Views.Menu.LandingView;
 import io.github.progark.Main;
 import io.github.progark.Server.Service.AuthService;
 
@@ -101,7 +101,7 @@ public class RegistrationView implements Screen {
                     authService.signUp(email, password);
                     statusLabel.setText("Registration Successful!");
 
-                    game.setScreen(new HomeView(game));
+                    game.setScreen(new LandingView(game));
                 } else {
                     statusLabel.setText("Please enter valid credentials.");
                 }
