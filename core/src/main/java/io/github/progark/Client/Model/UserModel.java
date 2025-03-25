@@ -12,10 +12,6 @@ public class UserModel {
         this.username = username;
     }
 
-    public UserModel() {
-
-    }
-
     public String getUid() {
         return uid;
     }
