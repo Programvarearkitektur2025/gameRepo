@@ -1,115 +1,107 @@
 package io.github.progark.Client.Views.Menu;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
 
-
-import io.github.progark.Client.Views.Login.RegistrationView;
+import io.github.progark.Client.Views.View;
 import io.github.progark.Main;
 
-public class LandingView implements Screen {
-    private Main game;
-    private Stage stage;
-    private Skin skin;
-    private Texture backgroundTexture;
-    private Texture logoTexture;
-    private Image background;
-    private Image logo;
+public class LandingView extends View {
+    private final Main game;
+    private final Skin skin;
+    private final Texture backgroundTexture;
+    private final Texture logoTexture;
+    private final Image background;
+    private final Image logo;
 
     public LandingView(Main game) {
+        super();
         this.game = game;
-        stage = new Stage();
-        skin = new Skin(Gdx.files.internal("uiskin.json"));
+        this.skin = new Skin(Gdx.files.internal("uiskin.json"));
 
-        Gdx.input.setInputProcessor(stage);
+        // Load textures
+        this.backgroundTexture = new Texture(Gdx.files.internal("Background_1.png"));
+        this.logoTexture = new Texture(Gdx.files.internal("ThinkFastLogo.png"));
 
-        backgroundTexture = new Texture(Gdx.files.internal("Background_1.png"));
-        logoTexture = new Texture(Gdx.files.internal("ThinkFastLogo.png"));
+        this.background = new Image(backgroundTexture);
+        this.logo = new Image(logoTexture);
+    }
 
-        background = new Image(backgroundTexture);
-        logo = new Image(logoTexture);
-
+    @Override
+    protected void initialize() {
+        // Set up background
         background.setFillParent(true);
+        stage.addActor(background);
 
-
+        // Create main table
         Table table = new Table();
         table.setFillParent(true);
-        stage.addActor(background);
         stage.addActor(table);
 
-        table.add(logo).padBottom(100).row(); //padding between the logo and buttons
+        // Add logo
+        table.add(logo).size(200, 200).padBottom(50).row();
 
-        // Create a buttons
-        //TextButton loginButton = new TextButton("LOG IN", skin,"ninepatch");
-        //TextButton signUpButton = new TextButton("SIGN UP", skin, "ninepatch");
+        // Welcome message
+        Label welcomeLabel = new Label("Welcome to ThinkFast!", skin);
+        welcomeLabel.setFontScale(2.5f);
+        table.add(welcomeLabel).padBottom(50).row();
 
-        TextButton loginButton = new TextButton("LOG IN", skin);
-        TextButton signUpButton = new TextButton("SIGN UP", skin);
+        // Create game button
+        TextButton createGameButton = new TextButton("Create Game", skin);
+        createGameButton.getLabel().setFontScale(2f);
+        createGameButton.setSize(400, 80);
+        table.add(createGameButton).width(400).height(80).padBottom(20).row();
 
-        // Style the buttons
-        loginButton.getLabel().setFontScale(2f);
-        signUpButton.getLabel().setFontScale(2f);
+        //
 
-        // Add buttons to table
-        table.add(loginButton).width(300).height(80).padBottom(30).row();
-        table.add(signUpButton).width(300).height(80);
+        // Join game button
+        TextButton joinGameButton = new TextButton("Join Game", skin);
+        joinGameButton.getLabel().setFontScale(2f);
+        joinGameButton.setSize(400, 80);
+        table.add(joinGameButton).width(400).height(80).padBottom(20).row();
 
-        // Add event listeners
-        loginButton.addListener(new ClickListener() {
+        // Settings button
+        TextButton settingsButton = new TextButton("Settings", skin);
+        settingsButton.getLabel().setFontScale(2f);
+        settingsButton.setSize(400, 80);
+        table.add(settingsButton).width(400).height(80).row();
+
+        // Add button listeners
+        createGameButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                System.out.println("Clicked button yes plis ");
-                //game.setScreen(new LoginView(game));
+                game.getViewManager().setView(() -> new CreateGameView(game));
             }
         });
 
-        signUpButton.addListener(new ClickListener() {
+        joinGameButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                game.setScreen(new RegistrationView(game, null)); //Have set null for now, to check
+                // TODO: Implement join game functionality
+                System.out.println("Join game clicked");
+                game.getViewManager().setView(() -> new JoinGameView(game));
             }
         });
 
-
-
+        settingsButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                // TODO: Implement settings functionality
+                System.out.println("Settings clicked");
+            }
+        });
     }
-
-    @Override
-    public void show() {}
-
-    @Override
-    public void render(float delta) {
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
-        stage.draw();
-    }
-
-    @Override
-    public void resize(int width, int height) {
-        stage.getViewport().update(width, height, true);
-    }
-
-    @Override
-    public void pause() {}
-
-    @Override
-    public void resume() {}
-
-    @Override
-    public void hide() {}
 
     @Override
     public void dispose() {
-        stage.dispose();
+        super.dispose();
         skin.dispose();
         backgroundTexture.dispose();
         logoTexture.dispose();

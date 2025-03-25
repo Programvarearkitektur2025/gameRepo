@@ -2,32 +2,21 @@ package io.github.progark;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.utils.ScreenUtils;
-
 
 import io.github.progark.Client.Views.Login.LoginView;
-import io.github.progark.Client.Views.Login.RegistrationView;
-import io.github.progark.Client.Views.Menu.HomeView;
-import io.github.progark.Client.Views.Menu.LandingView;
-import io.github.progark.Client.Views.View;
+import io.github.progark.Client.Views.ViewManager;
 import io.github.progark.Server.Service.AuthService;
 import io.github.progark.Server.database.DatabaseManager;
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class Main extends Game {
-    private DatabaseManager dbInstance;
     private AuthService authService;
+    private ViewManager viewManager;
 
-
-    public Main(DatabaseManager dbManager, AuthService authManager){
-        if (dbManager == null){
-            return;
+    public Main(DatabaseManager dbManager, AuthService authManager) {
+        if (dbManager == null || authManager == null) {
+            throw new IllegalArgumentException("DatabaseManager and AuthService cannot be null");
         }
-        dbInstance = dbManager;
         authService = authManager;
 
         if (authManager.isUserLoggedIn()) {
@@ -37,19 +26,32 @@ public class Main extends Game {
         }
     }
 
-
     @Override
     public void create() {
-
-
-       this.setScreen(new HomeView(this));
-        //View.safeSetScreen(this, () -> new RegistrationView(this, authService));
-
+        viewManager = new ViewManager();
+        viewManager.setView(new LoginView(this, authService));
     }
 
-    public DatabaseManager getDbInstance() {
-        return dbInstance;
+    @Override
+    public void render() {
+        float delta = Gdx.graphics.getDeltaTime();
+        viewManager.update(delta);
+        viewManager.render();
     }
 
+    @Override
+    public void dispose() {
+        if (viewManager != null) {
+            viewManager.dispose();
+        }
+        super.dispose();
+    }
+
+    public ViewManager getViewManager() {
+        return viewManager;
+    }
+
+    public AuthService getAuthService() {
+        return authService;
+    }
 }
-
