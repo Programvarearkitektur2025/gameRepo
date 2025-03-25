@@ -12,6 +12,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 import io.github.progark.Client.Views.Menu.CreateGameView;
+import io.github.progark.Client.Views.Menu.LandingView;
 import io.github.progark.Client.Views.View;
 import io.github.progark.Main;
 import io.github.progark.Server.Service.AuthService;
