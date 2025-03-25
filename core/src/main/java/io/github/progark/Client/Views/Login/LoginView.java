@@ -2,7 +2,6 @@ package io.github.progark.Client.Views.Login;
 
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -15,8 +14,8 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import io.github.progark.Client.Views.Menu.LandingView;
 import io.github.progark.Client.Views.View;
 import io.github.progark.Main;
-import io.github.progark.Server.Service.Callback;
 import io.github.progark.Server.Service.AuthService;
+import io.github.progark.Server.database.DataCallback;
 
 
 public class LoginView implements Screen {
@@ -37,7 +36,7 @@ public class LoginView implements Screen {
 
         // Load Background and Logo Textures
         backgroundTexture = new Texture(Gdx.files.internal("Background_1.png"));
-        logoTexture = new Texture(Gdx.files.internal("ThinkFastLogo.png")); // Removed space in filename
+        logoTexture = new Texture(Gdx.files.internal("ThinkFastLogo.png"));
 
         background = new Image(backgroundTexture);
         logo = new Image(logoTexture);
@@ -80,11 +79,11 @@ public class LoginView implements Screen {
                 String password = passwordField.getText();
 
                 if (!email.isEmpty() && !password.isEmpty()) {
-                    authService.signIn(email, password, new Callback() {
+                    authService.signIn(email, password, new DataCallback() {
                         @Override
-                        public void onSuccess(String message) {
-                            System.out.println("Sign-in successful! User: " + message);
-                            View.safeSetScreen(game, () -> new RegistrationView(game, authService));
+                        public void onSuccess(Object message) {
+                            System.out.println("Sign-in successful! User: " + (String) message);
+                            View.safeSetScreen(game, () -> new CreateGameView(game));
 
                         }
 

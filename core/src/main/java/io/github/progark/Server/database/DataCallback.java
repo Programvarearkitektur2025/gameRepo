@@ -1,6 +1,6 @@
 package io.github.progark.Server.database;
 
-public interface dataCallback {
-    void onSuccess(String value);
+public interface DataCallback {
+    void onSuccess(Object data);
     void onFailure(Exception e);
 }

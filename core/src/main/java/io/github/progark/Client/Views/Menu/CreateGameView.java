@@ -2,6 +2,7 @@ package io.github.progark.Client.Views.Menu;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
@@ -41,10 +42,12 @@ public class CreateGameView implements Screen {
         generatedPin = String.format("%04d", new Random().nextInt(10000));
 
         // Bakgrunn
+
         backgroundTexture = new Texture(Gdx.files.internal("Background_1.png"));
         background = new Image(backgroundTexture);
         background.setFillParent(true);
         stage.addActor(background);
+
 
         // Last inn stor font
         FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("OpenSans.ttf"));
@@ -81,6 +84,7 @@ public class CreateGameView implements Screen {
         table.add(titleLabel).padBottom(20).row();
         table.add(pinLabel).padBottom(40).row();
         table.add(startGameButton).size(3000,600);
+
     }
 
     @Override
@@ -93,8 +97,10 @@ public class CreateGameView implements Screen {
         stage.draw();
     }
 
+
     @Override
     public void resize(int width, int height) {
+
         stage.getViewport().update(width, height, true);
     }
 
@@ -109,5 +115,6 @@ public class CreateGameView implements Screen {
         backgroundTexture.dispose();
         startGameButtonTexture.dispose();
         bigFont.dispose();
+
     }
 }
