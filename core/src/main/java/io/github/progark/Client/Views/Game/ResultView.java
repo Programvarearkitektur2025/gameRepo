@@ -7,11 +7,15 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+
+import io.github.progark.Client.Model.ResultModel;
+
 //PLACEHOLDER RESULTVIEW, MÅ ENDRES
 public class ResultView implements Screen {
     private Stage stage;
     private Skin skin;
     private Label resultLabel;
+    private ResultModel resultModel;
 
     public ResultView() {
         stage = new Stage(new ScreenViewport());
@@ -57,5 +61,12 @@ public class ResultView implements Screen {
     public void dispose() {
         stage.dispose();
         skin.dispose();
+    }
+
+
+    public void update(ResultModel updatedModel) {
+        this.resultModel = updatedModel;
+
+        resultLabel.setText("Vinner: " + updatedModel.getWinner());
     }
 }
