@@ -4,7 +4,7 @@ import io.github.progark.Server.database.DataCallback;
 
 public interface AuthService {
 
-    void signUp(String email, String password);
+    void signUp(String email, String password, String username, DataCallback callback);
     void signIn(String email, String password, DataCallback dataCallback);
     void signOut();
     boolean isUserLoggedIn();

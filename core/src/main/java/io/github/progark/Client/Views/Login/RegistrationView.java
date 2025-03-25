@@ -17,12 +17,14 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import io.github.progark.Client.Views.Menu.LandingView;
 import io.github.progark.Main;
 import io.github.progark.Server.Service.AuthService;
+import io.github.progark.Server.database.DataCallback;
 
 public class RegistrationView implements Screen {
     private Main game;
     private Stage stage;
     private Skin skin;
     private AuthService authService;
+    private DataCallback callback;
 
     private Texture backgroundTexture;
     private Texture logoTexture;
@@ -96,9 +98,10 @@ public class RegistrationView implements Screen {
             public void clicked(InputEvent event, float x, float y) {
                 String email = emailField.getText();
                 String password = passwordField.getText();
+                String username = usernameField.getText();
 
                 if (!email.isEmpty() && !password.isEmpty()) {
-                    authService.signUp(email, password);
+                    authService.signUp(email, password, username, callback);
                     statusLabel.setText("Registration Successful!");
 
                     game.setScreen(new LandingView(game));

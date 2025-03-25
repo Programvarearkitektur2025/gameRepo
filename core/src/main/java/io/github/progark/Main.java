@@ -11,7 +11,9 @@ import com.badlogic.gdx.utils.ScreenUtils;
 
 import io.github.progark.Client.Views.Login.LoginView;
 import io.github.progark.Client.Views.Login.RegistrationView;
+import io.github.progark.Client.Views.Menu.HomeView;
 import io.github.progark.Client.Views.Menu.LandingView;
+import io.github.progark.Client.Views.View;
 import io.github.progark.Server.Service.AuthService;
 import io.github.progark.Server.database.DatabaseManager;
 
@@ -40,7 +42,8 @@ public class Main extends Game {
     public void create() {
 
 
-        this.setScreen(new HomeView(this));
+       this.setScreen(new HomeView(this));
+        //View.safeSetScreen(this, () -> new RegistrationView(this, authService));
 
     }
 

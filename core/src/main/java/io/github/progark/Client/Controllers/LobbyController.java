@@ -33,9 +33,6 @@ public class LobbyController {
                 lobbyModel.setStatus("waiting");
                 lobbyModel.setCreatedAt(new Timestamp(System.currentTimeMillis()));
 
-
-
-
             }
 
             @Override
