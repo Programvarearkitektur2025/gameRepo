@@ -103,7 +103,7 @@ public class ResultModel {
         map.put("loserScore", loserScore);
         map.put("finishedAt", finishedAt != null ? finishedAt.getTime() : 0);
 
-        // Nye felter:
+
         map.put("questions", questions);
         map.put("numberOfGuessesP1", numberOfGuessesP1);
         map.put("numberOfGuessesP2", numberOfGuessesP2);
