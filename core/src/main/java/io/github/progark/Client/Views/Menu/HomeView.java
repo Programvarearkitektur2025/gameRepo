@@ -10,6 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import io.github.progark.Client.Views.View;
 import io.github.progark.Main;
+import io.github.progark.Server.Service.AuthService;
 
 import java.util.Arrays;
 import java.util.List;
@@ -23,7 +24,7 @@ public class HomeView extends View {
     private final Texture createGameTexture;
     private final Main game;
 
-    public HomeView(Main game) {
+    public HomeView(Main game, AuthService authService) {
         super();
         this.game = game;
         skin = new Skin(Gdx.files.internal("uiskin.json"));
