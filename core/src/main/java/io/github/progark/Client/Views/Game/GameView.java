@@ -9,6 +9,8 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
+import com.badlogic.gdx.utils.Align;
 
 import io.github.progark.Client.Views.View;
 import io.github.progark.Main;
@@ -19,6 +21,8 @@ public class GameView extends View {
     private final Skin skin;
     private final Texture backgroundTexture;
     private final Texture enterButtonTexture;
+    private final Texture textFieldTexture;
+    private final Texture rectangleTexture;
     private final Image background;
 
     private final BitmapFont font;
@@ -30,6 +34,8 @@ public class GameView extends View {
 
         this.backgroundTexture = new Texture(Gdx.files.internal("Background_1.png"));
         this.enterButtonTexture = new Texture(Gdx.files.internal("Enter.png"));
+        this.textFieldTexture = new Texture(Gdx.files.internal("TextField.png"));
+        this.rectangleTexture = new Texture(Gdx.files.internal("Rectangle.png"));
         this.background = new Image(backgroundTexture);
 
         // Font
@@ -47,33 +53,50 @@ public class GameView extends View {
 
         Table table = new Table();
         table.setFillParent(true);
-        table.center().padTop(50);
+        table.top().padTop(50);
         stage.addActor(table);
 
         // Timer
-        Label timerLabel = new Label("27 sec", new Label.LabelStyle(font, Color.WHITE));
+        Label timerLabel = new Label("TIME LEFT: 27 sec", new Label.LabelStyle(font, Color.WHITE));
         table.add(timerLabel).padBottom(50).row();
 
-        // Prompt
-        Label promptLabel = new Label("Girlsname starting with L", new Label.LabelStyle(font, Color.WHITE));
-        table.add(promptLabel).padBottom(60).row();
+        // === Meldingsboks med midtstilt kategori ===
 
-        // Style uten skygge
-        TextField.TextFieldStyle flatWhiteStyle = new TextField.TextFieldStyle();
-        flatWhiteStyle.font = font;
-        flatWhiteStyle.fontColor = Color.BLACK;
-        flatWhiteStyle.background = skin.newDrawable("white", Color.WHITE);
-        flatWhiteStyle.cursor = skin.newDrawable("white", Color.GRAY);
+        // Bruk TextField.png som bakgrunn for meldingsboks
+        Drawable messageBackgroundDrawable = new TextureRegionDrawable(new Texture(Gdx.files.internal("TextField.png")));
 
-        // Meldingsboks (over input)
-        TextArea messageBox = new TextArea("", flatWhiteStyle);
-        messageBox.setDisabled(true);
-        table.add(messageBox).width(800).height(1000).padBottom(80).row();
+        // Kategoritekst (midtstilt)
+        Label promptLabel = new Label("Girl name starting with L", new Label.LabelStyle(font, Color.DARK_GRAY));
+        promptLabel.setAlignment(Align.center);
 
-        // Svarfelt og knapp på rad
-        TextField answerField = new TextField("", flatWhiteStyle);
-        answerField.setMessageText("Write your answer");
+        // Pakk inn i bord for å sentrere teksten i toppen av bildet
+        Table promptTable = new Table();
+        promptTable.setFillParent(true);
+        promptTable.top().padTop(25);
+        promptTable.add(promptLabel).expandX().center();
 
+        // Stack for å kombinere bilde og tekst
+        Stack messageStack = new Stack();
+        Image messageBackground = new Image(messageBackgroundDrawable);
+        messageStack.add(messageBackground);
+        messageStack.add(promptTable);
+
+        table.add(messageStack).width(800).height(1050).padBottom(60).row();
+
+        // === Tekstinput med Rectangle.png ===
+
+        Drawable inputBackgroundDrawable = new TextureRegionDrawable(new Texture(Gdx.files.internal("Rectangle.png")));
+
+        TextField.TextFieldStyle inputStyle = new TextField.TextFieldStyle();
+        inputStyle.font = font;
+        inputStyle.fontColor = Color.DARK_GRAY;
+        inputStyle.background = inputBackgroundDrawable;
+        inputStyle.cursor = skin.newDrawable("white", Color.GRAY);
+
+        TextField answerField = new TextField("", inputStyle);
+        answerField.setMessageText("  Write your answer");
+
+        // Enter-knapp
         ImageButton enterButton = new ImageButton(new TextureRegionDrawable(enterButtonTexture));
         enterButton.addListener(new ClickListener() {
             @Override
@@ -82,11 +105,14 @@ public class GameView extends View {
             }
         });
 
+        // Raden med inputfelt og knapp
         Table inputRow = new Table();
         inputRow.add(answerField).width(500).height(130).padRight(15);
-        inputRow.add(enterButton).size(265,150).padLeft(15);
+        inputRow.add(enterButton).size(265, 150).padLeft(15);
         table.add(inputRow);
     }
+
+
 
     @Override
     public void dispose() {
@@ -94,6 +120,8 @@ public class GameView extends View {
         skin.dispose();
         backgroundTexture.dispose();
         enterButtonTexture.dispose();
+        rectangleTexture.dispose();
+        textFieldTexture.dispose();
         font.dispose();
     }
 }
