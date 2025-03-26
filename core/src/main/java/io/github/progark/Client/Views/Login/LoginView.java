@@ -111,7 +111,7 @@ public class LoginView extends View {
                         @Override
                         public void onSuccess(Object message) {
                             System.out.println("Sign-in successful! User: " + (String) message);
-                            game.getViewManager().setView(() -> new HomeView(game));
+                            game.getViewManager().setView(() -> new HomeView(game, authService));
                         }
 
                         @Override
