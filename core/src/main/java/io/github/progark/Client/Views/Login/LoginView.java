@@ -1,53 +1,51 @@
 package io.github.progark.Client.Views.Login;
 
-import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
-import io.github.progark.Client.Views.Menu.HomeView;
+import io.github.progark.Client.Views.Menu.LandingView;
 import io.github.progark.Client.Views.View;
 import io.github.progark.Main;
-import io.github.progark.Server.Service.Callback;
 import io.github.progark.Server.Service.AuthService;
+import io.github.progark.Server.database.DataCallback;
 
 
-public class LoginView implements Screen {
-
-    private Main game;
-    private Stage stage;
-    private Skin skin;
-    private Texture logoTexture, backgroundTexture;
-    private Image logo, background;
+public class LoginView extends View {
+    private final Main game;
+    private final AuthService authService;
+    private final Skin skin;
+    private final Texture logoTexture, backgroundTexture;
+    private final Image logo, background;
+    private Label statusLabel;
 
     public LoginView(Main game, AuthService authService) {
+        super();
         this.game = game;
-        stage = new Stage(new ScreenViewport());
-        Gdx.input.setInputProcessor(stage);
+        this.authService = authService;
 
-        // Load UI Skin
+        // Load resources
         skin = new Skin(Gdx.files.internal("uiskin.json"));
-
-        // Load Background and Logo Textures
         backgroundTexture = new Texture(Gdx.files.internal("Background_1.png"));
-        logoTexture = new Texture(Gdx.files.internal("ThinkFastLogo.png")); // Removed space in filename
+        logoTexture = new Texture(Gdx.files.internal("ThinkFastLogo.png"));
 
         background = new Image(backgroundTexture);
         logo = new Image(logoTexture);
+    }
 
+    @Override
+    protected void initialize() {
+        // Set up UI
         background.setFillParent(true);
-
-        // Add Background First
         stage.addActor(background);
 
-        // Create Table Layout
         Table table = new Table();
         table.setFillParent(true);
         stage.addActor(table);
@@ -67,49 +65,18 @@ public class LoginView implements Screen {
         passwordField.setPasswordCharacter('*');
 
         // Login Button
-        TextButton loginButton = new TextButton("Log in", skin); // Uses same style as HomeView
+        TextButton loginButton = new TextButton("Log in", skin);
         loginButton.getLabel().setFontScale(1.5f);
-        Label statusLabel = new Label("", skin);
+        statusLabel = new Label("", skin);
         statusLabel.setFontScale(2f);
 
-        // Login button onclick logic
-        loginButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                String email = usernameField.getText();
-                String password = passwordField.getText();
+        setupLoginButton(loginButton, usernameField, passwordField);
 
-                if (!email.isEmpty() && !password.isEmpty()) {
-                    authService.signIn(email, password, new Callback() {
-                        @Override
-                        public void onSuccess(String message) {
-                            System.out.println("Sign-in successful! User: " + message);
-                            View.safeSetScreen(game, () -> new RegistrationView(game, authService));
-
-                        }
-
-                        @Override
-                        public void onFailure(Exception e) {
-                            System.out.println("Sign-in failed: " + e.getMessage());
-                        }
-                    });
-                } else {
-                    statusLabel.setText("Please enter valid credentials.");
-                }
-            }
-        });
-        // Button that takes you to RegistrationView
+        // Register Button
         TextButton registerButton = new TextButton("New? Register user here", skin);
-        registerButton.getLabel().setFontScale(4f); // Makes text bigger
+        registerButton.getLabel().setFontScale(4f);
         registerButton.setSize(400, 200);
-        registerButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                game.setScreen(new RegistrationView(game,authService));
-            }
-        });
-        table.add(registerButton).width(400).height(200).pad(20); // Makes button larger and adds spacing
-        table.row();
+        setupRegisterButton(registerButton);
 
         // Add UI Elements to Table
         table.add(logo).size(200, 200).padBottom(20).row();
@@ -120,33 +87,46 @@ public class LoginView implements Screen {
         table.add(registerButton).padBottom(20).row();
     }
 
-    @Override
-    public void show() {}
+    private void setupLoginButton(TextButton loginButton, TextField usernameField, TextField passwordField) {
+        loginButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                String email = usernameField.getText();
+                String password = passwordField.getText();
 
-    @Override
-    public void render(float delta) {
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        stage.act(Gdx.graphics.getDeltaTime());
-        stage.draw();
+                if (!email.isEmpty() && !password.isEmpty()) {
+                    authService.signIn(email, password, new DataCallback() {
+                        @Override
+                        public void onSuccess(Object message) {
+                            System.out.println("Sign-in successful! User: " + (String) message);
+                            game.getViewManager().setView(() -> new LandingView(game));
+                        }
+
+                        @Override
+                        public void onFailure(Exception e) {
+                            System.out.println("Sign-in failed: " + e.getMessage());
+                            statusLabel.setText("Login failed: " + e.getMessage());
+                        }
+                    });
+                } else {
+                    statusLabel.setText("Please enter valid credentials.");
+                }
+            }
+        });
     }
 
-    @Override
-    public void resize(int width, int height) {
-        stage.getViewport().update(width, height, true);
+    private void setupRegisterButton(TextButton registerButton) {
+        registerButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                game.getViewManager().setView(() -> new RegistrationView(game, authService));
+            }
+        });
     }
-
-    @Override
-    public void pause() {}
-
-    @Override
-    public void resume() {}
-
-    @Override
-    public void hide() {}
 
     @Override
     public void dispose() {
-        stage.dispose();
+        super.dispose();
         skin.dispose();
         backgroundTexture.dispose();
         logoTexture.dispose();

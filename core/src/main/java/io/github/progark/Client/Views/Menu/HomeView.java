@@ -1,119 +1,118 @@
 package io.github.progark.Client.Views.Menu;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 
-import io.github.progark.Client.Views.Login.LoginView;
-import io.github.progark.Client.Views.Login.RegistrationView;
-import io.github.progark.Main;
-import io.github.progark.Server.Service.AuthService;
+import io.github.progark.Client.Views.View;
 
-public class HomeView implements Screen {
-    private Main game;
-    private Stage stage;
-    private Skin skin;
-    private Texture backgroundTexture;
-    private Texture logoTexture;
-    private Image background;
-    private Image logo;
+public class HomeView extends View {
+    private final Skin skin;
+    private final Texture backgroundTexture;
+    private final Image yourTurn;
+    private final Image theirTurn;
 
-    public HomeView(Main game) {
-        this.game = game;
-        stage = new Stage();
+    public HomeView() {
+        super();
+        // Load resources
         skin = new Skin(Gdx.files.internal("uiskin.json"));
+        backgroundTexture = new Texture(Gdx.files.internal("Background2.png"));
 
-        Gdx.input.setInputProcessor(stage);
+        yourTurn = new Image(new Texture(Gdx.files.internal("yourTurn.png")));
+        theirTurn = new Image(new Texture(Gdx.files.internal("theirTurn.png")));
+    }
 
-        backgroundTexture = new Texture(Gdx.files.internal("Background_1.png"));
-        logoTexture = new Texture(Gdx.files.internal("ThinkFastLogo.png"));
-
-        background = new Image(backgroundTexture);
-        logo = new Image(logoTexture);
-
+    @Override
+    protected void initialize() {
+        // Set up UI
+        Image background = new Image(backgroundTexture);
         background.setFillParent(true);
-
-
-        Table table = new Table();
-        table.setFillParent(true);
         stage.addActor(background);
-        stage.addActor(table);
 
-        table.add(logo).padBottom(100).row(); //padding between the logo and buttons
+        Table root = new Table();
+        root.setFillParent(true);
+        stage.addActor(root);
 
-        // Create a buttons
-        //TextButton loginButton = new TextButton("LOG IN", skin,"ninepatch");
-        //TextButton signUpButton = new TextButton("SIGN UP", skin, "ninepatch");
-
-        TextButton loginButton = new TextButton("LOG IN", skin,"ninepatch");
-        TextButton signUpButton = new TextButton("SIGN UP", skin, "ninepatch");
-
-        // Style the buttons
-        loginButton.getLabel().setFontScale(2f);
-        signUpButton.getLabel().setFontScale(2f);
-
-        // Add buttons to table
-        table.add(loginButton).width(300).height(80).padBottom(30).row();
-        table.add(signUpButton).width(300).height(80);
-
-        // Add event listeners
-        loginButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                System.out.println("Clicked button yes plis ");
-                //game.setScreen(new LoginView(game));
-            }
-        });
-
-        signUpButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                game.setScreen(new RegistrationView(game, null)); //Have set null for now, to check
-            }
-        });
-
-
-
+        setupMainTable(root);
+        setupNavBar();
     }
 
-    @Override
-    public void show() {}
+    private void setupMainTable(Table root) {
+        Table mainTable = new Table();
+        mainTable.top().padTop(10);
 
-    @Override
-    public void render(float delta) {
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
-        stage.draw();
+        mainTable.add(yourTurn).pad(10).right();
+        mainTable.add(theirTurn).pad(10).left();
+
+        ImageButton newGameBtn = createImageButton("newGame.png");
+        ImageButton joinGameBtn = createImageButton("joinGame.png");
+
+        mainTable.add(newGameBtn).size(216,86).pad(10).right();
+        mainTable.add(joinGameBtn).size(216,86).pad(10).left();
+
+        root.add(mainTable).expand().top().row();
     }
 
-    @Override
-    public void resize(int width, int height) {
-        stage.getViewport().update(width, height, true);
+    private void setupNavBar() {
+        Texture navBarTexture = new Texture(Gdx.files.internal("NavBar.png"));
+        Image navBarImage = new Image(navBarTexture);
+        navBarImage.setWidth(Gdx.graphics.getWidth());
+
+        Table navTable = new Table();
+        navTable.setFillParent(true);
+        navTable.bottom().padBottom(0);
+        navTable.add(navBarImage).center();
+
+        setupNavBarHitboxes();
+
+        stage.addActor(navTable);
     }
 
-    @Override
-    public void pause() {}
+    private void setupNavBarHitboxes() {
+        for (int i = 0; i < 4; i++) {
+            final int index = i;
+            Actor hitbox = new Actor();
+            hitbox.setBounds(64 * i, 0, 64, 64);
+            hitbox.setTouchable(Touchable.enabled);
 
-    @Override
-    public void resume() {}
+            hitbox.addListener(new ClickListener() {
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    handleNavBarClick(index);
+                }
+            });
 
-    @Override
-    public void hide() {}
+            stage.addActor(hitbox);
+        }
+    }
+
+    private void handleNavBarClick(int index) {
+        switch (index) {
+            case 0: System.out.println("Home clicked"); break;
+            case 1: System.out.println("Trophy clicked"); break;
+            case 2: System.out.println("User clicked"); break;
+            case 3: System.out.println("Menu clicked"); break;
+        }
+    }
+
+    private ImageButton createImageButton(String fileName) {
+        Texture texture = new Texture(Gdx.files.internal(fileName));
+        TextureRegionDrawable drawable = new TextureRegionDrawable(texture);
+        return new ImageButton(drawable);
+    }
 
     @Override
     public void dispose() {
-        stage.dispose();
-        skin.dispose();
+        super.dispose();
         backgroundTexture.dispose();
-        logoTexture.dispose();
+        skin.dispose();
     }
 }
