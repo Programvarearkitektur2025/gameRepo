@@ -4,6 +4,7 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 
 import io.github.progark.Client.Views.Login.LoginView;
+import io.github.progark.Client.Views.Menu.HomeView;
 import io.github.progark.Client.Views.ViewManager;
 import io.github.progark.Server.Service.AuthService;
 import io.github.progark.Server.database.DatabaseManager;
@@ -29,7 +30,7 @@ public class Main extends Game {
     @Override
     public void create() {
         viewManager = new ViewManager();
-        viewManager.setView(new LoginView(this, authService));
+        viewManager.setView(new HomeView(this, authService));
     }
 
     @Override
