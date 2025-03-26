@@ -2,117 +2,102 @@ package io.github.progark.Client.Views.Menu;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
-
 import io.github.progark.Client.Views.View;
+import io.github.progark.Main;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class HomeView extends View {
     private final Skin skin;
     private final Texture backgroundTexture;
-    private final Image yourTurn;
-    private final Image theirTurn;
+    private final Texture yourTurnTexture;
+    private final Texture theirTurnTexture;
+    private final Texture joinGameTexture;
+    private final Texture createGameTexture;
+    private final Main game;
 
-    public HomeView() {
+    public HomeView(Main game) {
         super();
-        // Load resources
+        this.game = game;
         skin = new Skin(Gdx.files.internal("uiskin.json"));
-        backgroundTexture = new Texture(Gdx.files.internal("Background2.png"));
-
-        yourTurn = new Image(new Texture(Gdx.files.internal("yourTurn.png")));
-        theirTurn = new Image(new Texture(Gdx.files.internal("theirTurn.png")));
+        backgroundTexture = new Texture(Gdx.files.internal("background.png"));
+        yourTurnTexture = new Texture(Gdx.files.internal("yourTurn.png"));
+        theirTurnTexture = new Texture(Gdx.files.internal("theirTurn.png"));
+        joinGameTexture = new Texture(Gdx.files.internal("joinGame.png"));
+        createGameTexture = new Texture(Gdx.files.internal("createGame.png"));
     }
 
     @Override
     protected void initialize() {
-        // Set up UI
-        Image background = new Image(backgroundTexture);
-        background.setFillParent(true);
-        stage.addActor(background);
-
         Table root = new Table();
         root.setFillParent(true);
         stage.addActor(root);
 
-        setupMainTable(root);
-        setupNavBar();
-    }
+        //List<String> yourTurnGames = Arrays.asList("George");
+        //List<String> theirTurnGames = Arrays.asList("Molly", "Clara");
 
-    private void setupMainTable(Table root) {
-        Table mainTable = new Table();
-        mainTable.top().padTop(10);
-
-        mainTable.add(yourTurn).pad(10).right();
-        mainTable.add(theirTurn).pad(10).left();
-
-        ImageButton newGameBtn = createImageButton("newGame.png");
-        ImageButton joinGameBtn = createImageButton("joinGame.png");
-
-        mainTable.add(newGameBtn).size(216,86).pad(10).right();
-        mainTable.add(joinGameBtn).size(216,86).pad(10).left();
-
-        root.add(mainTable).expand().top().row();
-    }
-
-    private void setupNavBar() {
-        Texture navBarTexture = new Texture(Gdx.files.internal("NavBar.png"));
-        Image navBarImage = new Image(navBarTexture);
-        navBarImage.setWidth(Gdx.graphics.getWidth());
-
-        Table navTable = new Table();
-        navTable.setFillParent(true);
-        navTable.bottom().padBottom(0);
-        navTable.add(navBarImage).center();
-
-        setupNavBarHitboxes();
-
-        stage.addActor(navTable);
-    }
-
-    private void setupNavBarHitboxes() {
-        for (int i = 0; i < 4; i++) {
-            final int index = i;
-            Actor hitbox = new Actor();
-            hitbox.setBounds(64 * i, 0, 64, 64);
-            hitbox.setTouchable(Touchable.enabled);
-
-            hitbox.addListener(new ClickListener() {
+        Image yourTurnImage = new Image(yourTurnTexture);
+        root.add(yourTurnImage).left().pad(10);
+        root.row();
+        /**for (String name : yourTurnGames) {
+            TextButton button = new TextButton(name + "  >", skin);
+            button.addListener(new ClickListener() {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
-                    handleNavBarClick(index);
+                    // Handle game open
                 }
             });
+            root.add(button).width(300).pad(5);
+            root.row();
+        }**/
 
-            stage.addActor(hitbox);
-        }
-    }
+        Image theirTurnImage = new Image(theirTurnTexture);
+        root.add(theirTurnImage).left().pad(10);
+        root.row();
+        /**for (String name : theirTurnGames) {
+            TextButton button = new TextButton(name + "  >", skin);
+            button.setTouchable(Touchable.disabled);
+            root.add(button).width(300).pad(5);
+            root.row();
+        }*/
 
-    private void handleNavBarClick(int index) {
-        switch (index) {
-            case 0: System.out.println("Home clicked"); break;
-            case 1: System.out.println("Trophy clicked"); break;
-            case 2: System.out.println("User clicked"); break;
-            case 3: System.out.println("Menu clicked"); break;
-        }
-    }
+        Table buttonTable = new Table();
 
-    private ImageButton createImageButton(String fileName) {
-        Texture texture = new Texture(Gdx.files.internal(fileName));
-        TextureRegionDrawable drawable = new TextureRegionDrawable(texture);
-        return new ImageButton(drawable);
+        ImageButton joinGameButton = new ImageButton(new TextureRegionDrawable(new TextureRegion(joinGameTexture)));
+        joinGameButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                game.getViewManager().setView(() -> new JoinGameView(game));
+            }
+        });
+
+        ImageButton createGameButton = new ImageButton(new TextureRegionDrawable(new TextureRegion(createGameTexture)));
+        createGameButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                game.getViewManager().setView(() -> new CreateGameView(game));
+            }
+        });
+
+        buttonTable.add(joinGameButton).pad(10);
+        buttonTable.add(createGameButton).pad(10);
+        root.add(buttonTable).colspan(2);
     }
 
     @Override
     public void dispose() {
         super.dispose();
         backgroundTexture.dispose();
-        skin.dispose();
+        yourTurnTexture.dispose();
+        theirTurnTexture.dispose();
+        joinGameTexture.dispose();
+        createGameTexture.dispose();
     }
 }

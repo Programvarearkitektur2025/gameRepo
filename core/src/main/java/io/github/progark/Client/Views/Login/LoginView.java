@@ -11,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 
+import io.github.progark.Client.Views.Menu.HomeView;
 import io.github.progark.Client.Views.Menu.LandingView;
 import io.github.progark.Client.Views.View;
 import io.github.progark.Main;
@@ -52,39 +53,50 @@ public class LoginView extends View {
 
         // Welcome Label
         Label titleLabel = new Label("Welcome back!", skin);
-        titleLabel.setFontScale(2f);
+        titleLabel.setFontScale(4f);
 
         // Username Field
         TextField usernameField = new TextField("", skin);
-        usernameField.setMessageText("Username");
+        usernameField.setMessageText("Email");
+        usernameField.getStyle().font.getData().setScale(2f);
 
         // Password Field
         TextField passwordField = new TextField("", skin);
         passwordField.setMessageText("Password");
         passwordField.setPasswordMode(true);
         passwordField.setPasswordCharacter('*');
+        passwordField.getStyle().font.getData().setScale(2f);
 
         // Login Button
         TextButton loginButton = new TextButton("Log in", skin);
-        loginButton.getLabel().setFontScale(1.5f);
+        loginButton.getLabel().setFontScale(3f);
         statusLabel = new Label("", skin);
-        statusLabel.setFontScale(2f);
+        statusLabel.setFontScale(4f);
 
         setupLoginButton(loginButton, usernameField, passwordField);
 
         // Register Button
         TextButton registerButton = new TextButton("New? Register user here", skin);
-        registerButton.getLabel().setFontScale(4f);
+        registerButton.getLabel().setFontScale(2.5f);
         registerButton.setSize(400, 200);
+
+        TextButton.TextButtonStyle clearStyle = new TextButton.TextButtonStyle(registerButton.getStyle());
+        clearStyle.up = null;
+        clearStyle.down = null;
+        clearStyle.over = null;
+        registerButton.setStyle(clearStyle);
+
         setupRegisterButton(registerButton);
 
+
+
         // Add UI Elements to Table
-        table.add(logo).size(200, 200).padBottom(20).row();
+        table.add(logo).size(600, 600).padBottom(20).row();
         table.add(titleLabel).padBottom(30).row();
-        table.add(usernameField).width(350).height(50).padBottom(20).row();
-        table.add(passwordField).width(350).height(50).padBottom(30).row();
-        table.add(loginButton).width(350).height(60).padBottom(20).row();
-        table.add(registerButton).padBottom(20).row();
+        table.add(usernameField).width(500).height(100).padBottom(20).row();
+        table.add(passwordField).width(500).height(100).padBottom(30).row();
+        table.add(loginButton).width(500).height(120).padBottom(50).row();
+        table.add(registerButton).width(500).height(120).padBottom(20).row();
     }
 
     private void setupLoginButton(TextButton loginButton, TextField usernameField, TextField passwordField) {
@@ -99,7 +111,7 @@ public class LoginView extends View {
                         @Override
                         public void onSuccess(Object message) {
                             System.out.println("Sign-in successful! User: " + (String) message);
-                            game.getViewManager().setView(() -> new LandingView(game));
+                            game.getViewManager().setView(() -> new HomeView(game));
                         }
 
                         @Override
