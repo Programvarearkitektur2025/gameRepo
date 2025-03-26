@@ -47,7 +47,7 @@ public class ResultController {
         resultModel.setGuessesP2(guessesP2);
 
         // Oppdaterer view (dersom du trenger umiddelbar oppdatering)
-        resultView.update(resultModel);
+        resultView.updateResultModel(resultModel);
     }
 
     public void saveResult() {
@@ -72,7 +72,7 @@ public class ResultController {
                     ResultModel loaded = (ResultModel) data;
                     resultModel = loaded;
                     // Oppdaterer view
-                    resultView.update(resultModel);
+                    resultView.updateResultModel(resultModel);
                 }
             }
 
