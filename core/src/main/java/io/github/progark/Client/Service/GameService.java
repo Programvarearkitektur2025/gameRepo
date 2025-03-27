@@ -6,14 +6,26 @@ import io.github.progark.Server.database.DatabaseManager;
 
 // This class should only update the database once the results are final
 public class GameService {
-    private final DatabaseManager databaseManager;
+    //private final DatabaseManager databaseManager;
+
+    private DatabaseManager databaseManager;
     private String id;
     private LobbyModel lobbyData;
 
     public GameService(DatabaseManager databaseManager, String id) {
-        this.databaseManager = databaseManager;
-        this.id = id;
-        fetchLobbyInfo(id);
+
+        if (databaseManager == null || id == null){
+            //Do nothing
+        }
+        else {
+
+            this.databaseManager = databaseManager;
+            this.id = id;
+            fetchLobbyInfo(id);
+
+        }
+
+
     }
 
     // Function for fetching lobby information asynchronuous.
