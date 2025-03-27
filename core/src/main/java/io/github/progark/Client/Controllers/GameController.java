@@ -2,13 +2,21 @@ package io.github.progark.Client.Controllers;
 
 import io.github.progark.Server.Model.Game;
 
+import io.github.progark.Client.Model.GameModel;
+import io.github.progark.Client.Service.GameService;
+import io.github.progark.Client.Views.Game.GameView;
+
 public class GameController {
-    private final Game model;
+    private GameService gameService;
+    private GameModel gameModel;
+    private GameView gameView;
 
-    public GameController(Game model) {
-        this.model = model;
+    public GameController(GameService gameService, GameModel gameModel, GameView gameView) {
+        this.gameService = gameService;
+        this.gameModel = gameModel;
+        this.gameView = gameView;
     }
-
+    
     public boolean trySubmitAnswer(String input) {
         String answer = input.trim().toLowerCase();
         if (answer.isEmpty() || model.hasAlreadySubmitted(answer)) {
@@ -38,5 +46,6 @@ public class GameController {
     public java.util.List<String> getSubmittedAnswers() {
         return model.getSubmittedAnswers();
     }
+
 }
 

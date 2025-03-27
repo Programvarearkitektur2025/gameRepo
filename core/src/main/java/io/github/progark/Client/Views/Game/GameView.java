@@ -11,12 +11,25 @@ import io.github.progark.Client.Controllers.GameController;
 import io.github.progark.Client.Views.View;
 import io.github.progark.Server.Model.Game;
 
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+
+import io.github.progark.Client.Views.View;
+import io.github.progark.Main;
+
+
 import java.util.List;
 
 public class GameView extends View implements Screen {
 
     private Stage stage;
-    private Skin skin;
+    private final Main game;
+
+    //private final Stage stage;
+    private final Skin skin;
+    private final Texture backgroundTexture;
 
     private Label timerLabel;
     private Label scoreLabel;
@@ -28,7 +41,14 @@ public class GameView extends View implements Screen {
     private Game gameModel;
     private GameController controller;
 
-    public GameView() {
+    public GameView(Main game){
+        // Initialize variables
+        super(); // This calls view constructor for standard initialization of view.
+        this.game = game;
+
+        // Initialize texture and skin here. This needs to be correct to planned UI
+        backgroundTexture = new Texture(Gdx.files.internal("game_background.png"));
+        skin = new Skin(Gdx.files.internal("uiskin.json"));
         gameModel = new Game();
         controller = new GameController(gameModel);
     }
@@ -137,8 +157,27 @@ public class GameView extends View implements Screen {
     @Override public void hide() { }
 
     @Override
-    public void dispose() {
-        stage.dispose();
-        skin.dispose();
+    public void enter() {
+        super.enter();
     }
+
+    @Override
+    protected void initialize() {
+
+    }
+
+    @Override
+    public void dispose() {
+        // Clean up resources
+        if (backgroundTexture != null) {
+            backgroundTexture.dispose();
+        }
+        if (skin != null) {
+            skin.dispose();
+        }
+        // Dispose of other resources
+        super.dispose(); // Call parent's dispose to clean up stage and spriteBatch
+
+    }
+
 }
