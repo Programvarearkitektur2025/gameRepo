@@ -11,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 
+import io.github.progark.Client.Views.Game.GameView;
 import io.github.progark.Client.Views.Menu.HomeView;
 import io.github.progark.Client.Views.Menu.LandingView;
 import io.github.progark.Client.Views.View;
@@ -43,6 +44,11 @@ public class LoginView extends View {
 
     @Override
     protected void initialize() {
+        // If user is already logged in we dont bother setting up UI
+        if (authService.isUserLoggedIn()){
+            game.getViewManager().setView(() -> new GameView(game));
+        }
+
         // Set up UI
         background.setFillParent(true);
         stage.addActor(background);

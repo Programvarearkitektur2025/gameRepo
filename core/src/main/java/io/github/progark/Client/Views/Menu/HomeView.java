@@ -28,11 +28,11 @@ public class HomeView extends View {
         super();
         this.game = game;
         skin = new Skin(Gdx.files.internal("uiskin.json"));
-        backgroundTexture = new Texture(Gdx.files.internal("background.png"));
+        backgroundTexture = new Texture(Gdx.files.internal("Background2.png"));
         yourTurnTexture = new Texture(Gdx.files.internal("yourTurn.png"));
         theirTurnTexture = new Texture(Gdx.files.internal("theirTurn.png"));
         joinGameTexture = new Texture(Gdx.files.internal("joinGame.png"));
-        createGameTexture = new Texture(Gdx.files.internal("createGame.png"));
+        createGameTexture = new Texture(Gdx.files.internal("joinGame.png")); // Should be createGame.png but have no texture
     }
 
     @Override
