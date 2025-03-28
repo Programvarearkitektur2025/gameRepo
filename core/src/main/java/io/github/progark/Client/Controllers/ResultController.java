@@ -3,8 +3,8 @@ package io.github.progark.Client.Controllers;
 import java.sql.Timestamp;
 import java.util.List;
 
-import io.github.progark.Client.Model.ResultModel;
-import io.github.progark.Client.Service.ResultService;
+import io.github.progark.Server.Model.Game.ResultModel;
+import io.github.progark.Server.Service.ResultService;
 import io.github.progark.Client.Views.Game.ResultView;
 import io.github.progark.Server.database.DataCallback;
 

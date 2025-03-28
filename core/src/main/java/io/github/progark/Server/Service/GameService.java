@@ -1,6 +1,6 @@
-package io.github.progark.Client.Service;
+package io.github.progark.Server.Service;
 
-import io.github.progark.Client.Model.LobbyModel;
+import io.github.progark.Server.Model.Game.LobbyModel;
 import io.github.progark.Server.database.DataCallback;
 import io.github.progark.Server.database.DatabaseManager;
 
@@ -9,20 +9,15 @@ public class GameService {
     //private final DatabaseManager databaseManager;
 
     private DatabaseManager databaseManager;
-    private String id;
     private LobbyModel lobbyData;
 
-    public GameService(DatabaseManager databaseManager, String id) {
-
-        if (databaseManager == null || id == null){
+    public GameService() {
+        if (databaseManager != null){
             //Do nothing
         }
         else {
-
+            // databaseManager = new DatabaseManager();
             this.databaseManager = databaseManager;
-            this.id = id;
-            fetchLobbyInfo(id);
-
         }
 
 

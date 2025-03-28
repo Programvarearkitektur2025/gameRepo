@@ -3,10 +3,8 @@ package io.github.progark;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 
-import io.github.progark.Client.Model.CategoryData;
-import io.github.progark.Client.Views.Game.GameView;
 import io.github.progark.Client.Views.Login.LoginView;
-import io.github.progark.Client.Views.Menu.CreateGameView;
+import io.github.progark.Client.Views.Menu.HomeView;
 import io.github.progark.Client.Views.ViewManager;
 import io.github.progark.Server.Service.AuthService;
 import io.github.progark.Server.database.DatabaseManager;
@@ -32,9 +30,7 @@ public class Main extends Game {
     @Override
     public void create() {
         viewManager = new ViewManager();
-        //viewManager.setView(new LoginView(this, authService));
-        viewManager.setView(new CreateGameView(this));
-        CategoryData.loadFromFile("categories.json");
+        viewManager.setView(new HomeView(this, authService));
     }
 
     @Override

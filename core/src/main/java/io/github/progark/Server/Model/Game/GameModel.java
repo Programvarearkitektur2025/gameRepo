@@ -1,11 +1,14 @@
-package io.github.progark.Client.Model;
+package io.github.progark.Server.Model.Game;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class GameModel {
 
+    /*
     private final PlayerModel playerOne;
     private final PlayerModel playerTwo;
+     */
 
     private final Map<String, Integer> submittedAnswers = new HashMap<>();
 
@@ -16,10 +19,11 @@ public class GameModel {
 
     private String categoryId;
 
-    public GameModel(UserModel user1, UserModel user2) {
+    public GameModel() {
+        /*
         this.playerOne = new PlayerModel(user1);
         this.playerTwo = new PlayerModel(user2);
-
+         */
         categoryId = "2";
 
         this.category = CategoryData.getCategory(categoryId);
@@ -28,27 +32,26 @@ public class GameModel {
             throw new IllegalArgumentException("Invalid category ID: " + categoryId);
         }
     }
-
+    /*
     public PlayerModel getPlayerOne() { return playerOne; }
     public PlayerModel getPlayerTwo() { return playerTwo; }
-
-    public boolean isAnswerValid(String answer) {
-        return category.isCorrect(answer);
-    }
+    */
 
     public boolean hasAlreadySubmitted(String answer) {
         return submittedAnswers.keySet().contains(answer.toLowerCase());
     }
 
-    public void submitAnswer(String answer) {
+    public boolean submitAnswer(String answer) {
         String normalized = answer.toLowerCase();
 
-        if (hasAlreadySubmitted(normalized)) return;
+        if (hasAlreadySubmitted(normalized)) return false;
 
         int points = getPoints(normalized);
 
         submittedAnswers.put(normalized, points);
         score += points;
+
+        return true;
     }
 
     private Integer getPoints(String answer){

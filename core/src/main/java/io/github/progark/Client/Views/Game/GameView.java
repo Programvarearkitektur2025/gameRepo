@@ -1,3 +1,4 @@
+@ -1,301 +1,234 @@
 package io.github.progark.Client.Views.Game;
 
 import com.badlogic.gdx.Gdx;
@@ -229,5 +230,42 @@ public class GameView extends View implements Screen {
         super.dispose(); // Call parent's dispose to clean up stage and spriteBatch
 
     }
+
+
+    public void showMessage(String displayMessage){
+        // Logic for displaying error message
+        // Method should end with an call to the render method to render new UI
+    }
+    public void updateScore (int score){
+        // Logic for displaying score
+        // Method should end with an call to the render method to render new UI
+    }
+
+    public void updateSubmittedAnswers(Map<String,Integer> solution){
+        // Logic for updating submitted answers
+        // Method should end with an call to the render method to render new UI
+
+    }
+    public void updateTimeRemaining(float time){
+    // Logic for updating the time remaining
+    // Method should end with an call to the render method to render new UI
+    }
+
+    public void showGameOver(){
+    // Logic for displaying that the game is over.
+    // Method should end with an call to the render method to render new UI
+    }
+    /*
+    @Override
+    public void render(SpriteBatch sb) {
+
+    }
+    @Override
+    public void update(float delta) {
+    }
+    @Override
+    public void handleInput() {
+    }
+        */
 
 }

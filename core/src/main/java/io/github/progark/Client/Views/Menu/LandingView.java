@@ -52,7 +52,7 @@ public class LandingView extends View {
         Label welcomeLabel = new Label("Welcome to ThinkFast!", skin);
         welcomeLabel.setFontScale(2.5f);
         table.add(welcomeLabel).padBottom(50).row();
-
+        /**
         // Create game button
         TextButton createGameButton = new TextButton("Create Game", skin);
         createGameButton.getLabel().setFontScale(2f);
@@ -96,7 +96,7 @@ public class LandingView extends View {
                 // TODO: Implement settings functionality
                 System.out.println("Settings clicked");
             }
-        });
+        });**/
     }
 
     @Override
