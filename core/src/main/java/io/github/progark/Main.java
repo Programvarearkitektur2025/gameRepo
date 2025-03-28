@@ -30,7 +30,7 @@ public class Main extends Game {
     @Override
     public void create() {
         viewManager = new ViewManager();
-        viewManager.setView(new LoginView(this, authService));
+        viewManager.setView(new HomeView(this, authService));
     }
 
     @Override
