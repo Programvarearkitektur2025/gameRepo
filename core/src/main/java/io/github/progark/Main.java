@@ -13,12 +13,14 @@ import io.github.progark.Server.database.DatabaseManager;
 public class Main extends Game {
     private AuthService authService;
     private ViewManager viewManager;
+    private DatabaseManager databaseManager;
 
     public Main(DatabaseManager dbManager, AuthService authManager) {
         if (dbManager == null || authManager == null) {
             throw new IllegalArgumentException("DatabaseManager and AuthService cannot be null");
         }
-        authService = authManager;
+        this.databaseManager = dbManager;
+        this.authService = authManager;
 
         if (authManager.isUserLoggedIn()) {
             System.out.println("Logged in as: " + authManager.getCurrentUserEmail());
@@ -54,5 +56,9 @@ public class Main extends Game {
 
     public AuthService getAuthService() {
         return authService;
+    }
+
+    public DatabaseManager getDatabaseManager() {
+        return databaseManager;
     }
 }
