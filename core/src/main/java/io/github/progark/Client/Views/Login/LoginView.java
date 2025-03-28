@@ -114,6 +114,8 @@ public class LoginView extends View {
                 String email = usernameField.getText();
                 String password = passwordField.getText();
 
+
+
                 if (!email.isEmpty() && !password.isEmpty()) {
                     authService.signIn(email, password, new DataCallback() {
                         @Override

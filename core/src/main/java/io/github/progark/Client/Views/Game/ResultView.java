@@ -107,5 +107,5 @@ public class ResultView extends View {
         if (bigFont != null) {
             bigFont.dispose();
         }
+        }
     }
-}
