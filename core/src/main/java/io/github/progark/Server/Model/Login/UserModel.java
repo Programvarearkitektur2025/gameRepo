@@ -1,4 +1,4 @@
-package io.github.progark.Client.Model;
+package io.github.progark.Server.Model.Login;
 
 public class UserModel {
 

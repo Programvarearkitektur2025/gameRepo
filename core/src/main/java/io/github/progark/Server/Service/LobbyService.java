@@ -1,4 +1,4 @@
-package io.github.progark.Client.Service;
+package io.github.progark.Server.Service;
 
 import java.sql.Timestamp;
 import java.util.HashMap;

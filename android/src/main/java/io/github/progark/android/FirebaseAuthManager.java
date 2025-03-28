@@ -6,7 +6,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import io.github.progark.Client.Model.UserModel;
+import io.github.progark.Server.Model.Login.UserModel;
 import io.github.progark.Server.Service.AuthService; // Change to proper interface
 import io.github.progark.Server.database.DataCallback;
 

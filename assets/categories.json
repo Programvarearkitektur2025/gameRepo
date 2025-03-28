@@ -1,0 +1,24 @@
+{
+  "1": {
+    "title": "Flags with the nordic cross",
+    "answers": {
+      "norway": 1,
+      "sweden": 1,
+      "denmark": 1,
+      "iceland": 1,
+      "finland": 1,
+      "faroe islands": 1
+    }
+  },
+  "2": {
+    "title": "Edible fruits",
+    "answers": {
+      "apple": 1,
+      "banana": 1,
+      "orange": 1,
+      "grape": 1,
+      "pear": 1,
+      "mango": 2
+    }
+  }
+}

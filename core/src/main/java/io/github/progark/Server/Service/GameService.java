@@ -1,19 +1,26 @@
-package io.github.progark.Client.Service;
+package io.github.progark.Server.Service;
 
-import io.github.progark.Client.Model.LobbyModel;
+import io.github.progark.Server.Model.Game.LobbyModel;
 import io.github.progark.Server.database.DataCallback;
 import io.github.progark.Server.database.DatabaseManager;
 
 // This class should only update the database once the results are final
 public class GameService {
-    private final DatabaseManager databaseManager;
-    private String id;
+    //private final DatabaseManager databaseManager;
+
+    private DatabaseManager databaseManager;
     private LobbyModel lobbyData;
 
-    public GameService(DatabaseManager databaseManager, String id) {
-        this.databaseManager = databaseManager;
-        this.id = id;
-        fetchLobbyInfo(id);
+    public GameService() {
+        if (databaseManager != null){
+            //Do nothing
+        }
+        else {
+            // databaseManager = new DatabaseManager();
+            this.databaseManager = databaseManager;
+        }
+
+
     }
 
     // Function for fetching lobby information asynchronuous.
