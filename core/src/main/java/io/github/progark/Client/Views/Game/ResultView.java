@@ -109,4 +109,4 @@ public class ResultView extends View {
             bigFont.dispose();
         }
         }
-   }
+    }
