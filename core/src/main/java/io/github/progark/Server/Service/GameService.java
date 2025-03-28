@@ -16,7 +16,7 @@ public class GameService {
             //Do nothing
         }
         else {
-            databaseManager = new DatabaseManager();
+            // databaseManager = new DatabaseManager();
             this.databaseManager = databaseManager;
         }
 
