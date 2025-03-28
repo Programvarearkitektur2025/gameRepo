@@ -19,7 +19,6 @@ import io.github.progark.Main;
 import io.github.progark.Server.Service.AuthService;
 import io.github.progark.Server.database.DataCallback;
 
-
 public class LoginView extends View {
     private final Main game;
     private final AuthService authService;
@@ -45,9 +44,12 @@ public class LoginView extends View {
     @Override
     protected void initialize() {
         // If user is already logged in we dont bother setting up UI
+        /*
         if (authService.isUserLoggedIn()){
-            game.getViewManager().setView(() -> new GameView(game));
+            game.getViewManager().setView(() -> new HomeView(game, authService));
         }
+
+         */
 
         // Set up UI
         background.setFillParent(true);

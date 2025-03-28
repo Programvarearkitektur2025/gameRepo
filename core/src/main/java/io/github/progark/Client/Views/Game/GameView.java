@@ -2,22 +2,29 @@ package io.github.progark.Client.Views.Game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 
+import java.util.Map;
+
+import io.github.progark.Client.Controllers.GameController;
+import io.github.progark.Server.Model.Game.GameModel;
+import io.github.progark.Server.Service.GameService;
 import io.github.progark.Client.Views.View;
 import io.github.progark.Main;
 
-    public class GameView extends View {
+public class GameView extends View {
         private final Main game;
+        private final GameController gameController;
         //private final Stage stage;
         private final Skin skin;
         private final Texture backgroundTexture;
 
         public GameView(Main game){
-            // Initialize variables
             super(); // This calls view constructor for standard initialization of view.
+            GameModel gameModel = new GameModel();
+            GameService gameService = new GameService();
+            // Initialize variables
+            this.gameController = new GameController(gameService, gameModel);
             this.game = game;
 
             // Initialize texture and skin here. This needs to be correct to planned UI
@@ -46,6 +53,30 @@ import io.github.progark.Main;
             // Dispose of other resources
             super.dispose(); // Call parent's dispose to clean up stage and spriteBatch
 
+        }
+
+        public void showMessage(String displayMessage){
+            // Logic for displaying error message
+            // Method should end with an call to the render method to render new UI
+        }
+        public void updateScore (int score){
+            // Logic for displaying score
+            // Method should end with an call to the render method to render new UI
+        }
+
+        public void updateSubmittedAnswers(Map<String,Integer> solution){
+            // Logic for updating submitted answers
+            // Method should end with an call to the render method to render new UI
+
+        }
+        public void updateTimeRemaining(float time){
+        // Logic for updating the time remaining
+        // Method should end with an call to the render method to render new UI
+        }
+
+        public void showGameOver(){
+        // Logic for displaying that the game is over.
+        // Method should end with an call to the render method to render new UI
         }
         /*
         @Override

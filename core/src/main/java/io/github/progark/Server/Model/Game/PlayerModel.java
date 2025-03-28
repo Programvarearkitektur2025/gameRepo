@@ -1,6 +1,8 @@
-package io.github.progark.Client.Model;
+package io.github.progark.Server.Model.Game;
 
-public class PlayerModel extends UserModel{
+import io.github.progark.Server.Model.Login.UserModel;
+
+public class PlayerModel extends UserModel {
     private final String userName;
     private int playerPoints;
     private int guesses;

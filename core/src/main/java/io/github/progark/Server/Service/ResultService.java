@@ -1,6 +1,6 @@
-package io.github.progark.Client.Service;
+package io.github.progark.Server.Service;
 
-import io.github.progark.Client.Model.ResultModel;
+import io.github.progark.Server.Model.Game.ResultModel;
 import io.github.progark.Server.database.DataCallback;
 import io.github.progark.Server.database.DatabaseManager;
 

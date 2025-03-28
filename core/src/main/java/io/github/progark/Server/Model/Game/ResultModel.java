@@ -1,9 +1,7 @@
-package io.github.progark.Client.Model;
+package io.github.progark.Server.Model.Game;
 
 import java.sql.Timestamp;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class ResultModel {
     private String gameId;

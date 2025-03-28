@@ -1,7 +1,7 @@
 package io.github.progark.Client.Controllers;
 
-import io.github.progark.Client.Model.GameModel;
-import io.github.progark.Client.Service.GameService;
+import io.github.progark.Server.Model.Game.GameModel;
+import io.github.progark.Server.Service.GameService;
 import io.github.progark.Client.Views.Game.GameView;
 
 public class GameController {
@@ -9,24 +9,38 @@ public class GameController {
     private GameModel gameModel;
     private GameView gameView;
 
-    public GameController(GameService gameService, GameModel gameModel, GameView gameView) {
+    public GameController(GameService gameService, GameModel gameModel) {
         this.gameService = gameService;
         this.gameModel = gameModel;
+    }
+
+    public void setGameView(GameView gameView) {
         this.gameView = gameView;
     }
 
-    public boolean trySubmitAnswer(String input) {
+    // Submit user input to game model
+
+    public void handleAnswerSubmission(String input) {
         String answer = input.trim().toLowerCase();
         if (answer.isEmpty() || gameModel.hasAlreadySubmitted(answer)) {
-            return false;
+            gameView.showMessage("Invalid answer. Please try again.");
+            return;
         }
-
-        gameModel.submitAnswer(answer);
-        return true;
+        boolean success = gameModel.submitAnswer(answer);
+        if (success) {
+            gameView.updateScore(gameModel.getScore());
+            gameView.updateSubmittedAnswers(gameModel.getSubmittedAnswers());
+        }
     }
 
-    public void updateTime(float delta) {
+
+    public void updateGameState(float delta) {
         gameModel.updateTime(delta);
+        gameView.updateTimeRemaining(gameModel.getTimeRemaining());
+
+        if (gameModel.isTimeUp()) {
+            gameView.showGameOver();
+        }
     }
 
     public boolean isTimeUp() {
