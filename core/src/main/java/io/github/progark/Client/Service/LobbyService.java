@@ -27,10 +27,10 @@ public class LobbyService {
     }
 
     public void createLobby(String playerUsername, DataCallback callback) {
-        String generatedCode = generateLobbyCode(); // Used as lobbyCode field, not document ID
+        String generatedCode = generateLobbyCode();
 
         LobbyModel lobby = new LobbyModel(
-            generatedCode,  // Will be stored as a field in the document
+            generatedCode,  
             playerUsername,
             null,
             "waiting",
@@ -38,9 +38,8 @@ public class LobbyService {
         );
 
 
-        // Firestore will generate a random document ID here:
         try {
-            databaseManager.writeData(generatedCode, lobby); // ✅ send the model directly
+            databaseManager.writeData("lobbies/" + generatedCode, lobbyModel);
             callback.onSuccess(generatedCode);
         } catch (Exception e) {
             callback.onFailure(e);
@@ -64,8 +63,7 @@ public class LobbyService {
                         lobby.setPlayerTwo(playerTwoUsername);
                         lobby.setStatus("full");
 
-                        // Write updated lobby back
-                        databaseManager.writeData(lobbyCode, lobby);
+                        databaseManager.writeData("lobbies/" + generatedCode, lobby);
                         callback.onSuccess(lobby);
                     } else {
                         callback.onFailure(new Exception("Lobby already full"));
