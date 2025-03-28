@@ -5,72 +5,108 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
+import com.badlogic.gdx.utils.Json;
+import com.badlogic.gdx.utils.JsonReader;
+import com.badlogic.gdx.utils.JsonValue;
+
+import io.github.progark.Client.Model.LobbyModel;
+import io.github.progark.Client.Model.UserModel;
+import io.github.progark.Server.Service.AuthService;
 import io.github.progark.Server.database.DataCallback;
 import io.github.progark.Server.database.DatabaseManager;
 
 public class LobbyService {
 
     private final DatabaseManager databaseManager;
+    private final AuthService authService;
+    private final Json json = new Json();
 
-    public LobbyService(DatabaseManager databaseManager) {
+    public LobbyService(DatabaseManager databaseManager, AuthService authService) {
         this.databaseManager = databaseManager;
+        this.authService = authService;
     }
 
-    public void createLobby(String playerOne, DataCallback callback) {
-        String generatedCode = generateLobbyCode();
+    public void createLobby(String playerUsername, DataCallback callback) {
+        String generatedCode = generateLobbyCode(); // Used as lobbyCode field, not document ID
+
+        LobbyModel lobby = new LobbyModel(
+            generatedCode,  // Will be stored as a field in the document
+            playerUsername,
+            null,
+            "waiting",
+            new Timestamp(System.currentTimeMillis())
+        );
 
 
-        Map<String, Object> lobbyData = new HashMap<>();
-        lobbyData.put("playerOne", playerOne);
-        lobbyData.put("playerTwo", null);
-        lobbyData.put("status", "waiting");
-        lobbyData.put("createdAt", new Timestamp(System.currentTimeMillis()));
-
+        // Firestore will generate a random document ID here:
         try {
-            databaseManager.writeData("lobbies/" + generatedCode, lobbyData);
+            databaseManager.writeData(generatedCode, lobby); // ✅ send the model directly
             callback.onSuccess(generatedCode);
         } catch (Exception e) {
             callback.onFailure(e);
         }
     }
 
-    public void joinLobby(String lobbyCode, String guestUsername, DataCallback dataCallback) {
 
-        databaseManager.readData("lobbies/" + lobbyCode, new DataCallback() {
+    public void joinLobby(String lobbyCode, String playerTwoUsername, DataCallback callback) {
+        databaseManager.readData(lobbyCode, new DataCallback() {
             @Override
             public void onSuccess(Object data) {
-                if (!(data instanceof Map)) {
-                    dataCallback.onFailure(new Exception("Malformed lobby data"));
+                if (!(data instanceof String)) {
+                    callback.onFailure(new Exception("Invalid lobby data format"));
                     return;
                 }
 
-                Map<String, Object> lobby = (Map<String, Object>) data;
+                try {
+                    LobbyModel lobby = json.fromJson(LobbyModel.class, (String) data);
 
-                Object playerTwo = lobby.get("playerTwo");
-                if (playerTwo == null || playerTwo.toString().isEmpty()) {
-                    lobby.put("playerTwo", playerTwo);
-                    lobby.put("status", "full");
+                    if (lobby.getPlayerTwo() == null || lobby.getPlayerTwo().isEmpty()) {
+                        lobby.setPlayerTwo(playerTwoUsername);
+                        lobby.setStatus("full");
 
-                    try {
-                        databaseManager.writeData("lobbies/" + lobbyCode, lobby);
-                        dataCallback.onSuccess(lobbyCode);
-                    } catch (Exception e) {
-                        dataCallback.onFailure(e);
+                        // Write updated lobby back
+                        databaseManager.writeData(lobbyCode, lobby);
+                        callback.onSuccess(lobby);
+                    } else {
+                        callback.onFailure(new Exception("Lobby already full"));
                     }
-                } else {
-                    dataCallback.onFailure(new Exception("Lobby already full"));
+                } catch (Exception e) {
+                    callback.onFailure(new Exception("Failed to parse lobby data: " + e.getMessage()));
                 }
-
-
             }
 
             @Override
             public void onFailure(Exception e) {
-                dataCallback.onFailure(e);
+                callback.onFailure(e);
             }
-
         });
     }
+
+
+    public void subscribeToLobbyUpdates(String lobbyCode, DataCallback callback) {
+        databaseManager.subscribeToDocument(lobbyCode, new DataCallback() {
+            @Override
+            public void onSuccess(Object data) {
+                if (!(data instanceof String)) {
+                    callback.onFailure(new Exception("Invalid lobby data format"));
+                    return;
+                }
+
+                try {
+                    LobbyModel updatedLobby = json.fromJson(LobbyModel.class, (String) data);
+                    callback.onSuccess(updatedLobby);
+                } catch (Exception e) {
+                    callback.onFailure(e);
+                }
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                callback.onFailure(e);
+            }
+        });
+    }
+
 
 
     private String generateLobbyCode() {

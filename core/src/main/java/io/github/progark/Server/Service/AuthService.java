@@ -9,4 +9,5 @@ public interface AuthService {
     void signOut();
     boolean isUserLoggedIn();
     String getCurrentUserEmail();
+    String getCurrentUser(DataCallback callback);
 }

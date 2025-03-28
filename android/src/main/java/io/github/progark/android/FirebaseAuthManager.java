@@ -108,4 +108,37 @@ public class FirebaseAuthManager implements AuthService { // Change interface
         FirebaseUser user = auth.getCurrentUser();
         return (user != null) ? user.getEmail() : "No user logged in";
     }
+
+    @Override
+    public String getCurrentUser(DataCallback callback) {
+        FirebaseUser firebaseUser = auth.getCurrentUser();
+
+        if (firebaseUser == null) {
+            callback.onFailure(new Exception("No user is currently logged in"));
+            return null;
+        }
+
+        String uid = firebaseUser.getUid();
+
+        FirebaseFirestore.getInstance()
+            .collection("Users")
+            .document(uid)
+            .get()
+            .addOnSuccessListener(documentSnapshot -> {
+                if (documentSnapshot.exists()) {
+                    String email = documentSnapshot.getString("email");
+                    String username = documentSnapshot.getString("username");
+
+                    UserModel userModel = new UserModel(uid, email, username);
+                    callback.onSuccess(userModel);
+                } else {
+                    callback.onFailure(new Exception("User document does not exist"));
+                }
+            })
+            .addOnFailureListener(callback::onFailure);
+        return uid;
+    }
+
+
+
 }

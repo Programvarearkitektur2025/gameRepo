@@ -24,7 +24,6 @@ public class LobbyModel {
 
     }
 
-
     public static LobbyModel fromMap(String lobbyCode, Map<String, Object> data) {
         String playerOne = (String) data.get("playerOne");
         String playerTwo = data.get("playerTwo") != null ? (String) data.get("playerTwo") : null;

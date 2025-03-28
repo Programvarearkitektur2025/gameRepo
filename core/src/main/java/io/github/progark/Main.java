@@ -42,7 +42,7 @@ public class Main extends Game {
     public void create() {
 
 
-       this.setScreen(new HomeView(this));
+       this.setScreen(new HomeView(this, authService));
         //View.safeSetScreen(this, () -> new RegistrationView(this, authService));
 
     }
