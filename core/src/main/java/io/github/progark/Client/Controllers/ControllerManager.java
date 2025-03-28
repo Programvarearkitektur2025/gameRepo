@@ -1,0 +1,30 @@
+package io.github.progark.Client.Controllers;
+
+import com.badlogic.gdx.Gdx;
+
+public class ControllerManager {
+
+    private Controller currentController;
+
+    public void setController(Controller newController) {
+        Gdx.app.postRunnable(() -> {
+            if (currentController != null) {
+                currentController.dispose();
+            }
+            currentController =newController;
+            currentController.enter();
+        });
+    }
+
+    public void update(float delta) {
+        if (currentController != null) {
+            currentController.update(delta);
+        }
+    }
+
+    public void dispose() {
+        if (currentController != null) {
+            currentController.dispose();
+        }
+    }
+}

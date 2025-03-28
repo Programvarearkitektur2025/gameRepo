@@ -1,25 +1,54 @@
 package io.github.progark.Client.Controllers;
 
+import java.util.Map;
+
+import io.github.progark.Main;
 import io.github.progark.Server.Model.Game.HomeModel;
+import io.github.progark.Server.Service.AuthService;
 import io.github.progark.Server.Service.HomeService;
 import io.github.progark.Client.Views.Menu.HomeView;
 import io.github.progark.Server.database.DataCallback;
+import io.github.progark.Server.database.DatabaseManager;
 
-public class HomeController {
-    private HomeModel homeModel;
-    private HomeService homeService;
-    private HomeView homeView;
+public class HomeController extends Controller {
+    private HomeModel model;
+    private HomeView view;
+    private final AuthService authService;
+    private final Main main;
 
-    public HomeController(HomeService homeService, HomeModel homeModel) {
-        this.homeService = homeService;
-        this.homeModel = homeModel;
+    public HomeController(AuthService authService, Main main) {
+        this.authService = authService;
+        this.main = main;
+        this.model = new HomeModel();
+        this.view = new HomeView(this);
+    }
+    @Override
+    public void enter() {
+        // When this controller becomes active, we can perform actions like checking user status.
+        //checkUserStatus();
     }
 
+    @Override
+    public void update(float delta) {
+        // Update the view (and possibly perform other periodic logic)
+        view.update(delta);
+        //view.handleInput();
+        view.render();
+    }
+
+    @Override
+    public void dispose() {
+        view.dispose();
+    }
+
+    /*
     public void setHomeView(HomeView homeView) {
         this.homeView = homeView;
     }
+     */
 
     public void loadUserGames(String userId) {
+        /*
         homeService.loadUserGames(userId, new DataCallback() {
             @Override
             public void onSuccess(Object data) {
@@ -37,9 +66,12 @@ public class HomeController {
                 System.out.println("Failed to load games: " + e.getMessage());
             }
         });
+         */
+
     }
 
     public void createNewGame(String userId, String opponentId) {
+        /*
         homeService.createNewGame(userId, opponentId, new DataCallback() {
             @Override
             public void onSuccess(Object data) {
@@ -53,28 +85,23 @@ public class HomeController {
                 System.out.println("Failed to create game: " + e.getMessage());
             }
         });
-    }
 
-    public void joinGame(String userId, String gameId) {
-        homeService.joinGame(userId, gameId, new DataCallback() {
-            @Override
-            public void onSuccess(Object data) {
-                String joinedGameId = (String) data;
-                System.out.println("Joined game with ID: " + joinedGameId);
-                loadUserGames(userId); // Reload games list
-            }
-
-            @Override
-            public void onFailure(Exception e) {
-                System.out.println("Failed to join game: " + e.getMessage());
-            }
-        });
+         */
     }
 
     public void handleGameEntryClick(String gameId) {
         // Handle game entry click - navigate to game view
+        /*
         if (homeView != null) {
             homeView.navigateToGame(gameId);
         }
+
+         */
+    }
+    public void ViewJoinGamePage(){
+        main.useJoinGameController();
+    }
+    public void ViewCreateGamePage(){
+        main.useCreateGameController();
     }
 }

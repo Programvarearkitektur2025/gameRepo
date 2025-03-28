@@ -12,6 +12,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 
+import io.github.progark.Client.Controllers.RegistrationController;
 import io.github.progark.Client.Views.Menu.HomeView;
 import io.github.progark.Client.Views.View;
 import io.github.progark.Main;
@@ -19,18 +20,16 @@ import io.github.progark.Server.Service.AuthService;
 import io.github.progark.Server.database.DataCallback;
 
 public class RegistrationView extends View {
-    private final Main game;
-    private final AuthService authService;
+    private RegistrationController controller;
     private final Skin skin;
     private final Texture backgroundTexture;
     private final Texture logoTexture;
     private final Image background;
     private final Image logo;
 
-    public RegistrationView(Main game, AuthService authService) {
+    public RegistrationView(RegistrationController controller) {
         super();
-        this.game = game;
-        this.authService = authService;
+        this.controller = controller;
         this.skin = new Skin(Gdx.files.internal("uiskin.json"));
 
         // Load textures
@@ -107,33 +106,20 @@ public class RegistrationView extends View {
             public void clicked(InputEvent event, float x, float y) {
                 String email = emailField.getText();
                 String password = passwordField.getText();
+                String username = usernameField.getText();
 
-                if (!email.isEmpty() && !password.isEmpty()) {
-                    String username = usernameField.getText();
-                    if (!username.isEmpty()) {
-                        authService.signUp(email, password, username, new DataCallback() {
-                            @Override
-                            public void onSuccess(Object message) {
-                                System.out.println("Registration successful!");
-                                game.getViewManager().setView(() -> new LoginView(game, authService));
-                            }
-
-                            @Override
-                            public void onFailure(Exception e) {
-                                System.out.println("Registration failed: " + e.getMessage());
-                            }
-                        });
+                if (!email.isEmpty() && !password.isEmpty() && !username.isEmpty()) {
+                        controller.registerUser(email, password, username);
                     } else {
                         System.out.println("Please enter a username");
                     }
-                }
             }
         });
 
         backButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                game.getViewManager().setView(() -> new LoginView(game, authService));
+                controller.viewLoginPage();
             }
         });
     }

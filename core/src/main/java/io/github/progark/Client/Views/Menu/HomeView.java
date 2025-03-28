@@ -11,6 +11,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
+
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -40,21 +42,12 @@ public class HomeView extends View {
     private Image joinGame;
     private Image createGame;
     private Image navBar;
-    private final Main game;
-    private final AuthService authService;
-    private final HomeController homeController;
+    private final HomeController controller;
     private Table contentTable;
 
-    public HomeView(Main game, AuthService authService) {
+    public HomeView(HomeController controller) {
         super();
-        this.game = game;
-        this.authService = authService;
-
-        // Initialize MVC components
-        HomeModel homeModel = new HomeModel();
-        DatabaseManager databaseManager = game.getDatabaseManager();
-        HomeService homeService = new HomeService(databaseManager);
-        this.homeController = new HomeController(homeService, homeModel);
+        this.controller = controller;
 
         // Initialize UI components
         skin = new Skin(Gdx.files.internal("uiskin.json"));
@@ -72,32 +65,41 @@ public class HomeView extends View {
         joinGame = new Image(joinGameTexture);
         createGame = new Image(createGameTexture);
         navBar = new Image(navBarTexture);
-
-        // Set up controller-view connection
-        homeController.setHomeView(this);
     }
 
     @Override
     protected void initialize() {
-        // Set up background
         background.setFillParent(true);
         stage.addActor(background);
 
-        // Create main container
-        Table mainContainer = new Table();
-        mainContainer.setFillParent(true);
-        stage.addActor(mainContainer);
+        Table mainLayout = new Table();
+        mainLayout.setFillParent(true);
+        mainLayout.bottom();
+        stage.addActor(mainLayout);
 
-        // Create content table for game lists and buttons
-        contentTable = new Table();
-        contentTable.setFillParent(true);
-        mainContainer.add(contentTable).expand().fill();
+        List<String> yourTurnGames = Arrays.asList("George");
+        List<String> theirTurnGames = Arrays.asList("Molly", "Clara");
 
-        // Load user's games
-        String userId = authService.getCurrentUserEmail();
-        homeController.loadUserGames(userId);
+        mainLayout.top();
+        mainLayout.add(yourTurn).left().pad(30);
+        mainLayout.row();
+        /*
 
-        // Button section
+        for (String name : yourTurnGames) {
+            Table entry = createGameEntry(name);
+            mainLayout.add(entry).padLeft(120).width(400);
+            mainLayout.row();
+        }
+
+        mainLayout.add(theirTurn).left().pad(30);
+        mainLayout.row();
+        for (String name : theirTurnGames) {
+            Table entry = createGameEntry(name);
+            mainLayout.add(entry).padLeft(120).width(400);
+            mainLayout.row();
+        }
+         */
+
         Table buttonTable = new Table();
         ImageButton joinGameButton = new ImageButton(new TextureRegionDrawable(new TextureRegion(joinGameTexture)));
         ImageButton createGameButton = new ImageButton(new TextureRegionDrawable(new TextureRegion(createGameTexture)));
@@ -105,30 +107,25 @@ public class HomeView extends View {
         joinGameButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                game.getViewManager().setView(() -> new JoinGameView(game));
+                controller.ViewJoinGamePage();
             }
         });
 
         createGameButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                game.getViewManager().setView(() -> new CreateGameView(game));
+                controller.ViewCreateGamePage();
             }
         });
 
-        float buttonWidth = Gdx.graphics.getWidth() * 0.4f;
-        float buttonHeight = buttonWidth * 0.3f;
+        buttonTable.add(joinGameButton).pad(20).size(480);
+        buttonTable.add(createGameButton).pad(20).size(500);
+        mainLayout.add(buttonTable).colspan(2).padTop(20).padBottom(20);
+        mainLayout.row();
 
-        buttonTable.add(joinGameButton).size(buttonWidth, buttonHeight).pad(20);
-        buttonTable.add(createGameButton).size(buttonWidth, buttonHeight).pad(20);
-        contentTable.add(buttonTable).colspan(2).padTop(20).padBottom(20).row();
-
-        // Navigation bar
         Table navWrapper = new Table();
-        navWrapper.setFillParent(true);
-        navWrapper.bottom();
-        navWrapper.add(navBar).expandX().fillX().height(Gdx.graphics.getHeight() * 0.15f);
-        mainContainer.add(navWrapper).expandX().fillX().bottom();
+        navWrapper.bottom().add(navBar).expandX().fillX().height(300);
+        mainLayout.add(navWrapper).expandY().bottom().fillX().colspan(2);
     }
 
     public void updateGameLists(HomeModel homeModel) {
@@ -143,7 +140,8 @@ public class HomeView extends View {
             entry.addListener(new ClickListener() {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
-                    homeController.handleGameEntryClick(game.getGameId());
+                    System.out.println("ClickedGameEntry");
+                    //controller.handleGameEntryClick(game.getGameId());
                 }
             });
             contentTable.add(entry).width(Gdx.graphics.getWidth() * 0.8f).height(100).padLeft(120).row();
@@ -157,7 +155,8 @@ public class HomeView extends View {
             entry.addListener(new ClickListener() {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
-                    homeController.handleGameEntryClick(game.getGameId());
+                    System.out.println("ClickedGameEntry");
+                    //controller.handleGameEntryClick(game.getGameId());
                 }
             });
             contentTable.add(entry).width(Gdx.graphics.getWidth() * 0.8f).height(100).padLeft(120).row();
@@ -176,7 +175,9 @@ public class HomeView extends View {
         contentTable.add(buttonTable).colspan(2).padTop(20).padBottom(20).row();
     }
 
+
     private Table createGameEntry(HomeModel.GameEntry game) {
+    /*
         Table entry = new Table();
         entry.setBackground(skin.getDrawable("default-pane"));
 
@@ -197,10 +198,8 @@ public class HomeView extends View {
 
         entry.add(stack).size(80, 80).pad(5);
         return entry;
-    }
-
-    public void navigateToGame(String gameId) {
-        game.getViewManager().setView(() -> new GameView(game));
+     */
+    return new Table();
     }
 
     @Override

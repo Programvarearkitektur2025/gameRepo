@@ -24,8 +24,8 @@ public class JoinGameView extends View {
     private final Texture backgroundTexture;
     private final Texture joinButtonTexture;
     private final Image background;
-    private final BitmapFont bigFont;
-    private final BitmapFont smallFont;
+    //private final BitmapFont bigFont;
+    //private final BitmapFont smallFont;
     private TextField pinField;
     private Label statusLabel;
 
@@ -33,17 +33,20 @@ public class JoinGameView extends View {
         super();
         this.game = game;
         this.skin = new Skin(Gdx.files.internal("uiskin.json"));
-        
+
         // Load textures
         this.backgroundTexture = new Texture(Gdx.files.internal("Background_1.png"));
         this.joinButtonTexture = new Texture(Gdx.files.internal("JoinButton.png"));
-        
+
         // Create background
         this.background = new Image(backgroundTexture);
-        
+
         // Initialize fonts
+        /*
         this.bigFont = new BitmapFont(Gdx.files.internal("fonts/big.fnt"));
         this.smallFont = new BitmapFont(Gdx.files.internal("fonts/small.fnt"));
+
+         */
     }
 
     @Override
@@ -60,11 +63,11 @@ public class JoinGameView extends View {
 
         // Create styles
         Label.LabelStyle labelStyle = new Label.LabelStyle();
-        labelStyle.font = bigFont;
+        //labelStyle.font = bigFont;
         labelStyle.fontColor = Color.BLACK;
 
         TextField.TextFieldStyle textFieldStyle = new TextField.TextFieldStyle();
-        textFieldStyle.font = smallFont;
+        //textFieldStyle.font = smallFont;
         textFieldStyle.fontColor = Color.BLACK;
         textFieldStyle.background = skin.getDrawable("textfield");
         textFieldStyle.cursor = skin.getDrawable("cursor");
@@ -116,7 +119,7 @@ public class JoinGameView extends View {
         skin.dispose();
         backgroundTexture.dispose();
         joinButtonTexture.dispose();
-        bigFont.dispose();
-        smallFont.dispose();
+        //bigFont.dispose();
+        //smallFont.dispose();
     }
 }
