@@ -1,116 +1,66 @@
 package io.github.progark.Client.Controllers;
 
 import java.sql.Timestamp;
+import java.util.List;
 
-import io.github.progark.Server.Model.Game.LobbyModel;
-import io.github.progark.Server.Model.Login.UserModel;
-import io.github.progark.Server.Service.LobbyService;
 import io.github.progark.Client.Views.Game.LobbyView;
-import io.github.progark.Server.Service.AuthService;
+import io.github.progark.Server.Model.Game.LobbyModel;
+import io.github.progark.Server.Model.Game.ResultModel;
+import io.github.progark.Server.Service.LobbyService;
+import io.github.progark.Client.Views.Game.ResultView;
 import io.github.progark.Server.database.DataCallback;
 
 public class LobbyController {
-
-    private final LobbyService lobbyService;
-    private final LobbyModel lobbyModel;
+    private LobbyModel lobbyModel;
+    private LobbyService lobbyService;
     private LobbyView lobbyView;
-    private final AuthService authService;
 
-    public LobbyController(LobbyService lobbyService, LobbyModel lobbyModel, LobbyView lobbyView, AuthService authService) {
-        this.lobbyService = lobbyService;
+    public LobbyController(LobbyModel lobbyModel,
+                           LobbyService lobbyService,
+                           LobbyView lobbyView) {
         this.lobbyModel = lobbyModel;
+        this.lobbyService = lobbyService;
         this.lobbyView = lobbyView;
-        this.authService = authService;
     }
 
-    public void createLobby() {
-        authService.getCurrentUser(new DataCallback() {
+    public void updateResult(String winner,
+                             String loser,
+                             int winnerScore,
+                             int loserScore,
+                             List<String> questions,
+                             int numberOfGuessesP1,
+                             int numberOfGuessesP2,
+                             int correctGuessesP1,
+                             int correctGuessesP2,
+                             List<String> guessesP1,
+                             List<String> guessesP2) {
+
+
+        // Oppdaterer view (dersom du trenger umiddelbar oppdatering)
+        // lobbyView.updateResultModel(resultModel);
+    }
+
+    public void saveResult() {
+    }
+
+    public void loadResult(String gameId) {
+        lobbyService.loadResult(gameId, new DataCallback() {
             @Override
-            public void onSuccess(Object userObj) {
-                UserModel user = (UserModel) userObj;
+            public void onSuccess(Object data) {
+                /*
+                if (data instanceof ResultModel) {
+                    ResultModel loaded = (ResultModel) data;
+                    resultModel = loaded;
+                    // Oppdaterer view for resultat etter runden
+                }
 
-                lobbyService.createLobby(user.getUsername(), new DataCallback() {
-                    @Override
-                    public void onSuccess(Object codeObj) {
-                        String lobbyCode = (String) codeObj;
-
-                        // Update local LobbyModel
-                        lobbyModel.setLobbyCode(lobbyCode);
-                        lobbyModel.setPlayerOne(user.getUsername());
-                        lobbyModel.setPlayerTwo(null);
-                        lobbyModel.setStatus("waiting");
-                        lobbyModel.setCreatedAt(new Timestamp(System.currentTimeMillis()));
-
-                        System.out.println("Lobby created: " + lobbyModel);
-
-                        lobbyService.subscribeToLobbyUpdates(lobbyCode, new DataCallback() {
-                            @Override
-                            public void onSuccess(Object updatedLobbyObj) {
-                                LobbyModel updatedLobby = (LobbyModel) updatedLobbyObj;
-
-                                if ("full".equals(updatedLobby.getStatus())) {
-                                    System.out.println("Lobby is full! Opponent joined: " + updatedLobby.getPlayerTwo());
-
-                                    lobbyModel.setPlayerTwo(updatedLobby.getPlayerTwo());
-                                    lobbyModel.setStatus("full");
-
-                                    // lobbyView.startGame(lobbyModel.getPlayerOne(), lobbyModel.getPlayerTwo());
-                                }
-                            }
-
-                            @Override
-                            public void onFailure(Exception e) {
-                                System.out.println("Failed to subscribe to lobby updates: " + e.getMessage());
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void onFailure(Exception e) {
-                        System.out.println("Failed to create lobby: " + e.getMessage());
-                    }
-                });
+                 */
             }
 
             @Override
             public void onFailure(Exception e) {
-                System.out.println("Failed to fetch user for lobby: " + e.getMessage());
+                e.printStackTrace();
             }
         });
     }
-
-
-    public void joinLobby(String lobbyCode) {
-        authService.getCurrentUser(new DataCallback() {
-            @Override
-            public void onSuccess(Object userObj) {
-                UserModel user = (UserModel) userObj;
-
-                lobbyService.joinLobby(lobbyCode, user.getUsername(), new DataCallback() {
-                    @Override
-                    public void onSuccess(Object updatedLobby) {
-                        LobbyModel joinedLobby = (LobbyModel) updatedLobby;
-                        lobbyModel.setLobbyCode(joinedLobby.getLobbyCode());
-                        lobbyModel.setPlayerOne(joinedLobby.getPlayerOne());
-                        lobbyModel.setPlayerTwo(joinedLobby.getPlayerTwo());
-                        lobbyModel.setStatus(joinedLobby.getStatus());
-                        lobbyModel.setCreatedAt(joinedLobby.getCreatedAt());
-
-                        System.out.println("Successfully joined lobby: " + joinedLobby);
-                    }
-
-                    @Override
-                    public void onFailure(Exception e) {
-                        System.out.println("Failed to join lobby: " + e.getMessage());
-                    }
-                });
-            }
-
-            @Override
-            public void onFailure(Exception e) {
-                System.out.println("Failed to fetch current user: " + e.getMessage());
-            }
-        });
-    }
-
 }

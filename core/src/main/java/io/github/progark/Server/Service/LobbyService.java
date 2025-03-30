@@ -1,77 +1,93 @@
 package io.github.progark.Server.Service;
 
-import java.sql.Timestamp;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
-
-import com.badlogic.gdx.utils.Json;
-import com.badlogic.gdx.utils.JsonReader;
-import com.badlogic.gdx.utils.JsonValue;
-
-import io.github.progark.Server.Model.Game.LobbyModel;
-import io.github.progark.Server.Service.AuthService;
+import io.github.progark.Server.Model.Game.ResultModel;
 import io.github.progark.Server.database.DataCallback;
 import io.github.progark.Server.database.DatabaseManager;
 
+import java.sql.Timestamp;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class LobbyService {
-
     private final DatabaseManager databaseManager;
-    private final AuthService authService;
-    private final Json json = new Json();
 
-    public LobbyService(DatabaseManager databaseManager, AuthService authService) {
+    public LobbyService(DatabaseManager databaseManager) {
         this.databaseManager = databaseManager;
-        this.authService = authService;
     }
 
-    public void createLobby(String playerUsername, DataCallback callback) {
-        String generatedCode = generateLobbyCode(); // Used as lobbyCode field, not document ID
 
-        LobbyModel lobby = new LobbyModel(
-            generatedCode,  // Will be stored as a field in the document
-            playerUsername,
-            null,
-            "waiting",
-            new Timestamp(System.currentTimeMillis())
-        );
+    public void saveResult(ResultModel model, DataCallback callback) {
+        String key = "results/" + model.getGameId();
 
 
-        // Firestore will generate a random document ID here:
+        Map<String, Object> data = new HashMap<>();
+        data.put("gameId", model.getGameId());
+        data.put("winner", model.getWinner());
+        data.put("loser", model.getLoser());
+        data.put("winnerScore", model.getWinnerScore());
+        data.put("loserScore", model.getLoserScore());
+        data.put("finishedAt", model.getFinishedAt() != null ? model.getFinishedAt().getTime() : null);
+        data.put("questions", model.getQuestions());
+        data.put("numberOfGuessesP1", model.getNumberOfGuessesP1());
+        data.put("numberOfGuessesP2", model.getNumberOfGuessesP2());
+        data.put("correctGuessesP1", model.getCorrectGuessesP1());
+        data.put("correctGuessesP2", model.getCorrectGuessesP2());
+        data.put("guessesP1", model.getGuessesP1());
+        data.put("guessesP2", model.getGuessesP2());
+
         try {
-            databaseManager.writeData(generatedCode, lobby); // ✅ send the model directly
-            callback.onSuccess(generatedCode);
+
+            databaseManager.writeData(key, data);
+            callback.onSuccess("Result saved for " + model.getGameId());
         } catch (Exception e) {
             callback.onFailure(e);
         }
     }
 
 
-    public void joinLobby(String lobbyCode, String playerTwoUsername, DataCallback callback) {
-        databaseManager.readData(lobbyCode, new DataCallback() {
+    public void loadResult(String gameId, DataCallback callback) {
+        String key = "results/" + gameId;
+        databaseManager.readData(key, new DataCallback() {
             @Override
             public void onSuccess(Object data) {
-                if (!(data instanceof String)) {
-                    callback.onFailure(new Exception("Invalid lobby data format"));
+                if (!(data instanceof Map)) {
+
+                    callback.onFailure(new Exception("Database result is not a Map"));
                     return;
                 }
 
-                try {
-                    LobbyModel lobby = json.fromJson(LobbyModel.class, (String) data);
+                Map<?, ?> rawMap = (Map<?, ?>) data;
 
-                    if (lobby.getPlayerTwo() == null || lobby.getPlayerTwo().isEmpty()) {
-                        lobby.setPlayerTwo(playerTwoUsername);
-                        lobby.setStatus("full");
+                ResultModel model = new ResultModel();
 
-                        // Write updated lobby back
-                        databaseManager.writeData(lobbyCode, lobby);
-                        callback.onSuccess(lobby);
-                    } else {
-                        callback.onFailure(new Exception("Lobby already full"));
-                    }
-                } catch (Exception e) {
-                    callback.onFailure(new Exception("Failed to parse lobby data: " + e.getMessage()));
+
+                model.setGameId((String) rawMap.get("gameId"));
+                model.setWinner((String) rawMap.get("winner"));
+                model.setLoser((String) rawMap.get("loser"));
+
+
+                model.setWinnerScore(castToInt(rawMap.get("winnerScore")));
+                model.setLoserScore(castToInt(rawMap.get("loserScore")));
+
+
+                Long finishedAtLong = castToLong(rawMap.get("finishedAt"));
+                if (finishedAtLong != null) {
+                    model.setFinishedAt(new Timestamp(finishedAtLong));
                 }
+
+
+                model.setQuestions(castToStringList(rawMap.get("questions")));
+                model.setGuessesP1(castToStringList(rawMap.get("guessesP1")));
+                model.setGuessesP2(castToStringList(rawMap.get("guessesP2")));
+
+                model.setNumberOfGuessesP1(castToInt(rawMap.get("numberOfGuessesP1")));
+                model.setNumberOfGuessesP2(castToInt(rawMap.get("numberOfGuessesP2")));
+                model.setCorrectGuessesP1(castToInt(rawMap.get("correctGuessesP1")));
+                model.setCorrectGuessesP2(castToInt(rawMap.get("correctGuessesP2")));
+
+
+                callback.onSuccess(model);
             }
 
             @Override
@@ -82,35 +98,25 @@ public class LobbyService {
     }
 
 
-    public void subscribeToLobbyUpdates(String lobbyCode, DataCallback callback) {
-        databaseManager.subscribeToDocument(lobbyCode, new DataCallback() {
-            @Override
-            public void onSuccess(Object data) {
-                if (!(data instanceof String)) {
-                    callback.onFailure(new Exception("Invalid lobby data format"));
-                    return;
-                }
-
-                try {
-                    LobbyModel updatedLobby = json.fromJson(LobbyModel.class, (String) data);
-                    callback.onSuccess(updatedLobby);
-                } catch (Exception e) {
-                    callback.onFailure(e);
-                }
-            }
-
-            @Override
-            public void onFailure(Exception e) {
-                callback.onFailure(e);
-            }
-        });
+    private int castToInt(Object val) {
+        if (val instanceof Number) {
+            return ((Number) val).intValue();
+        }
+        return 0;
     }
 
+    private Long castToLong(Object val) {
+        if (val instanceof Number) {
+            return ((Number) val).longValue();
+        }
+        return null;
+    }
 
-
-    private String generateLobbyCode() {
-        Random rand = new Random();
-
-        return String.format("%06d", rand.nextInt(1000000));
+    @SuppressWarnings("unchecked")
+    private List<String> castToStringList(Object val) {
+        if (val instanceof List) {
+            return (List<String>) val;
+        }
+        return null;
     }
 }
