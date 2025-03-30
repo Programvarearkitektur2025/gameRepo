@@ -1,9 +1,10 @@
 package io.github.progark.Server.Service;
 
-import io.github.progark.Server.Model.Game.LobbyModel;
 import io.github.progark.Server.Model.Game.GameModel;
+import io.github.progark.Server.Model.Game.LobbyModel;
 import io.github.progark.Server.database.DataCallback;
 import io.github.progark.Server.database.DatabaseManager;
+
 import java.util.Map;
 import java.util.HashMap;
 
@@ -43,7 +44,7 @@ public class GameService {
 
     public void updateGameState(String userId, String gameId, GameModel gameModel, DataCallback callback) {
         String gamePath = "games/" + userId + "/" + gameId;
-        
+
         Map<String, Object> gameData = new HashMap<>();
         gameData.put("score", gameModel.getScore());
         gameData.put("timeRemaining", gameModel.getTimeRemaining());
