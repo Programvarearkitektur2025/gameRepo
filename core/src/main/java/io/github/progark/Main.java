@@ -4,19 +4,26 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 
 import io.github.progark.Client.Controllers.ControllerManager;
-import io.github.progark.Client.Controllers.CreateGameController;
-import io.github.progark.Client.Controllers.GameController;
+import io.github.progark.Client.Controllers.RoundController;
 import io.github.progark.Client.Controllers.HomeController;
+import io.github.progark.Client.Controllers.JoinGameController;
+import io.github.progark.Client.Controllers.LeaderBoardController;
 import io.github.progark.Client.Controllers.LoginController;
 import io.github.progark.Client.Controllers.RegistrationController;
+import io.github.progark.Client.Controllers.SettingsController;
+import io.github.progark.Client.Controllers.TutorialController;
+import io.github.progark.Client.Controllers.UserController;
 import io.github.progark.Server.Service.AuthService;
 import io.github.progark.Server.database.DatabaseManager;
+import io.github.progark.Client.Audio.MusicManager;
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class Main extends Game {
     private AuthService authService;
     private ControllerManager controllerManager;
     private DatabaseManager databaseManager;
+    private final MusicManager musicManager = new MusicManager();
+
 
     public Main(DatabaseManager dbManager, AuthService authManager) {
         if (dbManager == null || authManager == null) {
@@ -59,23 +66,54 @@ public class Main extends Game {
         return databaseManager;
     }
 
-    public void useLoginController(){
-        controllerManager.setController(new LoginController(authService,this));
+    public void useLoginController() {
+        controllerManager.setController(new LoginController(authService, this));
     }
-    public void useHomeController(){
+
+    public void useHomeController() {
         controllerManager.setController(new HomeController(authService, this));
     }
-    public void useRegisterController(){
+
+    public void useRegisterController() {
         controllerManager.setController(new RegistrationController(authService, this));
     }
-    public void useJoinGameController(){
-        //controllerManager.setController(new JoinGameController((authService,this));
+
+    public void useJoinGameController() {
+        controllerManager.setController(new JoinGameController(authService, databaseManager, this));
     }
-    public void useCreateGameController(){
+
+    public void useCreateGameController() {
         controllerManager.setController(new CreateGameController(authService, databaseManager, this));
     }
 
     public void useGameController() {
-        controllerManager.setController(new GameController(databaseManager, this));
+        controllerManager.setController(new RoundController(databaseManager, this));
     }
+
+    public void useTutorialController() {
+        controllerManager.setController(new TutorialController(this));
+    }
+
+    public void useTutorialController() {
+        controllerManager.setController(new TutorialController(this));
+    }
+
+    public void useUserController() {
+        controllerManager.setController(new UserController(authService, this));
+    }
+
+
+    public void useLeaderBoardController() {
+        controllerManager.setController(new LeaderBoardController(this));
+    }
+
+    public void useSettingsController() {
+        controllerManager.setController(new SettingsController(this));
+    }
+    public MusicManager getMusicManager() {
+        return musicManager;
+    }
+
+
+
 }

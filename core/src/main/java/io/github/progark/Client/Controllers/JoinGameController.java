@@ -3,7 +3,7 @@ package io.github.progark.Client.Controllers;
 
 import io.github.progark.Client.Views.Menu.JoinGameView;
 import io.github.progark.Main;
-import io.github.progark.Server.Model.Game.LobbyModel;
+import io.github.progark.Server.Model.Game.GameModel;
 import io.github.progark.Server.Model.Login.UserModel;
 import io.github.progark.Server.Service.AuthService;
 import io.github.progark.Server.Service.CreateGameService;
@@ -38,7 +38,7 @@ public class JoinGameController extends Controller {
                     @Override
                     public void onSuccess(Object result) {
                         Map<String, Object> dataMap = (Map<String, Object>) result;
-                        LobbyModel lobby = LobbyModel.fromMap(lobbyCode, dataMap);
+                        GameModel lobby = GameModel.fromMap(lobbyCode, dataMap);
 
                         if (lobby.isFull() || "started".equalsIgnoreCase(lobby.getStatus())) {
                             System.out.println("Lobby is full or already started.");
@@ -75,6 +75,9 @@ public class JoinGameController extends Controller {
     public void update(float delta) {
         joinGameView.update(delta);
         joinGameView.render();
+    }
+    public void goBackToHome() {
+        main.useHomeController();
     }
 
     @Override
