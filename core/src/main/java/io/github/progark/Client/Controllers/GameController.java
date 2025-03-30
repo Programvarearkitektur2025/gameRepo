@@ -12,6 +12,7 @@ public class GameController {
     public GameController(GameService gameService, GameModel gameModel) {
         this.gameService = gameService;
         this.gameModel = gameModel;
+        this.gameView = new GameView(this);
     }
 
     public void setGameView(GameView gameView) {
