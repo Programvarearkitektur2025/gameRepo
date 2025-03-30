@@ -19,6 +19,7 @@ public class GameModel {
     private Number playerTwoPoints;
 
     private List<RoundModel> games;
+  
     public static GameModel fromMap(String lobbyCode, Map<String, Object> data) {
         GameModel lobby = new GameModel();
 
@@ -32,7 +33,7 @@ public class GameModel {
         lobby.setPlayerOnePoints(((Number) data.get("playerOnePoints")).intValue());
         lobby.setPlayerTwoPoints(((Number) data.get("playerTwoPoints")).intValue());
 
-        // ✅ Handle createdAt as Map or Long
+        // Handle createdAt as Map or Long
         Object createdRaw = data.get("createdAt");
         if (createdRaw instanceof Map) {
             Map<String, Object> tsMap = (Map<String, Object>) createdRaw;

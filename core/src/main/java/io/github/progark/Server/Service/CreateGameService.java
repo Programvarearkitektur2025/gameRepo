@@ -55,6 +55,7 @@ public class CreateGameService {
 
                 @SuppressWarnings("unchecked")
                 Map<String, Object> dataMap = (Map<String, Object>) result;
+
                 GameModel lobby = GameModel.fromMap(lobbyCode, dataMap);
 
                 if (lobby.isFull() || "started".equalsIgnoreCase(lobby.getStatus())) {
