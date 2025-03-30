@@ -47,6 +47,10 @@ public class CreateGameController extends Controller {
     public void dispose() {
         createGameView.dispose();
     }
+    public void goBackToHome() {
+        main.useHomeController();
+    }
+
 
     public void createLobby(int difficulty, int rounds, boolean multiplayer) {
         authService.getCurrentUser(new DataCallback() {

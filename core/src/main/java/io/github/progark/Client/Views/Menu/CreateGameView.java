@@ -11,15 +11,18 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 
-import java.util.Random;
+import java.util.function.IntConsumer;
 
 import io.github.progark.Client.Controllers.CreateGameController;
 import io.github.progark.Client.Views.View;
 
 public class CreateGameView extends View {
+
     private final Skin skin;
     private final Texture backgroundTexture;
     private final Texture startGameButtonTexture;
+    private final Texture backButtonTexture;
+    private final Texture roundsToPlayTextTexture;
     private final Image background;
     private final BitmapFont font;
 
@@ -29,22 +32,25 @@ public class CreateGameView extends View {
     private Texture oneGrey, oneWhite, twoGrey, twoWhite, threeGrey, threeWhite;
 
     // State
-    private int selectedMode = 0;         // 0 = Single, 1 = Multi
-    private int selectedDifficulty = 0;   // 0 = Easy, 1 = Medium, 2 = Hard
-    private int selectedRounds = 0;       // 0 = 1, 1 = 2, 2 = 3
+    private int selectedMode = 0;
+    private int selectedDifficulty = 0;
+    private int selectedRounds = 0;
 
-    private CreateGameController controller;
+    private final CreateGameController controller;
 
     public CreateGameView(CreateGameController createGameController) {
         super();
         this.skin = new Skin(Gdx.files.internal("uiskin.json"));
         this.controller = createGameController;
 
+        // Background and Button
         this.backgroundTexture = new Texture(Gdx.files.internal("Background2.png"));
-        this.startGameButtonTexture = new Texture(Gdx.files.internal("StartGameButton.png"));
-
+        this.startGameButtonTexture = new Texture(Gdx.files.internal("CreateGreen.png"));
+        this.backButtonTexture = new Texture(Gdx.files.internal("backButtonBlue.png"));
+        this.roundsToPlayTextTexture = new Texture(Gdx.files.internal("RoundsToPlayText.png"));
         this.background = new Image(backgroundTexture);
 
+        // Font
         FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("OpenSans.ttf"));
         FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
         parameter.size = 80;
@@ -57,29 +63,45 @@ public class CreateGameView extends View {
         background.setFillParent(true);
         stage.addActor(background);
 
+        // Back Button
+        ImageButton backButton = new ImageButton(new TextureRegionDrawable(backButtonTexture));
+        backButton.setPosition(30, Gdx.graphics.getHeight() - 100); // Adjust position
+        backButton.setSize(80, 80);
+        backButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                controller.goBackToHome();
+            }
+        });
+        stage.addActor(backButton);
+
+        // Main layout
         Table table = new Table();
         table.setFillParent(true);
-        table.top().padTop(80);
+        table.top().padTop(100);
         stage.addActor(table);
 
         Label.LabelStyle labelStyle = new Label.LabelStyle(font, Color.WHITE);
         Label titleLabel = new Label("Create a game", labelStyle);
         titleLabel.setAlignment(Align.center);
-        table.add(titleLabel).colspan(3).padBottom(40).row();
+        table.add(titleLabel).colspan(3).padBottom(150).padTop(150).center().row();
 
         loadTextures();
 
-        // Mode buttons
+        // --- Game Mode Buttons ---
         ImageButton singleBtn = new ImageButton(new TextureRegionDrawable(singleGrey));
         ImageButton multiBtn = new ImageButton(new TextureRegionDrawable(multiGrey));
         ImageButton[] modeButtons = {singleBtn, multiBtn};
         Texture[] modeWhite = {singleWhite, multiWhite};
         Texture[] modeGrey = {this.singleGrey, this.multiGrey};
         addToggleLogic(modeButtons, modeWhite, modeGrey, i -> selectedMode = i);
-        table.add(singleBtn).pad(10);
-        table.add(multiBtn).pad(10).row();
 
-        // Difficulty buttons
+        Table modeRow = new Table();
+        modeRow.add(singleBtn).pad(20).width(300).height(100);
+        modeRow.add(multiBtn).pad(20).width(300).height(100);
+        table.add(modeRow).colspan(3).padBottom(100).row();
+
+        // --- Difficulty Buttons ---
         ImageButton easyBtn = new ImageButton(new TextureRegionDrawable(easyGrey));
         ImageButton mediumBtn = new ImageButton(new TextureRegionDrawable(mediumGrey));
         ImageButton hardBtn = new ImageButton(new TextureRegionDrawable(hardGrey));
@@ -87,11 +109,18 @@ public class CreateGameView extends View {
         Texture[] diffWhite = {easyWhite, mediumWhite, hardWhite};
         Texture[] diffGrey = {this.easyGrey, this.mediumGrey, this.hardGrey};
         addToggleLogic(diffButtons, diffWhite, diffGrey, i -> selectedDifficulty = i);
-        table.add(easyBtn).pad(10);
-        table.add(mediumBtn).pad(10);
-        table.add(hardBtn).pad(10).row();
 
-        // Rounds buttons
+        Table diffRow = new Table();
+        diffRow.add(easyBtn).pad(10).width(200).height(100);
+        diffRow.add(mediumBtn).pad(10).width(200).height(100);
+        diffRow.add(hardBtn).pad(10).width(200).height(100);
+        table.add(diffRow).colspan(3).padBottom(100).row();
+
+        // --- Rounds Label ---
+        Image roundsToPlayText = new Image(roundsToPlayTextTexture);
+        table.add(roundsToPlayText).padBottom(60).width(900).height(70).center().row();
+
+        // --- Rounds Buttons ---
         ImageButton oneBtn = new ImageButton(new TextureRegionDrawable(oneGrey));
         ImageButton twoBtn = new ImageButton(new TextureRegionDrawable(twoGrey));
         ImageButton threeBtn = new ImageButton(new TextureRegionDrawable(threeGrey));
@@ -99,28 +128,31 @@ public class CreateGameView extends View {
         Texture[] roundWhite = {oneWhite, twoWhite, threeWhite};
         Texture[] roundGrey = {oneGrey, twoGrey, threeGrey};
         addToggleLogic(roundButtons, roundWhite, roundGrey, i -> selectedRounds = i);
-        table.add(oneBtn).pad(10);
-        table.add(twoBtn).pad(10);
-        table.add(threeBtn).pad(10).row();
 
-        // Create button
+        Table roundsRow = new Table();
+        roundsRow.add(oneBtn).pad(10).width(200).height(100);
+        roundsRow.add(twoBtn).pad(10).width(200).height(100);
+        roundsRow.add(threeBtn).pad(10).width(200).height(100);
+        table.add(roundsRow).colspan(3).padBottom(100).row();
+
+        // --- Start Game Button ---
         ImageButton startGameButton = new ImageButton(new TextureRegionDrawable(startGameButtonTexture));
         startGameButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                int rounds = selectedRounds + 1; // 0 => 1 round, etc.
+                int rounds = selectedRounds + 1;
                 boolean isMultiplayer = selectedMode == 1;
                 controller.createLobby(selectedDifficulty, rounds, isMultiplayer);
                 System.out.println("Start game clicked - Mode: " + isMultiplayer + ", Diff: " + selectedDifficulty + ", Rounds: " + rounds);
             }
         });
 
-        table.add(startGameButton).colspan(3).padTop(40).width(600).height(180).row();
+        table.add(startGameButton).colspan(3).center().width(700).height(400);
     }
 
     private void loadTextures() {
         // Mode
-        singleGrey = new Texture("SingleplayerGrey.png");
+        singleGrey = new Texture("SinglePlayerGrey.png");
         singleWhite = new Texture("SingleplayerWhite.png");
         multiGrey = new Texture("MultiplayerGray.png");
         multiWhite = new Texture("MultiplayerWhite.png");
@@ -142,7 +174,7 @@ public class CreateGameView extends View {
         threeWhite = new Texture("ThreeRoundsWhite.png");
     }
 
-    private void addToggleLogic(ImageButton[] buttons, Texture[] whiteTextures, Texture[] greyTextures, java.util.function.IntConsumer onSelected) {
+    private void addToggleLogic(ImageButton[] buttons, Texture[] whiteTextures, Texture[] greyTextures, IntConsumer onSelected) {
         for (int i = 0; i < buttons.length; i++) {
             final int index = i;
             buttons[i].addListener(new ClickListener() {
@@ -166,6 +198,8 @@ public class CreateGameView extends View {
         skin.dispose();
         backgroundTexture.dispose();
         startGameButtonTexture.dispose();
+        backButtonTexture.dispose();
+        roundsToPlayTextTexture.dispose();
         font.dispose();
     }
 }
