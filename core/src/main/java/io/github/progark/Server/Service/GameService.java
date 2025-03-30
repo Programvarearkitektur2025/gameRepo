@@ -1,9 +1,10 @@
 package io.github.progark.Server.Service;
 
-import io.github.progark.Server.Model.Game.LobbyModel;
 import io.github.progark.Server.Model.Game.GameModel;
+import io.github.progark.Server.Model.Game.LobbyModel;
 import io.github.progark.Server.database.DataCallback;
 import io.github.progark.Server.database.DatabaseManager;
+
 import java.util.Map;
 import java.util.HashMap;
 

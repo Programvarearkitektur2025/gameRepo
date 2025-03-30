@@ -15,7 +15,7 @@ import io.github.progark.Main;
 //Eksempel på ResultView
 public class ResultView extends View {
     private final Main game;
-    private ResultModel resultModel;
+    //private ResultModel resultModel;
 
     private Skin skin;
     private Texture backgroundTexture;
@@ -23,10 +23,10 @@ public class ResultView extends View {
     private BitmapFont bigFont;
     private Label resultLabel;
 
-    public ResultView(Main game, ResultModel resultModel) {
+    public ResultView(Main game) {
         super();
         this.game = game;
-        this.resultModel = resultModel;
+        //this.resultModel = resultModel;
     }
 
 
@@ -53,9 +53,9 @@ public class ResultView extends View {
         labelStyle.font = bigFont;
 
 
-        String displayText = buildResultText(resultModel);
+        //String displayText = buildResultText(resultModel);
 
-        resultLabel = new Label(displayText, labelStyle);
+        //resultLabel = new Label(displayText, labelStyle);
         resultLabel.setFontScale(1.0f);
         resultLabel.setAlignment(1);
 
@@ -65,6 +65,7 @@ public class ResultView extends View {
     }
 
    //Eksempel på hvordan man kan hente ut verdier fra Result
+    /*
     private String buildResultText(ResultModel model) {
         if (model == null) {
             return "No results yet";
@@ -109,3 +110,4 @@ public class ResultView extends View {
         }
         }
     }
+     */

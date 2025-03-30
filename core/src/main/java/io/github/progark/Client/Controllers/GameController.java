@@ -55,6 +55,15 @@ public class GameController {
         return gameModel.getTimeRemaining();
     }
 
+    public void updateTime(float delta){
+        // Add logic as necessary
+    };
+
+    public boolean trySubmitAnswer(String answer){
+        // Add logic as necessary
+        return true;
+    }
+
     public java.util.Map<String, Integer> getSubmittedAnswers() {
         return gameModel.getSubmittedAnswers();
     }
