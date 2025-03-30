@@ -20,11 +20,10 @@ import io.github.progark.Client.Controllers.GameController;
 
 public class GameView extends View {
 
-    private final GameController gameController;
+    private final GameController controller;
     //private final Stage stage;
     private final Skin skin;
     private final Texture backgroundTexture;
-
     private Label timerLabel;
     private Label scoreLabel;
     private Label categoryLabel;
@@ -32,18 +31,15 @@ public class GameView extends View {
     private TextButton submitButton;
 
     private Table answerContainer;
-    private com.badlogic.gdx.scenes.scene2d.ui.List<String> answersList;
+    private List<String> answers;
 
-    private GameModel gameModel;
-    private GameController controller;
-    private GameService gameService;
 
 
     public GameView(GameController gameController){
         super(); // This calls view constructor for standard initialization of view.
         //GameService gameService = new GameService(game.getDatabaseManager());
 
-        this.gameController = gameController;
+        this.controller = gameController;
         //this.game = game;
 
         // Initialize texture and skin here. This needs to be correct to planned UI
@@ -86,7 +82,7 @@ public class GameView extends View {
         this.timerLabel = timerLabelTop; // Assign to use in update()
 
         // === CATEGORY LABEL ===
-        categoryLabel = new Label(gameModel.getCategoryTitle(), skin);
+        categoryLabel = new Label("Mmmmmmmmmolly", skin);
         categoryLabel.setFontScale(2.5f);
         categoryLabel.setAlignment(Align.center);
         root.add(categoryLabel).padTop(20).padBottom(20).row();
@@ -139,7 +135,9 @@ public class GameView extends View {
      */
     @Override
     public void update(float delta) {
+        /*
         controller.updateTime(delta);
+
 
         if (controller.isTimeUp()) {
             inputField.setDisabled(true);
@@ -149,16 +147,24 @@ public class GameView extends View {
             timerLabel.setText("Time: " + (int) controller.getTimeRemaining());
         }
 
-        stage.act(delta);
+
+
+       stage.act(delta);
+
+         */
     }
 
     private void submitAnswer() {
+        /*
         String input = inputField.getText();
         boolean accepted = controller.trySubmitAnswer(input);
         if (accepted) {
             updateUI();
         }
         inputField.setText("");
+        */
+
+        controller.getQuestionByID("C02rSsE1DU2E9gGPR4UC");
     }
 
     private void updateUI() {
