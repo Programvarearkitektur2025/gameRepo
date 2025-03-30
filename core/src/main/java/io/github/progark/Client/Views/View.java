@@ -9,14 +9,16 @@ public abstract class View {
     protected boolean isInitialized = false;
 
     protected View() {
-        stage = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
-        Gdx.input.setInputProcessor(stage);
     }
 
     public void enter() {
         if (!isInitialized) {
-            initialize();
-            isInitialized = true;
+            Gdx.app.postRunnable(() -> {
+                stage = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
+                Gdx.input.setInputProcessor(stage);
+                initialize();
+                isInitialized = true;
+            });
         }
     }
 
@@ -37,7 +39,9 @@ public abstract class View {
     public void dispose() {
         if (stage != null) {
             stage.dispose();
+            stage = null;
         }
+        isInitialized = false;
     }
 
     protected void handleInput() {

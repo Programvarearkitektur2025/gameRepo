@@ -1,4 +1,4 @@
-package io.github.progark.Server.Model.Game;
+package io.github.progark.Client.Model;
 
 import java.sql.Timestamp;
 import java.util.Date;
@@ -18,6 +18,10 @@ public class LobbyModel {
         this.playerTwo = playerTwo;
         this.status = status;
         this.createdAt = createdAt;
+    }
+
+    public LobbyModel() {
+
     }
 
     public static LobbyModel fromMap(String lobbyCode, Map<String, Object> data) {

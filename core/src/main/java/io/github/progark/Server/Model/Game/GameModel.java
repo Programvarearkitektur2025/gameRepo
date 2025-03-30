@@ -11,7 +11,6 @@ public class GameModel {
      */
 
     private final Map<String, Integer> submittedAnswers = new HashMap<>();
-
     private int score = 0;
     private float timeRemaining = 60f;
 
@@ -25,6 +24,7 @@ public class GameModel {
         this.playerTwo = new PlayerModel(user2);
          */
         categoryId = "2";
+
 
         this.category = CategoryData.getCategory(categoryId);
 

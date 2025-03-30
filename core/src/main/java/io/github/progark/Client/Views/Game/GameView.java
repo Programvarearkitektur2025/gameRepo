@@ -1,34 +1,31 @@
-@ -1,301 +1,234 @@
 package io.github.progark.Client.Views.Game;
+
+import java.util.Map;
+
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.text.View;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.*;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
-import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.Align;
 
-import io.github.progark.Client.Controllers.GameController;
-import io.github.progark.Client.Model.GameModel;
-import io.github.progark.Client.Model.UserModel;
-import io.github.progark.Client.Service.GameService;
-import io.github.progark.Client.Views.View;
-
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-
 import io.github.progark.Main;
-
-
-import java.util.List;
-import java.util.Map;
+import io.github.progark.Server.Model.Game.GameModel;
+import io.github.progark.Server.Model.UserModel;
+import io.github.progark.Server.Service.GameService;
+import io.github.progark.Client.Controllers.GameController;
 
 public class GameView extends View implements Screen {
 
     private final Main game;
-
+    private final GameController gameController;
     //private final Stage stage;
     private final Skin skin;
     private final Texture backgroundTexture;
@@ -49,12 +46,21 @@ public class GameView extends View implements Screen {
     private UserModel user2;
 
 
-    public GameView(Main game) {
-        // Initialize variables
+    public GameView(Main game){
         super(); // This calls view constructor for standard initialization of view.
+        GameModel gameModel = new GameModel();
+        GameService gameService = new GameService(game.getDatabaseManager());
+        
+        this.gameController = new GameController(gameService, gameModel);
         this.game = game;
 
         // Initialize texture and skin here. This needs to be correct to planned UI
+        //backgroundTexture = new Texture(Gdx.files.internal("game_background.png"));
+       
+        skin = new Skin(Gdx.files.internal("uiskin.json"));
+
+        this.game = game;
+
         backgroundTexture = new Texture(Gdx.files.internal("game_background.png"));
         skin = new Skin(Gdx.files.internal("uiskin.json"));
 
@@ -115,6 +121,7 @@ public class GameView extends View implements Screen {
         submitButton = new TextButton("Submit", skin);
         submitButton.getLabel().setFontScale(1.5f);
         submitButton.setHeight(80);
+
         submitButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -228,9 +235,7 @@ public class GameView extends View implements Screen {
         }
         // Dispose of other resources
         super.dispose(); // Call parent's dispose to clean up stage and spriteBatch
-
     }
-
 
     public void showMessage(String displayMessage){
         // Logic for displaying error message

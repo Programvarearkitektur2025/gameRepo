@@ -23,12 +23,13 @@ public class AndroidDatabaseManager implements DatabaseManager {
     }
 
     @Override
-    public void writeData(String key, Map<String, Object> value) {
-        firestore.document(key)
-            .set(value)
+    public void writeData(String key, Object data) {
+        firestore.document("lobbies/" + key)
+            .set(data) // ✅ this is now a POJO or Map
             .addOnSuccessListener(aVoid -> System.out.println("Firestore: Data saved successfully"))
             .addOnFailureListener(e -> System.out.println("Firestore: Data save failed: " + e.getMessage()));
     }
+
 
     @Override
     public void readData(String key, DataCallback callback) {
@@ -43,4 +44,22 @@ public class AndroidDatabaseManager implements DatabaseManager {
             })
             .addOnFailureListener(callback::onFailure);
     }
+
+    @Override
+    public void subscribeToDocument(String key, DataCallback callback) {
+        firestore.document(key).addSnapshotListener((snapshot, error) -> {
+            if (error != null) {
+                callback.onFailure(error);
+                return;
+            }
+
+            if (snapshot != null && snapshot.exists()) {
+                String json = snapshot.getData().toString(); // You may serialize it better
+                callback.onSuccess(json);
+            } else {
+                callback.onFailure(new Exception("No data found"));
+            }
+        });
+    }
+
 }
