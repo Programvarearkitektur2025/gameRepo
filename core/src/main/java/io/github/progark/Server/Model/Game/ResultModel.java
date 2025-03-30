@@ -14,5 +14,5 @@ public class ResultModel {
     private Map<String, Integer> guessesP1;
     private Map<String, Integer> guessesP2;
 
-
+}
 

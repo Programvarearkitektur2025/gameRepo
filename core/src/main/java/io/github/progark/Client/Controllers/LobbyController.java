@@ -1,13 +1,10 @@
 package io.github.progark.Client.Controllers;
 
-import java.sql.Timestamp;
 import java.util.List;
 
 import io.github.progark.Client.Views.Game.LobbyView;
 import io.github.progark.Server.Model.Game.LobbyModel;
-import io.github.progark.Server.Model.Game.ResultModel;
 import io.github.progark.Server.Service.LobbyService;
-import io.github.progark.Client.Views.Game.ResultView;
 import io.github.progark.Server.database.DataCallback;
 
 public class LobbyController {
@@ -45,9 +42,9 @@ public class LobbyController {
     }
 
     public void loadResult(String gameId) {
-        lobbyService.loadResult(gameId, new DataCallback() {
-            @Override
-            public void onSuccess(Object data) {
+        //lobbyService.loadResult(gameId, new DataCallback() {
+          //  @Override
+            //public void onSuccess(Object data) {
                 /*
                 if (data instanceof ResultModel) {
                     ResultModel loaded = (ResultModel) data;
@@ -56,12 +53,12 @@ public class LobbyController {
                 }
 
                  */
-            }
+           // }
 
-            @Override
+           /* @Override
             public void onFailure(Exception e) {
                 e.printStackTrace();
             }
         });
-    }
-}
+    } */
+}}
