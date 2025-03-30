@@ -3,6 +3,7 @@ package io.github.progark.Server.Model.Game;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 public class LobbyModel {
 
@@ -142,4 +143,43 @@ public class LobbyModel {
             ", createdAt=" + createdAt +
             '}';
     }
+
+    public static LobbyModel fromMap(String lobbyCode, Map<String, Object> data) {
+        LobbyModel lobby = new LobbyModel();
+
+        lobby.setLobbyCode(lobbyCode);
+        lobby.setPlayerOne((String) data.get("playerOne"));
+        lobby.setPlayerTwo((String) data.get("playerTwo"));
+        lobby.setDifficulty(((Number) data.get("difficulty")).intValue());
+        lobby.setStatus((String) data.get("status"));
+        lobby.setRounds(((Number) data.get("rounds")).intValue());
+        lobby.setMultiplayer((Boolean) data.get("multiplayer"));
+        lobby.setPlayerOnePoints(((Number) data.get("playerOnePoints")).intValue());
+        lobby.setPlayerTwoPoints(((Number) data.get("playerTwoPoints")).intValue());
+
+        // ✅ Handle createdAt as Map or Long
+        Object createdRaw = data.get("createdAt");
+        if (createdRaw instanceof Map) {
+            Map<String, Object> tsMap = (Map<String, Object>) createdRaw;
+
+            if (tsMap.containsKey("seconds")) {
+                long seconds = ((Number) tsMap.get("seconds")).longValue();
+                long nanos = tsMap.containsKey("nanoseconds")
+                    ? ((Number) tsMap.get("nanoseconds")).longValue()
+                    : 0;
+
+                long millis = (seconds * 1000) + (nanos / 1_000_000);
+                lobby.setCreatedAt(new Timestamp(millis));
+            }
+        } else if (createdRaw instanceof Long) {
+            // Fallback: if createdAt is just a long millis
+            lobby.setCreatedAt(new Timestamp((Long) createdRaw));
+        }
+
+        // Placeholder for games (deserialize later if needed)
+        lobby.setGames((List) data.get("games"));
+
+        return lobby;
+    }
+
 }
