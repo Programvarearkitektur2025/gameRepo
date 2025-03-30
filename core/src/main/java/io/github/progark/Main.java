@@ -82,4 +82,8 @@ public class Main extends Game {
     public void useTutorialController() {
         controllerManager.setController(new TutorialController(this));
     }
+
+    public void useTutorialController() {
+        controllerManager.setController(new TutorialController(this));
+    }
 }
