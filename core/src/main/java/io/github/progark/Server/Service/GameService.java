@@ -43,7 +43,7 @@ public class GameService {
 
     public void updateGameState(String userId, String gameId, GameModel gameModel, DataCallback callback) {
         String gamePath = "games/" + userId + "/" + gameId;
-        
+
         Map<String, Object> gameData = new HashMap<>();
         gameData.put("score", gameModel.getScore());
         gameData.put("timeRemaining", gameModel.getTimeRemaining());
@@ -59,7 +59,7 @@ public class GameService {
     }
 
     // Function for fetching lobby information asynchronuous.
-    public void fetchLobbyInfo(String id, DataCallback callback) {
+   /*public void fetchLobbyInfo(String id, DataCallback callback) {
         databaseManager.readData("lobbies/" + id, new DataCallback() {
             @Override
             public void onSuccess(Object data) {
@@ -76,7 +76,7 @@ public class GameService {
                 callback.onFailure(e);
             }
         });
-    }
+    }*/
 
     public LobbyModel getLobbyData() {
         return lobbyData;

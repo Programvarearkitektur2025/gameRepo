@@ -1,46 +1,37 @@
-package io.github.progark.Client.Model;
+package io.github.progark.Server.Model.Game;
 
 import java.sql.Timestamp;
 import java.util.Date;
-import java.util.Map;
+import java.util.List;
 
 public class LobbyModel {
 
     private String lobbyCode;
     private String playerOne;
     private String playerTwo;
+    private int difficulty;
     private String status;
     private Timestamp createdAt;
+    private int rounds;
+    private boolean multiplayer;
 
-    public LobbyModel(String lobbyCode, String playerOne, String playerTwo, String status, Timestamp createdAt) {
+    private Number playerOnePoints;
+    private Number playerTwoPoints;
+
+    private List<GameModel> games;
+
+    public LobbyModel(String lobbyCode, String playerOne, String playerTwo, int difficulty, String status, Timestamp createdAt, int rounds, boolean multiplayer) {
         this.lobbyCode = lobbyCode;
         this.playerOne = playerOne;
         this.playerTwo = playerTwo;
+        this.difficulty = difficulty;
         this.status = status;
         this.createdAt = createdAt;
+        this.rounds = rounds;
+        this.multiplayer = multiplayer;
     }
 
     public LobbyModel() {
-
-    }
-
-    public static LobbyModel fromMap(String lobbyCode, Map<String, Object> data) {
-        String playerOne = (String) data.get("playerOne");
-        String playerTwo = data.get("playerTwo") != null ? (String) data.get("playerTwo") : null;
-        String status = (String) data.get("status");
-
-        Timestamp createdAt = null;
-        Object createdRaw = data.get("createdAt");
-
-        if (createdRaw instanceof Timestamp) {
-            createdAt = (Timestamp) createdRaw;
-        } else if (createdRaw instanceof Long) {
-            createdAt = new Timestamp((Long) createdRaw);
-        } else if (createdRaw instanceof Double) {
-            createdAt = new Timestamp(((Double) createdRaw).longValue());
-        }
-
-        return new LobbyModel(lobbyCode, playerOne, playerTwo, status, createdAt);
     }
 
     public boolean isFull() {
@@ -73,19 +64,28 @@ public class LobbyModel {
         return createdAt;
     }
 
-    public Date getCreatedAtAsDate() {
-        return new Date(createdAt.getTime());
+    public int getDifficulty() {
+        return difficulty;
     }
 
-    @Override
-    public String toString() {
-        return "LobbyModel{" +
-            "lobbyCode='" + lobbyCode + '\'' +
-            ", playerOne='" + playerOne + '\'' +
-            ", playerTwo='" + playerTwo + '\'' +
-            ", status='" + status + '\'' +
-            ", createdAt=" + createdAt +
-            '}';
+    public int getRounds() {
+        return rounds;
+    }
+
+    public boolean isMultiplayer() {
+        return multiplayer;
+    }
+
+    public Number getPlayerOnePoints() {
+        return playerOnePoints;
+    }
+
+    public Number getPlayerTwoPoints() {
+        return playerTwoPoints;
+    }
+
+    public List<GameModel> getGames() {
+        return games;
     }
 
     public void setLobbyCode(String lobbyCode) {
@@ -106,5 +106,40 @@ public class LobbyModel {
 
     public void setCreatedAt(Timestamp createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public void setDifficulty(int difficulty) {
+        this.difficulty = difficulty;
+    }
+
+    public void setRounds(int rounds) {
+        this.rounds = rounds;
+    }
+
+    public void setMultiplayer(boolean multiplayer) {
+        this.multiplayer = multiplayer;
+    }
+
+    public void setPlayerOnePoints(Number playerOnePoints) {
+        this.playerOnePoints = playerOnePoints;
+    }
+
+    public void setPlayerTwoPoints(Number playerTwoPoints) {
+        this.playerTwoPoints = playerTwoPoints;
+    }
+
+    public void setGames(List<GameModel> games) {
+        this.games = games;
+    }
+
+    @Override
+    public String toString() {
+        return "LobbyModel{" +
+            "lobbyCode='" + lobbyCode + '\'' +
+            ", playerOne='" + playerOne + '\'' +
+            ", playerTwo='" + playerTwo + '\'' +
+            ", status='" + status + '\'' +
+            ", createdAt=" + createdAt +
+            '}';
     }
 }
