@@ -11,27 +11,19 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 
-import io.github.progark.Client.Views.Game.GameView;
-import io.github.progark.Client.Views.Menu.HomeView;
-import io.github.progark.Client.Views.Menu.LandingView;
+import io.github.progark.Client.Controllers.LoginController;
 import io.github.progark.Client.Views.View;
-import io.github.progark.Main;
-import io.github.progark.Server.Service.AuthService;
-import io.github.progark.Server.database.DataCallback;
 
 public class LoginView extends View {
-    private final Main game;
-    private final AuthService authService;
+    private LoginController controller;
     private final Skin skin;
     private final Texture logoTexture, backgroundTexture;
     private final Image logo, background;
     private Label statusLabel;
 
-    public LoginView(Main game, AuthService authService) {
+    public LoginView(LoginController loginController) {
         super();
-        this.game = game;
-        this.authService = authService;
-
+        this.controller = loginController;
         // Load resources
         skin = new Skin(Gdx.files.internal("uiskin.json"));
         backgroundTexture = new Texture(Gdx.files.internal("Background_1.png"));
@@ -43,14 +35,6 @@ public class LoginView extends View {
 
     @Override
     protected void initialize() {
-        // If user is already logged in we dont bother setting up UI
-        /*
-        if (authService.isUserLoggedIn()){
-            game.getViewManager().setView(() -> new HomeView(game, authService));
-        }
-
-         */
-
         // Set up UI
         background.setFillParent(true);
         stage.addActor(background);
@@ -114,34 +98,22 @@ public class LoginView extends View {
                 String email = usernameField.getText();
                 String password = passwordField.getText();
 
-
-
                 if (!email.isEmpty() && !password.isEmpty()) {
-                    authService.signIn(email, password, new DataCallback() {
-                        @Override
-                        public void onSuccess(Object message) {
-                            System.out.println("Sign-in successful! User: " + (String) message);
-                            game.getViewManager().setView(() -> new HomeView(game, authService));
-                        }
-
-                        @Override
-                        public void onFailure(Exception e) {
-                            System.out.println("Sign-in failed: " + e.getMessage());
-                            statusLabel.setText("Login failed: " + e.getMessage());
-                        }
-                    });
+                    controller.logInUser(email,password);
                 } else {
                     statusLabel.setText("Please enter valid credentials.");
                 }
             }
         });
+
     }
 
     private void setupRegisterButton(TextButton registerButton) {
         registerButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                game.getViewManager().setView(() -> new RegistrationView(game, authService));
+                controller.ViewRegisterPage();
+                // game.getViewManager().setView(() -> new RegistrationView(game, authService));
             }
         });
     }
