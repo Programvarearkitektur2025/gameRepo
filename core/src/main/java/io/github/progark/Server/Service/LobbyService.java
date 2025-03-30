@@ -9,8 +9,8 @@ import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
 
-import io.github.progark.Client.Model.LobbyModel;
-import io.github.progark.Client.Model.UserModel;
+import io.github.progark.Server.Model.Game.LobbyModel;
+import io.github.progark.Server.Model.Login.UserModel;
 import io.github.progark.Server.Service.AuthService;
 import io.github.progark.Server.database.DataCallback;
 import io.github.progark.Server.database.DatabaseManager;

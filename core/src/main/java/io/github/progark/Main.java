@@ -3,11 +3,17 @@ package io.github.progark;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 
+import java.util.HashMap;
+
 import io.github.progark.Client.Controllers.ControllerManager;
 import io.github.progark.Client.Controllers.HomeController;
+import io.github.progark.Client.Controllers.LeaderboardController;
 import io.github.progark.Client.Controllers.LoginController;
 import io.github.progark.Client.Controllers.RegistrationController;
+import io.github.progark.Client.Views.LeaderboardView;
+import io.github.progark.Server.Model.Game.LeaderboardModel;
 import io.github.progark.Server.Service.AuthService;
+import io.github.progark.Server.Service.LeaderboardService;
 import io.github.progark.Server.database.DatabaseManager;
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
@@ -72,4 +78,19 @@ public class Main extends Game {
     public void useCreateGameController(){
         //controllerManager.setController(new CreateGameController((authService,this));
     }
+
+
+    public void useLeaderboardController() {
+        LeaderboardModel model = new LeaderboardModel(new HashMap<>());
+        LeaderboardService service = new LeaderboardService(getDatabaseManager(), authService);
+        LeaderboardView view = new LeaderboardView(this);
+
+        LeaderboardController controller = new LeaderboardController(model, view, service);
+        // ev. view.setController(controller); om du trenger
+
+        controllerManager.setController(controller);
+    }
+
+
+
 }
