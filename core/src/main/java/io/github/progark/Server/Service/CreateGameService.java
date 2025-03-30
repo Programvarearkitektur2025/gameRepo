@@ -2,6 +2,7 @@ package io.github.progark.Server.Service;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Random;
 
 import io.github.progark.Server.Model.Game.GameModel;
@@ -15,7 +16,6 @@ public class CreateGameService {
     public CreateGameService(DatabaseManager databaseManager) {
         this.databaseManager = databaseManager;
     }
-
 
     public void createLobby(String username, int difficulty, int rounds, boolean multiplayer, DataCallback callback) {
         try {
@@ -32,13 +32,9 @@ public class CreateGameService {
             lobby.setMultiplayer(multiplayer);
             lobby.setPlayerOnePoints(0);
             lobby.setPlayerTwoPoints(0);
-            lobby.setGames(new ArrayList<>());
+            lobby.setGames(new java.util.ArrayList<>());
 
-
-            // Save lobby to database
-            databaseManager.writeData(lobbyCode, lobby);
-
-            // Return the full lobby object to the controller
+            databaseManager.writeData("lobbies/" + lobbyCode, lobby);
             callback.onSuccess(lobby);
 
         } catch (Exception e) {
@@ -46,10 +42,42 @@ public class CreateGameService {
         }
     }
 
+    public void joinLobby(String lobbyCode, String username, DataCallback callback) {
+        String path = "lobbies/" + lobbyCode;
+
+        databaseManager.readData(path, new DataCallback() {
+            @Override
+            public void onSuccess(Object result) {
+                if (!(result instanceof Map)) {
+                    callback.onFailure(new Exception("Invalid lobby format"));
+                    return;
+                }
+
+                @SuppressWarnings("unchecked")
+                Map<String, Object> dataMap = (Map<String, Object>) result;
+                LobbyModel lobby = LobbyModel.fromMap(lobbyCode, dataMap);
+
+                if (lobby.isFull() || "started".equalsIgnoreCase(lobby.getStatus())) {
+                    callback.onFailure(new Exception("Lobby is full or already started"));
+                    return;
+                }
+
+                lobby.setPlayerTwo(username);
+                lobby.setStatus("started");
+
+                databaseManager.writeData("lobbies/" + lobbyCode, lobby);
+                callback.onSuccess(lobby);
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                callback.onFailure(e);
+            }
+        });
+    }
 
     private String generateLobbyCode() {
         Random rand = new Random();
-
         return String.format("%06d", rand.nextInt(1000000));
     }
 }
