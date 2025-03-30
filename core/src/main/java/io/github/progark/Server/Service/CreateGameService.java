@@ -4,7 +4,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Random;
 
-import io.github.progark.Server.Model.Game.LobbyModel;
+import io.github.progark.Server.Model.Game.GameModel;
 import io.github.progark.Server.database.DataCallback;
 import io.github.progark.Server.database.DatabaseManager;
 
@@ -21,7 +21,7 @@ public class CreateGameService {
         try {
             String lobbyCode = generateLobbyCode();
 
-            LobbyModel lobby = new LobbyModel();
+            GameModel lobby = new GameModel();
             lobby.setLobbyCode(lobbyCode);
             lobby.setPlayerOne(username);
             lobby.setPlayerTwo(null);
