@@ -2,29 +2,24 @@ package io.github.progark.Client.Views.Game;
 
 import java.util.Map;
 
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import javax.swing.text.View;
-
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.*;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.Align;
 
+import io.github.progark.Client.Views.View;
 import io.github.progark.Main;
 import io.github.progark.Server.Model.Game.GameModel;
-import io.github.progark.Server.Model.UserModel;
 import io.github.progark.Server.Service.GameService;
 import io.github.progark.Client.Controllers.GameController;
 
-public class GameView extends View implements Screen {
+public class GameView extends View {
 
-    private final Main game;
     private final GameController gameController;
     //private final Stage stage;
     private final Skin skin;
@@ -42,35 +37,28 @@ public class GameView extends View implements Screen {
     private GameModel gameModel;
     private GameController controller;
     private GameService gameService;
-    private UserModel user1;
-    private UserModel user2;
 
 
-    public GameView(Main game){
+    public GameView(GameController gameController){
         super(); // This calls view constructor for standard initialization of view.
-        GameModel gameModel = new GameModel();
-        GameService gameService = new GameService(game.getDatabaseManager());
-        
-        this.gameController = new GameController(gameService, gameModel);
-        this.game = game;
+        //GameService gameService = new GameService(game.getDatabaseManager());
+
+        this.gameController = gameController;
+        //this.game = game;
 
         // Initialize texture and skin here. This needs to be correct to planned UI
         //backgroundTexture = new Texture(Gdx.files.internal("game_background.png"));
-       
+
         skin = new Skin(Gdx.files.internal("uiskin.json"));
 
-        this.game = game;
+        //this.game = game;
 
         backgroundTexture = new Texture(Gdx.files.internal("game_background.png"));
-        skin = new Skin(Gdx.files.internal("uiskin.json"));
+        //skin = new Skin(Gdx.files.internal("uiskin.json"));
 
         // Initializing with dummy values, needs to be fixed.
-        user1 = new UserModel("1","bastetest@test.com", "bastetest1");
-        user2 = new UserModel("2","bastetest@test.com", "bastetest2");
-
-        gameModel = new GameModel(user1, user2);
-        gameService = new GameService(null, null);
-        controller = new GameController(gameService, gameModel, this);
+        //user1 = new UserModel("1","bastetest@test.com", "bastetest1");
+        //user2 = new UserModel("2","bastetest@test.com", "bastetest2");
     }
 
     @Override
@@ -142,23 +130,9 @@ public class GameView extends View implements Screen {
         Gdx.input.setOnscreenKeyboardVisible(true);
     }
 
-    @Override
-    public void show() {
-
-    }
-
     /**
      * Called from LibGDX automatically every frame.
      */
-    @Override
-    public void render(float delta) {
-        update(delta);
-
-        Gdx.gl.glClearColor(0.1f, 0.1f, 0.2f, 1);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
-        stage.draw();
-    }
 
     /**
      * Your custom update method called from render().
@@ -208,20 +182,6 @@ public class GameView extends View implements Screen {
 
             answerContainer.add(row).padBottom(10).row();
         });
-    }
-
-
-    @Override public void resize(int width, int height) {
-        stage.getViewport().update(width, height, true);
-    }
-
-    @Override public void pause() { }
-    @Override public void resume() { }
-    @Override public void hide() { }
-
-    @Override
-    public void enter() {
-        super.enter();
     }
 
     @Override
