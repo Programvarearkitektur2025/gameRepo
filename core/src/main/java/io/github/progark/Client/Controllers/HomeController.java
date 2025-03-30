@@ -105,12 +105,31 @@ public class HomeController extends Controller {
     public void ViewCreateGamePage(){
         main.useCreateGameController();
     }
+    public Main getMain() {
+        return main;
+    }
     public void ViewGamePage(){
         main.useGameController();
+    }
+    public void ViewUserPage() {
+        main.useUserController();
     }
 
     public void openTutorialPage() {
         main.useTutorialController();
     }
+
+    public void navigateToHome() {
+        main.useHomeController();
+    }
+
+    public void navigateToLeaderboard() {
+        main.useLeaderBoardController();
+    }
+
+    public void navigateToSettings() {
+        main.useSettingsController();
+    }
+
 
 }

@@ -13,28 +13,31 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
 
+import io.github.progark.Client.Controllers.JoinGameController;
 import io.github.progark.Client.Views.View;
 import io.github.progark.Main;
 
 public class JoinGameView extends View {
-    private final Main game;
     private final Skin skin;
     private final Texture backgroundTexture;
     private final Texture joinButtonTexture;
     private final Texture rectangleTexture;
+    private final Texture backButtonTexture;
     private final Image background;
     private final BitmapFont font;
+    private final JoinGameController controller;
     private TextField pinField;
     private Label statusLabel;
 
-    public JoinGameView(Main game) {
+    public JoinGameView(JoinGameController controller) {
         super();
-        this.game = game;
+        this.controller = controller;
         this.skin = new Skin(Gdx.files.internal("uiskin.json"));
 
-        this.backgroundTexture = new Texture(Gdx.files.internal("Background_1.png"));
+        this.backgroundTexture = new Texture(Gdx.files.internal("Background2.png"));
         this.joinButtonTexture = new Texture(Gdx.files.internal("JoinButton.png"));
         this.rectangleTexture = new Texture(Gdx.files.internal("Rectangle.png"));
+        this.backButtonTexture = new Texture(Gdx.files.internal("backButtonBlue.png"));
         this.background = new Image(backgroundTexture);
 
         // Font
@@ -56,6 +59,18 @@ public class JoinGameView extends View {
         stage.addActor(table);
 
         Label.LabelStyle labelStyle = new Label.LabelStyle(font, Color.WHITE);
+
+        // Back Button
+        ImageButton backButton = new ImageButton(new TextureRegionDrawable(backButtonTexture));
+        backButton.setPosition(30, Gdx.graphics.getHeight() - 100); // Adjust position
+        backButton.setSize(80, 80);
+        backButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                controller.goBackToHome();
+            }
+        });
+        stage.addActor(backButton);
 
         // Bakgrunn for input
         Drawable inputBackground = new TextureRegionDrawable(rectangleTexture);

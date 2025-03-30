@@ -15,6 +15,7 @@ import java.util.List;
 import io.github.progark.Client.Controllers.HomeController;
 import io.github.progark.Client.Views.View;
 import io.github.progark.Server.Model.Game.HomeModel;
+import io.github.progark.Client.Views.Components.NavBar;
 
 public class HomeView extends View {
 
@@ -27,6 +28,8 @@ public class HomeView extends View {
     private final Texture avatarTexture;
     private final Texture navBarTexture;
     private final Texture howToButtonTexture;
+    private final Texture transparentTexture;
+    private NavBar navBar;
 
     private Image background;
     private final HomeController controller;
@@ -34,6 +37,7 @@ public class HomeView extends View {
 
     public HomeView(HomeController controller) {
         super();
+        this.navBar = navBar;
         this.controller = controller;
 
         // Load assets
@@ -46,6 +50,7 @@ public class HomeView extends View {
         avatarTexture = new Texture(Gdx.files.internal("gameAvatar.png"));
         navBarTexture = new Texture(Gdx.files.internal("navBar2.png"));
         howToButtonTexture = new Texture(Gdx.files.internal("HowToButton.png"));
+        transparentTexture = new Texture(Gdx.files.internal("Transparent.png"));
 
         background = new Image(backgroundTexture);
 
@@ -81,22 +86,7 @@ public class HomeView extends View {
         mainLayout.add(new Image(yourTurnTexture)).left().pad(30);
         mainLayout.row();
 
-        /*
-        for (String name : yourTurnGames) {
-            Table entry = createGameEntry(name);
-            mainLayout.add(entry).padLeft(120).width(400);
-            mainLayout.row();
-        }
-
-        mainLayout.add(new Image(theirTurnTexture)).left().pad(30);
-        mainLayout.row();
-        for (String name : theirTurnGames) {
-            Table entry = createGameEntry(name);
-            mainLayout.add(entry).padLeft(120).width(400);
-            mainLayout.row();
-        }
-        */
-
+        // Game Buttons
         Table buttonTable = new Table();
         ImageButton joinGameButton = new ImageButton(new TextureRegionDrawable(new TextureRegion(joinGameTexture)));
         ImageButton createGameButton = new ImageButton(new TextureRegionDrawable(new TextureRegion(createGameTexture)));
@@ -120,9 +110,15 @@ public class HomeView extends View {
         mainLayout.add(buttonTable).colspan(2).padTop(20).padBottom(20);
         mainLayout.row();
 
-        Table navWrapper = new Table();
-        navWrapper.bottom().add(new Image(navBarTexture)).expandX().fillX().height(300);
-        mainLayout.add(navWrapper).expandY().bottom().fillX().colspan(2);
+        navBar = new NavBar(stage, controller.getMain());
+        if (!controller.getMain().getMusicManager().isPlaying()) {
+            controller.getMain().getMusicManager().play("ThinkingOutLoud.mp3");
+        }
+        controller.getMain().getMusicManager().setVolume(1.0f);
+
+
+
+
     }
 
     public void updateGameLists(HomeModel homeModel) {
@@ -136,7 +132,6 @@ public class HomeView extends View {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
                     System.out.println("ClickedGameEntry");
-                    // controller.handleGameEntryClick(game.getGameId());
                 }
             });
             contentTable.add(entry).width(Gdx.graphics.getWidth() * 0.8f).height(100).padLeft(120).row();
@@ -150,7 +145,6 @@ public class HomeView extends View {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
                     System.out.println("ClickedGameEntry");
-                    // controller.handleGameEntryClick(game.getGameId());
                 }
             });
             contentTable.add(entry).width(Gdx.graphics.getWidth() * 0.8f).height(100).padLeft(120).row();
@@ -169,7 +163,7 @@ public class HomeView extends View {
     }
 
     private Table createGameEntry(HomeModel.GameEntry game) {
-        return new Table(); // Placeholder (not shown in screenshot)
+        return new Table(); // Placeholder
     }
 
     @Override
@@ -183,5 +177,7 @@ public class HomeView extends View {
         avatarTexture.dispose();
         navBarTexture.dispose();
         howToButtonTexture.dispose();
+        transparentTexture.dispose();
+        navBar.dispose();
     }
 }
