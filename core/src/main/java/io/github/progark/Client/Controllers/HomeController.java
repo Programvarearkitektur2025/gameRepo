@@ -105,4 +105,7 @@ public class HomeController extends Controller {
     public void ViewCreateGamePage(){
         main.useCreateGameController();
     }
+    public void ViewGamePage(){
+        main.useGameController();
+    }
 }
