@@ -60,7 +60,7 @@ public class GameService {
     }
 
     // Function for fetching lobby information asynchronuous.
-    public void fetchLobbyInfo(String id, DataCallback callback) {
+   /*public void fetchLobbyInfo(String id, DataCallback callback) {
         databaseManager.readData("lobbies/" + id, new DataCallback() {
             @Override
             public void onSuccess(Object data) {
@@ -77,7 +77,7 @@ public class GameService {
                 callback.onFailure(e);
             }
         });
-    }
+    }*/
 
     public LobbyModel getLobbyData() {
         return lobbyData;
