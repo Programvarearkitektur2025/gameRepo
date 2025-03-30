@@ -26,6 +26,7 @@ public class HomeController extends Controller {
     public void enter() {
         // When this controller becomes active, we can perform actions like checking user status.
         //checkUserStatus();
+        view.enter();
     }
 
     @Override

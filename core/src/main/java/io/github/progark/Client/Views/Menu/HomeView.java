@@ -65,6 +65,8 @@ public class HomeView extends View {
         joinGame = new Image(joinGameTexture);
         createGame = new Image(createGameTexture);
         navBar = new Image(navBarTexture);
+
+        enter();
     }
 
     @Override

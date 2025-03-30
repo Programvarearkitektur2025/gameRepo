@@ -41,7 +41,6 @@ public class LobbyController {
             }
         });
 
-        //Need to add the joinlobby and publish & subscribe methods
     }
 
 }
