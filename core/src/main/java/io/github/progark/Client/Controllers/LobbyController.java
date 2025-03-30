@@ -11,6 +11,7 @@ import io.github.progark.Client.Views.Game.ResultView;
 import io.github.progark.Server.database.DataCallback;
 
 public class LobbyController {
+
     private LobbyModel lobbyModel;
     private LobbyService lobbyService;
     private LobbyView lobbyView;
