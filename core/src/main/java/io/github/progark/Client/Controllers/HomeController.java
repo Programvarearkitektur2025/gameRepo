@@ -108,4 +108,9 @@ public class HomeController extends Controller {
     public void ViewGamePage(){
         main.useGameController();
     }
+
+    public void openTutorialPage() {
+        main.useTutorialController();
+    }
+
 }

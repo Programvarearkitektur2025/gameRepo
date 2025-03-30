@@ -9,6 +9,7 @@ import io.github.progark.Client.Controllers.GameController;
 import io.github.progark.Client.Controllers.HomeController;
 import io.github.progark.Client.Controllers.LoginController;
 import io.github.progark.Client.Controllers.RegistrationController;
+import io.github.progark.Client.Controllers.TutorialController;
 import io.github.progark.Server.Service.AuthService;
 import io.github.progark.Server.database.DatabaseManager;
 
@@ -77,5 +78,9 @@ public class Main extends Game {
 
     public void useGameController() {
         controllerManager.setController(new GameController(databaseManager, this));
+    }
+
+    public void useTutorialController() {
+        controllerManager.setController(new TutorialController(this));
     }
 }
