@@ -2,7 +2,7 @@ package io.github.progark.Client.Controllers;
 
 import java.sql.Timestamp;
 
-import io.github.progark.Client.Model.LobbyModel;
+import io.github.progark.Server.Model.Game.LobbyModel;
 import io.github.progark.Server.Model.Login.UserModel;
 import io.github.progark.Server.Service.LobbyService;
 import io.github.progark.Client.Views.Game.LobbyView;
