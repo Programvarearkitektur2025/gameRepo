@@ -1,14 +1,11 @@
 package io.github.progark.Client.Controllers;
 
-import java.sql.Timestamp;
-
 import io.github.progark.Client.Views.Menu.CreateGameView;
 import io.github.progark.Main;
-import io.github.progark.Server.Model.Game.LobbyModel;
+import io.github.progark.Server.Model.Game.GameModel;
 import io.github.progark.Server.Model.Login.UserModel;
 import io.github.progark.Server.Service.AuthService;
 import io.github.progark.Server.Service.CreateGameService;
-import io.github.progark.Server.Service.LobbyService;
 import io.github.progark.Server.database.DataCallback;
 import io.github.progark.Server.database.DatabaseManager;
 
@@ -19,8 +16,8 @@ public class CreateGameController extends Controller {
     private CreateGameView createGameView;
     private DatabaseManager databaseManager;
     private final CreateGameService createGameService;
-    private LobbyService lobbyService;
-    private LobbyModel lobbyModel;
+    // private LobbyService lobbyService;
+    private GameModel lobbyModel;
 
     public CreateGameController(AuthService authService, DatabaseManager databaseManager, Main main) {
         this.databaseManager = databaseManager;
@@ -57,7 +54,7 @@ public class CreateGameController extends Controller {
                 createGameService.createLobby(user.getUsername(), difficulty, rounds, multiplayer, new DataCallback() {
                     @Override
                     public void onSuccess(Object result) {
-                        LobbyModel createdLobby = (LobbyModel) result;
+                        GameModel createdLobby = (GameModel) result;
 
                         // Set internal model to match
                         lobbyModel.setLobbyCode(createdLobby.getLobbyCode());

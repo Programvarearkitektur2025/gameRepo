@@ -12,22 +12,24 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
+import io.github.progark.Client.Controllers.CreateGameController;
 import io.github.progark.Client.Views.View;
 import io.github.progark.Main;
 
 import java.util.Random;
 
 public class CreateGameView extends View {
-    private final Main game;
     private final Skin skin;
     private final Texture backgroundTexture;
     private final Texture startGameButtonTexture;
     private final Image background;
     private final BitmapFont font;
 
-    public CreateGameView(Main game) {
+    private final CreateGameController createGameController;
+
+    public CreateGameView(CreateGameController createGameController) {
         super();
-        this.game = game;
+        this.createGameController = createGameController;
         this.skin = new Skin(Gdx.files.internal("uiskin.json"));
 
         this.backgroundTexture = new Texture(Gdx.files.internal("Background_1.png"));
