@@ -1,7 +1,6 @@
 package io.github.progark.Client.Views.Menu;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -9,22 +8,14 @@ import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
-import com.badlogic.gdx.utils.Align;
-import com.badlogic.gdx.utils.Scaling;
 
 import java.util.Arrays;
 import java.util.List;
 
 
 import io.github.progark.Client.Controllers.HomeController;
-import io.github.progark.Client.Views.Game.GameView;
 import io.github.progark.Client.Views.View;
-import io.github.progark.Main;
-import io.github.progark.Server.Model.Game.GameModel;
 import io.github.progark.Server.Model.Game.HomeModel;
-import io.github.progark.Server.Service.AuthService;
-import io.github.progark.Server.Service.HomeService;
-import io.github.progark.Server.database.DatabaseManager;
 
 public class HomeView extends View {
     private final Skin skin;
