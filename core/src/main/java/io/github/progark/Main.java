@@ -4,6 +4,7 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 
 import io.github.progark.Client.Controllers.ControllerManager;
+import io.github.progark.Client.Controllers.CreateGameController;
 import io.github.progark.Client.Controllers.GameController;
 import io.github.progark.Client.Controllers.HomeController;
 import io.github.progark.Client.Controllers.LoginController;
@@ -71,7 +72,7 @@ public class Main extends Game {
         //controllerManager.setController(new JoinGameController((authService,this));
     }
     public void useCreateGameController(){
-        //controllerManager.setController(new CreateGameController((authService,this));
+        controllerManager.setController(new CreateGameController(authService, databaseManager, this));
     }
 
     public void useGameController() {
