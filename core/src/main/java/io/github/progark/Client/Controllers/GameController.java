@@ -1,63 +1,74 @@
 package io.github.progark.Client.Controllers;
 
+import java.util.List;
+
+import io.github.progark.Client.Views.Game.GameView;
+import io.github.progark.Main;
+import io.github.progark.Server.Model.Game.RoundModel;
 import io.github.progark.Server.Model.Game.GameModel;
 import io.github.progark.Server.Service.GameService;
-import io.github.progark.Client.Views.Game.GameView;
+import io.github.progark.Server.database.DatabaseManager;
 
-public class GameController {
-    private GameService gameService;
-    private GameModel gameModel;
-    private GameView gameView;
+public class GameController extends Controller {
 
-    public GameController(GameService gameService, GameModel gameModel) {
-        this.gameService = gameService;
-        this.gameModel = gameModel;
+    private GameModel lobbyModel;
+    private GameService lobbyService;
+    private GameView lobbyView;
+
+    public GameController(DatabaseManager databaseManager, Main main) {
+        this.lobbyView = new GameView(this);
+        this.lobbyService = new GameService(databaseManager);
     }
 
-    public void setGameView(GameView gameView) {
-        this.gameView = gameView;
+    public void setLobbyView(GameView lobbyView) {
+        this.lobbyView = lobbyView;
     }
 
-    // Submit user input to game model
-
-    public void handleAnswerSubmission(String input) {
-        String answer = input.trim().toLowerCase();
-        if (answer.isEmpty() || gameModel.hasAlreadySubmitted(answer)) {
-            gameView.showMessage("Invalid answer. Please try again.");
-            return;
-        }
-        boolean success = gameModel.submitAnswer(answer);
-        if (success) {
-            gameView.updateScore(gameModel.getScore());
-            gameView.updateSubmittedAnswers(gameModel.getSubmittedAnswers());
-        }
+    public String getLobbyCode() {
+        return lobbyModel.getLobbyCode();
     }
 
-
-    public void updateGameState(float delta) {
-        gameModel.updateTime(delta);
-        gameView.updateTimeRemaining(gameModel.getTimeRemaining());
-
-        if (gameModel.isTimeUp()) {
-            gameView.showGameOver();
-        }
+    public String getPlayerOne() {
+        return lobbyModel.getPlayerOne();
     }
 
-    public boolean isTimeUp() {
-        return gameModel.isTimeUp();
+    public String getPlayerTwo() {
+        return lobbyModel.getPlayerTwo();
     }
 
-    public int getScore() {
-        return gameModel.getScore();
+    public int getDifficulty() {
+        return lobbyModel.getDifficulty();
     }
 
-    public float getTimeRemaining() {
-        return gameModel.getTimeRemaining();
+    public int getRounds() {
+        return lobbyModel.getRounds();
     }
 
-    public java.util.Map<String, Integer> getSubmittedAnswers() {
-        return gameModel.getSubmittedAnswers();
+    public Number getPlayerOnePoints() {
+        return lobbyModel.getPlayerOnePoints();
     }
 
+    public Number getPlayerTwoPoints() {
+        return lobbyModel.getPlayerTwoPoints();
+    }
+
+    public List<RoundModel> getGames() {
+        return lobbyModel.getGames();
+    }
+
+    @Override
+    public void enter() {
+        lobbyView.enter();
+    }
+
+    @Override
+    public void update(float delta) {
+        lobbyView.update(delta);
+        lobbyView.render();
+    }
+
+    @Override
+    public void dispose() {
+        lobbyView.dispose();
+    }
 }
-
