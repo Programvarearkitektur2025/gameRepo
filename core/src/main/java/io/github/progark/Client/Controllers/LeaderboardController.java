@@ -2,7 +2,7 @@ package io.github.progark.Client.Controllers;
 
 import io.github.progark.Server.Model.Game.LeaderboardModel;
 import io.github.progark.Server.Service.LeaderboardService;
-import io.github.progark.Client.Views.LeaderboardView;
+import io.github.progark.Client.Views.Game.LeaderboardView;
 import io.github.progark.Server.database.DataCallback;
 
 public class LeaderboardController extends Controller {
@@ -59,4 +59,8 @@ public class LeaderboardController extends Controller {
             }
         });
     }
+    public void setLeaderBoardView(LeaderboardView view) {
+        this.view = view;
+    }
+
 }

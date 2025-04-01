@@ -10,7 +10,7 @@ import io.github.progark.Client.Controllers.HomeController;
 import io.github.progark.Client.Controllers.LeaderboardController;
 import io.github.progark.Client.Controllers.LoginController;
 import io.github.progark.Client.Controllers.RegistrationController;
-import io.github.progark.Client.Views.LeaderboardView;
+import io.github.progark.Client.Views.Game.LeaderboardView;
 import io.github.progark.Server.Model.Game.LeaderboardModel;
 import io.github.progark.Server.Service.AuthService;
 import io.github.progark.Server.Service.LeaderboardService;
@@ -80,16 +80,8 @@ public class Main extends Game {
     }
 
 
-    public void useLeaderboardController() {
-        LeaderboardModel model = new LeaderboardModel(new HashMap<>());
-        LeaderboardService service = new LeaderboardService(getDatabaseManager(), authService);
-        LeaderboardView view = new LeaderboardView(this);
 
-        LeaderboardController controller = new LeaderboardController(model, view, service);
-        // ev. view.setController(controller); om du trenger
 
-        controllerManager.setController(controller);
-    }
 
 
 
