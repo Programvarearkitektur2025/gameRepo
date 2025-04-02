@@ -10,8 +10,8 @@ import io.github.progark.Server.database.DatabaseManager;
 public class LeaderboardService {
 
     private final DatabaseManager databaseManager;
-    private final AuthService authService; // <-- Henter brukernavn her
-    private static final String LEADERBOARD_DOC = "leaderboard/Leaderboard-2025";
+    private final AuthService authService;
+    private static final String LEADERBOARD_DOC = "leaderboard/Leaderboard - 2025";
 
     public LeaderboardService(DatabaseManager databaseManager, AuthService authService) {
         this.databaseManager = databaseManager;
@@ -28,7 +28,7 @@ public class LeaderboardService {
                     return;
                 }
                 @SuppressWarnings("unchecked")
-                Map<String, Object> rawMap = (Map<String, Object>) data; // userId -> score
+                Map<String, Object> rawMap = (Map<String, Object>) data;
                 Map<String, Integer> nameScoreMap = new HashMap<>();
 
                 for (String userId : rawMap.keySet()) {

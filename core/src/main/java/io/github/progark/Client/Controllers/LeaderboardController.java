@@ -1,66 +1,83 @@
 package io.github.progark.Client.Controllers;
 
+import java.util.Map;
+
+import io.github.progark.Client.Views.Game.LeaderBoardView;
+import io.github.progark.Main;
 import io.github.progark.Server.Model.Game.LeaderboardModel;
+import io.github.progark.Server.Service.AuthService;
 import io.github.progark.Server.Service.LeaderboardService;
-import io.github.progark.Client.Views.Game.LeaderboardView;
 import io.github.progark.Server.database.DataCallback;
+import io.github.progark.Server.database.DatabaseManager;
 
 public class LeaderboardController extends Controller {
-    private LeaderboardModel model;
-    private LeaderboardView view;
-    private LeaderboardService service;
 
-    public LeaderboardController(LeaderboardModel model, LeaderboardView view, LeaderboardService service) {
-        this.model = model;
-        this.view = view;
-        this.service = service;
+    private final LeaderBoardView view;
+    private final LeaderboardService leaderboardService;
+    private final Main main;
+    private LeaderboardModel model;
+
+    public LeaderboardController(DatabaseManager databaseManager, AuthService authService, Main main) {
+        this.main = main;
+        this.leaderboardService = new LeaderboardService(databaseManager, authService);
+        this.view = new LeaderBoardView(this);
     }
 
     @Override
     public void enter() {
-
+        view.enter();
         loadLeaderboard();
     }
 
     @Override
-    public void update(float delta) { }
+    public void update(float delta) {
+        view.update(delta);
+        view.render();
+    }
 
     @Override
-    public void dispose() { }
+    public void dispose() {
+        view.dispose();
+    }
 
     public void loadLeaderboard() {
-        service.loadLeaderboard(new DataCallback() {
+        leaderboardService.loadLeaderboard(new DataCallback() {
             @Override
             public void onSuccess(Object data) {
                 if (data instanceof LeaderboardModel) {
                     model = (LeaderboardModel) data;
-                    if (view != null) {
-                        view.updateLeaderboard(model);
+
+                    System.out.println("==== Leaderboard ====");
+                    for (Map.Entry<String, Integer> entry : model.getUserScore().entrySet()) {
+                        System.out.println(entry.getKey() + " : " + entry.getValue());
                     }
+                    System.out.println("=====================");
                 }
             }
+
             @Override
             public void onFailure(Exception e) {
+                System.err.println("Failed to load leaderboard:");
                 e.printStackTrace();
             }
         });
     }
 
     public void incrementScoreFor(String userId) {
-        service.incrementUserScore(userId, new DataCallback() {
+        leaderboardService.incrementUserScore(userId, new DataCallback() {
             @Override
             public void onSuccess(Object data) {
-
                 loadLeaderboard();
             }
+
             @Override
             public void onFailure(Exception e) {
                 e.printStackTrace();
             }
         });
     }
-    public void setLeaderBoardView(LeaderboardView view) {
-        this.view = view;
-    }
 
+    public Main getMain() {
+        return main;
+    }
 }
