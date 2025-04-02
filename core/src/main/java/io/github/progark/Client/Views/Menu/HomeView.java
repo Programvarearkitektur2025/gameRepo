@@ -111,9 +111,11 @@ public class HomeView extends View {
         mainLayout.row();
 
         navBar = new NavBar(stage, controller.getMain());
+        /*
         if (!controller.getMain().getMusicManager().isPlaying()) {
             controller.getMain().getMusicManager().play("ThinkingOutLoud.mp3");
         }
+         */
         controller.getMain().getMusicManager().setVolume(1.0f);
 
 

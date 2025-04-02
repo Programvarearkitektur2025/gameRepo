@@ -69,9 +69,8 @@ public class CreateGameController extends Controller {
                         lobbyModel.setCreatedAt(createdLobby.getCreatedAt());
                         lobbyModel.setRounds(createdLobby.getRounds());
                         lobbyModel.setMultiplayer(createdLobby.isMultiplayer());
-
                         System.out.println("Lobby created: " + createdLobby);
-
+                        main.useGameController(createdLobby );
                     }
 
                     @Override
