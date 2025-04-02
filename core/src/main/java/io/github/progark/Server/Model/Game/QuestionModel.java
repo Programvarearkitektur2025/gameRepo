@@ -2,15 +2,15 @@ package io.github.progark.Server.Model.Game;
 
 import java.util.Map;
 
-import io.github.progark.Client.Controllers.GameController;
+import io.github.progark.Client.Controllers.RoundController;
 
 public class QuestionModel {
     private String question;
     private Map<String, Integer> answers;
     private Integer difficulty;
-    private GameController gameController;
+    private RoundController gameController;
 
-    public QuestionModel(GameController gameController){
+    public QuestionModel(RoundController gameController){
         this.gameController = gameController;
     }
 
