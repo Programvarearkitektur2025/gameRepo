@@ -92,3 +92,4 @@ public class GameController extends Controller {
             System.out.println("GameService is not initialized.");
         }
     }
+}
