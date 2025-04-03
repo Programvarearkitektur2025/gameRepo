@@ -139,6 +139,10 @@ public class FirebaseAuthManager implements AuthService { // Change interface
         return uid;
     }
 
+    @Override
+    public String getUsernameFromUserId(String userId) {
 
+        return userId;
+    }
 
 }

@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
@@ -16,11 +17,12 @@ import com.badlogic.gdx.utils.Align;
 
 import java.util.Map;
 
-import io.github.progark.Client.Controllers.LeaderBoardController;
 import io.github.progark.Client.Views.View;
 import io.github.progark.Client.Views.Components.NavBar;
+import io.github.progark.Client.Controllers.LeaderboardController;
 
 public class LeaderBoardView extends View {
+
 
     private final Texture backgroundTexture, backButtonTexture, userTexture, pointsTexture, leaderboardHeader, trophyTexture, yourPointsTexture;
     private final LeaderBoardController controller;
@@ -29,9 +31,10 @@ public class LeaderBoardView extends View {
     private final Skin skin;
 
 
-    public LeaderBoardView(LeaderBoardController controller) {
+    public LeaderBoardView(LeaderboardController controller) {
         super();
         this.controller = controller;
+
         this.backgroundTexture = new Texture(Gdx.files.internal("Background2.png"));
         this.backButtonTexture = new Texture(Gdx.files.internal("backButtonBlue.png"));
         this.userTexture = new Texture(Gdx.files.internal("User_Headline.png"));
@@ -155,6 +158,7 @@ public class LeaderBoardView extends View {
     public void dispose() {
         super.dispose();
         backgroundTexture.dispose();
+
         backButtonTexture.dispose();
         userTexture.dispose();
         pointsTexture.dispose();
