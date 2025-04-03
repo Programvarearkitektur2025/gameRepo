@@ -22,6 +22,27 @@ public class HomeService {
         return String.format("%08d", random.nextInt(100000000));
     }
 
+    private void getLobbyInformation(DataCallback callback){
+        String lobbyPath = "lobbies/";
+        databaseManager.readData(lobbyPath, new DataCallback() {
+            @Override
+            public void onSuccess(Object data) {
+                if (!(data instanceof Map))
+                {
+                    callback.onFailure(new Exception("Database result is not a Map"));
+                    return;
+                }
+                Map<String,Object> lobbyMap = (Map<String,Object>) data;
+                System.out.println(lobbyMap);
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                callback.onFailure(e);
+            }
+        });
+    }
+
     public void loadUserGames(String userId, DataCallback callback) {
 /*        String gamesPath = "games/";
         databaseManager.readData(gamesPath, new DataCallback() {
@@ -86,6 +107,7 @@ public class HomeService {
         String gameId = generateGameId();
         String gamePath = "games/" + gameId;
 
+        // Type definitions in java <3
         Map<String, Object> gameData = Map.of(
             "gameId", gameId,
             "creatorId", userId,

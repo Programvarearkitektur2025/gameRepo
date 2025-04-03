@@ -50,6 +50,7 @@ public class JoinGameController extends Controller {
 
                         databaseManager.writeData("lobbies/" + lobbyCode, lobby);
                         System.out.println("Successfully joined lobby: " + lobby);
+                        viewGamePage(lobby);
                     }
 
                     @Override
@@ -64,6 +65,10 @@ public class JoinGameController extends Controller {
                 System.out.println("Failed to fetch user: " + e.getMessage());
             }
         });
+    }
+
+    public void viewGamePage(GameModel gameModel){
+        main.useGameController(gameModel);
     }
 
     @Override

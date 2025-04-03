@@ -98,6 +98,7 @@ public class JoinGameView extends View {
                 if (!pin.isEmpty()) {
                     System.out.println("Attempting to join game with PIN: " + pin);
                     statusLabel.setText("Joining game...");
+                    controller.joinLobby(pin);
                 } else {
                     statusLabel.setText("Please enter a game PIN");
                 }

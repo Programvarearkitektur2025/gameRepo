@@ -14,12 +14,13 @@ public class GameModel {
     private Timestamp createdAt;
     private int rounds;
     private boolean multiplayer;
+    private boolean playerOneTurn;
 
     private Number playerOnePoints;
     private Number playerTwoPoints;
 
     private List<RoundModel> games;
-  
+
     public static GameModel fromMap(String lobbyCode, Map<String, Object> data) {
         GameModel lobby = new GameModel();
 
