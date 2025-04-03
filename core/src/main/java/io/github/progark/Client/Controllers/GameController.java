@@ -11,64 +11,65 @@ import io.github.progark.Server.database.DatabaseManager;
 
 public class GameController extends Controller {
 
-    private GameModel lobbyModel;
+    private GameModel gameModel;
     private GameService lobbyService;
-    private GameView lobbyView;
+    private GameView gameView;
 
-    public GameController(DatabaseManager databaseManager, Main main) {
-        this.lobbyView = new GameView(this);
+    public GameController(DatabaseManager databaseManager, Main main, GameModel gameModel) {
+        this.gameView = new GameView(this);
         this.lobbyService = new GameService(databaseManager);
+        this.gameModel = gameModel;
     }
 
-    public void setLobbyView(GameView lobbyView) {
-        this.lobbyView = lobbyView;
+    public void setgameView(GameView gameView) {
+        this.gameView = gameView;
     }
 
     public String getLobbyCode() {
-        return lobbyModel.getLobbyCode();
+        return gameModel.getLobbyCode();
     }
 
     public String getPlayerOne() {
-        return lobbyModel.getPlayerOne();
+        return gameModel.getPlayerOne();
     }
 
     public String getPlayerTwo() {
-        return lobbyModel.getPlayerTwo();
+        return gameModel.getPlayerTwo();
     }
 
     public int getDifficulty() {
-        return lobbyModel.getDifficulty();
+        return gameModel.getDifficulty();
     }
 
     public int getRounds() {
-        return lobbyModel.getRounds();
+        return gameModel.getRounds();
     }
 
     public Number getPlayerOnePoints() {
-        return lobbyModel.getPlayerOnePoints();
+        return gameModel.getPlayerOnePoints();
     }
 
     public Number getPlayerTwoPoints() {
-        return lobbyModel.getPlayerTwoPoints();
+        return gameModel.getPlayerTwoPoints();
     }
 
     public List<RoundModel> getGames() {
-        return lobbyModel.getGames();
+        return gameModel.getGames();
     }
 
     @Override
     public void enter() {
-        lobbyView.enter();
+        gameView.enter();
     }
 
     @Override
     public void update(float delta) {
-        lobbyView.update(delta);
-        lobbyView.render();
+        gameView.update(delta);
+        gameView.render();
     }
 
     @Override
     public void dispose() {
-        lobbyView.dispose();
+        gameView.dispose();
     }
 }

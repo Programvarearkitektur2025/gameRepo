@@ -4,8 +4,10 @@ import io.github.progark.Client.Controllers.GameController;
 import io.github.progark.Client.Views.View;
 
 public class GameView extends View {
+    private final GameController controller;
 
-    public GameView(GameController lobbyController){
+    public GameView(GameController gameController){
+        this.controller = gameController;
 
     }
 

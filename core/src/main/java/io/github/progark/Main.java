@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx;
 
 import io.github.progark.Client.Controllers.ControllerManager;
 import io.github.progark.Client.Controllers.CreateGameController;
+import io.github.progark.Client.Controllers.GameController;
 import io.github.progark.Client.Controllers.RoundController;
 import io.github.progark.Client.Controllers.HomeController;
 import io.github.progark.Client.Controllers.JoinGameController;
@@ -15,6 +16,7 @@ import io.github.progark.Client.Controllers.SettingsController;
 import io.github.progark.Client.Controllers.SolutionController;
 import io.github.progark.Client.Controllers.TutorialController;
 import io.github.progark.Client.Controllers.UserController;
+import io.github.progark.Server.Model.Game.GameModel;
 import io.github.progark.Server.Service.AuthService;
 import io.github.progark.Server.database.DatabaseManager;
 import io.github.progark.Client.Audio.MusicManager;
@@ -73,7 +75,7 @@ public class Main extends Game {
     }
 
     public void useHomeController() {
-        controllerManager.setController(new HomeController(authService, this));
+        controllerManager.setController(new HomeController(authService, this, databaseManager));
     }
 
     public void useRegisterController() {
@@ -88,8 +90,8 @@ public class Main extends Game {
         controllerManager.setController(new CreateGameController(authService, databaseManager, this));
     }
 
-    public void useGameController() {
-        controllerManager.setController(new RoundController(databaseManager, this));
+    public void useGameController(GameModel gameModel) {
+        controllerManager.setController(new GameController(databaseManager, this, gameModel));
     }
 
     public void useTutorialController() {

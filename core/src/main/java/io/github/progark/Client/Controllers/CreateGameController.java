@@ -23,6 +23,7 @@ public class CreateGameController extends Controller {
         this.databaseManager = databaseManager;
         this.main = main;
         this.authService = authService;
+        this.lobbyModel = new GameModel();
         this.createGameView = new CreateGameView(this);
         this.createGameService = new CreateGameService(databaseManager);
     }
@@ -69,9 +70,7 @@ public class CreateGameController extends Controller {
                         lobbyModel.setCreatedAt(createdLobby.getCreatedAt());
                         lobbyModel.setRounds(createdLobby.getRounds());
                         lobbyModel.setMultiplayer(createdLobby.isMultiplayer());
-
-                        System.out.println("Lobby created: " + createdLobby);
-
+                        main.useGameController(createdLobby);
                     }
 
                     @Override
