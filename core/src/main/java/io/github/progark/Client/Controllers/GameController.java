@@ -1,5 +1,6 @@
 package io.github.progark.Client.Controllers;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import io.github.progark.Client.Views.Game.GameView;
@@ -14,6 +15,7 @@ public class GameController extends Controller {
     private GameModel gameModel;
     private GameService lobbyService;
     private GameView gameView;
+    private GameService gameService;
 
     public GameController(DatabaseManager databaseManager, Main main, GameModel gameModel) {
         this.gameView = new GameView(this);
@@ -72,4 +74,21 @@ public class GameController extends Controller {
     public void dispose() {
         gameView.dispose();
     }
-}
+
+    public void setGameRounds() {
+        int totalRounds = gameModel.getRounds();
+        List<RoundModel> rounds = new ArrayList<>();
+
+        // Ensure the game has the correct number of rounds
+        for (int i = 0; i < totalRounds; i++) {
+            rounds.add(new RoundModel()); // Creating new round instances
+        }
+
+        gameModel.setGames(rounds); // Updating the GameModel with the new rounds
+
+        if (gameService != null) {
+            gameService.setNewGameRounds(gameModel, rounds); // Delegate to service for database update
+        } else {
+            System.out.println("GameService is not initialized.");
+        }
+    }
