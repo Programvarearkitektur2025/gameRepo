@@ -11,11 +11,14 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import io.github.progark.Client.Controllers.HomeController;
 import io.github.progark.Client.Views.View;
+import io.github.progark.Server.Model.Game.GameModel;
 import io.github.progark.Server.Model.Game.HomeModel;
 import io.github.progark.Client.Views.Components.NavBar;
+import io.github.progark.Server.database.DataCallback;
 
 public class HomeView extends View {
 
@@ -79,8 +82,21 @@ public class HomeView extends View {
         mainLayout.bottom();
         stage.addActor(mainLayout);
 
-        List<String> yourTurnGames = Arrays.asList("George");
-        List<String> theirTurnGames = Arrays.asList("Molly", "Clara");
+        controller.getRelevantGames(new DataCallback(){
+
+            @Override
+            public void onSuccess(Object data) {
+                System.out.println("This is what we like: " + data);
+                List<Map<String, GameModel>> createdLobby = (List<Map<String, GameModel>>) data;
+                renderGames(createdLobby);
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                System.out.println("Failed to display relevant games: " + e.getMessage());
+
+            }
+        });
 
         mainLayout.top();
         mainLayout.add(new Image(yourTurnTexture)).left().pad(30);
@@ -166,6 +182,10 @@ public class HomeView extends View {
 
     private Table createGameEntry(HomeModel.GameEntry game) {
         return new Table(); // Placeholder
+    }
+
+    public void renderGames(List<Map<String, GameModel>> gameList){
+        // Logic for rendering games in the UI. Someone help
     }
 
     @Override

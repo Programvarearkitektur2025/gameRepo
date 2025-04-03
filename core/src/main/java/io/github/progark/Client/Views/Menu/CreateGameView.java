@@ -143,7 +143,6 @@ public class CreateGameView extends View {
                 int rounds = selectedRounds + 1;
                 boolean isMultiplayer = selectedMode == 1;
                 controller.createLobby(selectedDifficulty, rounds, isMultiplayer);
-                System.out.println("Start game clicked - Mode: " + isMultiplayer + ", Diff: " + selectedDifficulty + ", Rounds: " + rounds);
             }
         });
 

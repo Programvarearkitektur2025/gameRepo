@@ -19,7 +19,6 @@ public class GameController extends Controller {
         this.gameView = new GameView(this);
         this.lobbyService = new GameService(databaseManager);
         this.gameModel = gameModel;
-        System.out.println(gameModel);
     }
 
     public void setgameView(GameView gameView) {
