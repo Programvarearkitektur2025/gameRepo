@@ -86,6 +86,20 @@ public class SettingsView extends View {
         }
 
         navBar = new NavBar(stage, controller.getMain());
+        String currentTrack = controller.getMain().getMusicManager().getCurrentTrack();
+
+        if (currentTrack == null || currentTrack.isEmpty()) {
+            updateButtons("none");
+        } else if (currentTrack.contains("Jeopardy")) {
+            updateButtons("jeopardy");
+        } else if (currentTrack.contains("ThinkingOutLoud")) {
+            updateButtons("ed");
+        } else if (currentTrack.contains("FixYou")) {
+            updateButtons("fixyou");
+        } else if (currentTrack.contains("GiveYouUp")) {
+            updateButtons("giveyouup");
+        }
+
     }
 
     private ImageButton createButton(Texture offTexture, String key, String file) {
