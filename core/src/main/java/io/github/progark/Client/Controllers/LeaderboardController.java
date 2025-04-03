@@ -15,7 +15,7 @@ public class LeaderboardController extends Controller {
     private final LeaderBoardView view;
     private final LeaderboardService leaderboardService;
     private final Main main;
-    private LeaderboardModel model;
+    private LeaderboardModel leaderboardModel;
 
     public LeaderboardController(DatabaseManager databaseManager, AuthService authService, Main main) {
         this.main = main;
@@ -26,7 +26,6 @@ public class LeaderboardController extends Controller {
     @Override
     public void enter() {
         view.enter();
-        loadLeaderboard();
     }
 
     @Override
@@ -40,18 +39,35 @@ public class LeaderboardController extends Controller {
         view.dispose();
     }
 
-    public void loadLeaderboard() {
+    public void loadLeaderboard(DataCallback dataCallback) {
         leaderboardService.loadLeaderboard(new DataCallback() {
             @Override
             public void onSuccess(Object data) {
                 if (data instanceof LeaderboardModel) {
-                    model = (LeaderboardModel) data;
-
-                    System.out.println("==== Leaderboard ====");
-                    for (Map.Entry<String, Integer> entry : model.getUserScore().entrySet()) {
-                        System.out.println(entry.getKey() + " : " + entry.getValue());
+                    leaderboardModel = (LeaderboardModel) data;
+                    System.out.println(leaderboardModel);
+                    for (Map.Entry<String, Integer> entry : leaderboardModel.getUserScore().entrySet()) {
+                        System.out.println(entry);
                     }
-                    System.out.println("=====================");
+
+                    Map<String, Integer> unsorted = leaderboardModel.getUserScore();
+
+                    Map<String, Integer> sorted = unsorted.entrySet()
+                            .stream()
+                            .sorted((a, b) -> b.getValue().compareTo(a.getValue())) // descending
+                            .collect(java.util.stream.Collectors.toMap(
+                                    Map.Entry::getKey,
+                                    Map.Entry::getValue,
+                                    (e1, e2) -> e1,
+                                    java.util.LinkedHashMap::new
+                            ));
+
+                    leaderboardModel.setUserScore(sorted);
+
+
+                    dataCallback.onSuccess(leaderboardModel);
+                    System.out.println("Loaded " + leaderboardModel.getUserScore().size() + " users into leaderboard.");
+
                 }
             }
 
@@ -67,7 +83,7 @@ public class LeaderboardController extends Controller {
         leaderboardService.incrementUserScore(userId, new DataCallback() {
             @Override
             public void onSuccess(Object data) {
-                loadLeaderboard();
+                //loadLeaderboard();
             }
 
             @Override
@@ -80,4 +96,6 @@ public class LeaderboardController extends Controller {
     public Main getMain() {
         return main;
     }
+
+
 }

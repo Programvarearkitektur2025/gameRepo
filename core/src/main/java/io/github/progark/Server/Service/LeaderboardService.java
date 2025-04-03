@@ -18,7 +18,6 @@ public class LeaderboardService {
         this.authService = authService;
     }
 
-
     public void loadLeaderboard(DataCallback callback) {
         databaseManager.readData(LEADERBOARD_DOC, new DataCallback() {
             @Override
@@ -41,7 +40,20 @@ public class LeaderboardService {
                     }
                 }
 
-                LeaderboardModel leaderboard = new LeaderboardModel(nameScoreMap);
+                Map<String, Integer> sortedTop10 = nameScoreMap.entrySet()
+                        .stream()
+                        .sorted((a, b) -> b.getValue().compareTo(a.getValue())) // sort descending
+                        .limit(10)
+                        .collect(java.util.stream.Collectors.toMap(
+                                Map.Entry::getKey,
+                                Map.Entry::getValue,
+                                (e1, e2) -> e1,
+                                java.util.LinkedHashMap::new
+                        ));
+
+                LeaderboardModel leaderboard = new LeaderboardModel(sortedTop10);
+                callback.onSuccess(leaderboard);
+
                 callback.onSuccess(leaderboard);
             }
 
@@ -50,6 +62,11 @@ public class LeaderboardService {
                 callback.onFailure(e);
             }
         });
+    }
+
+
+    public void getUserLeaderboardScore(String username, DataCallback callback) {
+
     }
 
     /**

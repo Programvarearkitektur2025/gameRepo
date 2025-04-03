@@ -20,12 +20,14 @@ import java.util.Map;
 import io.github.progark.Client.Views.View;
 import io.github.progark.Client.Views.Components.NavBar;
 import io.github.progark.Client.Controllers.LeaderboardController;
+import io.github.progark.Server.Model.Game.LeaderboardModel;
+import io.github.progark.Server.database.DataCallback;
 
 public class LeaderBoardView extends View {
 
 
     private final Texture backgroundTexture, backButtonTexture, userTexture, pointsTexture, leaderboardHeader, trophyTexture, yourPointsTexture;
-    private final LeaderBoardController controller;
+    private final LeaderboardController controller;
     private final BitmapFont font;
     private NavBar navBar;
     private final Skin skin;
@@ -60,6 +62,25 @@ public class LeaderBoardView extends View {
         Image background = new Image(backgroundTexture);
         background.setFillParent(true);
         stage.addActor(background);
+        controller.loadLeaderboard(new DataCallback() {
+            @Override
+            public void onSuccess(Object data) {
+                if (data instanceof LeaderboardModel) {
+                    LeaderboardModel model = (LeaderboardModel) data;
+
+                    Gdx.app.postRunnable(() -> {
+                        populateLeaderboard(model);
+                    });
+                }
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                e.printStackTrace();
+            }
+        });
+
+
 
         // Tilbake knapp
         ImageButton backButton = new ImageButton(new TextureRegionDrawable(backButtonTexture));
@@ -68,7 +89,7 @@ public class LeaderBoardView extends View {
         backButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                controller.goBackHome();
+                //controller.goBackHome();
             }
         });
         stage.addActor(backButton);
@@ -100,7 +121,7 @@ public class LeaderBoardView extends View {
         stage.addActor(pointsHeadline);
 
         // Henter data fra controller
-        Map<String, Integer> leaderboard = controller.getLeaderboard();
+        //Map<String, Integer> leaderboard = controller.getLeaderboard();
 
         // Lager tabeller for både username og points
         Table usernamesTable = new Table();
@@ -109,7 +130,7 @@ public class LeaderBoardView extends View {
         pointsTable.top().padTop(20); // Add space under the points label
 
         // Legg til alle 10 entries returnert i hashmapet fra queryen
-        for (Map.Entry<String, Integer> entry : leaderboard.entrySet()) {
+       /* for (Map.Entry<String, Integer> entry : leaderboard.entrySet()) {
             // Usernames
             Label.LabelStyle labelStyle = new Label.LabelStyle(font, skin.getColor("white"));
             Label playerNameLabel = new Label(entry.getKey(), labelStyle);
@@ -122,7 +143,7 @@ public class LeaderBoardView extends View {
             pointsLabel.setAlignment(Align.right);
             pointsTable.setWidth(20);
             pointsTable.add(pointsLabel).right().padLeft(100).padTop(20).row();
-        }
+        }*/
 
         usernamesTable.setPosition(50, Gdx.graphics.getHeight() - 480);
         pointsTable.setPosition(Gdx.graphics.getWidth() - 320, Gdx.graphics.getHeight() - 480);
@@ -135,13 +156,13 @@ public class LeaderBoardView extends View {
 
         // Den innloggede brukeren sine poeng
         // Henter bruker og poeng fra query i controller
-        String loggedInUser = controller.getLoggedInUser();
-        int userScore = controller.getLoggedInUserPoints();
+       // String loggedInUser = controller.getLoggedInUser();
+        //int userScore = controller.getLoggedInUserPoints();
 
         Label.LabelStyle labelStyle = new Label.LabelStyle(font, skin.getColor("white"));
 
         // Username (logged in user)
-        Label loggedInUserLabel = new Label(loggedInUser, labelStyle);
+       /* Label loggedInUserLabel = new Label(loggedInUser, labelStyle);
         loggedInUserLabel.setAlignment(Align.left);
         usernamesTable.add(loggedInUserLabel).left().padLeft(250).padTop(300).row();
 
@@ -149,10 +170,41 @@ public class LeaderBoardView extends View {
         Label loggedInUserScoreLabel = new Label(String.valueOf(userScore), labelStyle);
         loggedInUserScoreLabel.setAlignment(Align.right);
         pointsTable.add(loggedInUserScoreLabel).right().padLeft(250).padTop(300).row();
+*/
+        stage.addActor(usernamesTable);
+        stage.addActor(pointsTable);
+    }
+
+    private void populateLeaderboard(LeaderboardModel model) {
+        Map<String, Integer> leaderboard = model.getUserScore();
+
+        Table usernamesTable = new Table();
+        Table pointsTable = new Table();
+
+        usernamesTable.top().padTop(20);
+        pointsTable.top().padTop(20);
+
+        Label.LabelStyle labelStyle = new Label.LabelStyle(font, skin.getColor("white"));
+
+        for (Map.Entry<String, Integer> entry : leaderboard.entrySet()) {
+            // Username
+            Label playerNameLabel = new Label(entry.getKey(), labelStyle);
+            playerNameLabel.setAlignment(Align.left);
+            usernamesTable.add(playerNameLabel).left().padLeft(250).padTop(20).row();
+
+            // Points
+            Label pointsLabel = new Label(entry.getValue().toString(), labelStyle);
+            pointsLabel.setAlignment(Align.right);
+            pointsTable.add(pointsLabel).right().padLeft(100).padTop(20).row();
+        }
+
+        usernamesTable.setPosition(50, Gdx.graphics.getHeight() - 480);
+        pointsTable.setPosition(Gdx.graphics.getWidth() - 320, Gdx.graphics.getHeight() - 480);
 
         stage.addActor(usernamesTable);
         stage.addActor(pointsTable);
     }
+
 
     @Override
     public void dispose() {
