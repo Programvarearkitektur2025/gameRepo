@@ -6,6 +6,7 @@ import com.badlogic.gdx.Gdx;
 import io.github.progark.Client.Controllers.ControllerManager;
 import io.github.progark.Client.Controllers.CreateGameController;
 import io.github.progark.Client.Controllers.GameController;
+import io.github.progark.Client.Controllers.ResultsController;
 import io.github.progark.Client.Controllers.RoundController;
 import io.github.progark.Client.Controllers.HomeController;
 import io.github.progark.Client.Controllers.JoinGameController;
@@ -35,7 +36,6 @@ public class Main extends Game {
         }
         this.databaseManager = dbManager;
         this.authService = authManager;
-
     }
 
     @Override
@@ -119,4 +119,11 @@ public class Main extends Game {
         controllerManager.setController(new SolutionController(this));
     }
 
+    public void useResultsController() {
+        controllerManager.setController(new ResultsController(this));
+    }
+
+    public void useRoundController() {
+        controllerManager.setController(new RoundController(databaseManager, this));
+    }
 }

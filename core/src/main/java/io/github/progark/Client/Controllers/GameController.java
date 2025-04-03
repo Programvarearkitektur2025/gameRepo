@@ -12,13 +12,14 @@ import io.github.progark.Server.database.DatabaseManager;
 public class GameController extends Controller {
 
     private GameModel gameModel;
-    private GameService lobbyService;
     private GameView gameView;
+    private Main main;
 
     public GameController(DatabaseManager databaseManager, Main main, GameModel gameModel) {
         this.gameView = new GameView(this);
-        this.lobbyService = new GameService(databaseManager);
         this.gameModel = gameModel;
+        this.main = main;
+        enter();
     }
 
     public void setgameView(GameView gameView) {
@@ -57,6 +58,10 @@ public class GameController extends Controller {
         return gameModel.getGames();
     }
 
+    public boolean isMultiplayer() {
+        return gameModel.isMultiplayer();  // Assuming gameModel has isMultiplayer method
+    }
+
     @Override
     public void enter() {
         gameView.enter();
@@ -71,5 +76,13 @@ public class GameController extends Controller {
     @Override
     public void dispose() {
         gameView.dispose();
+    }
+
+    public void goToHome() {
+        main.useHomeController();
+    }
+
+    public void goToRound() {
+        main.useRoundController();
     }
 }

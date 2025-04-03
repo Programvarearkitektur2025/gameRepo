@@ -28,9 +28,6 @@ public class CreateGameController extends Controller {
         this.createGameService = new CreateGameService(databaseManager);
     }
 
-
-
-
     @Override
     public void enter() {
         createGameView.enter();
@@ -49,6 +46,9 @@ public class CreateGameController extends Controller {
         main.useHomeController();
     }
 
+    public void viewGamePage(GameModel gameModel){
+        main.useGameController(gameModel);
+    }
 
     public void createLobby(int difficulty, int rounds, boolean multiplayer) {
         authService.getCurrentUser(new DataCallback() {
@@ -70,7 +70,9 @@ public class CreateGameController extends Controller {
                         lobbyModel.setCreatedAt(createdLobby.getCreatedAt());
                         lobbyModel.setRounds(createdLobby.getRounds());
                         lobbyModel.setMultiplayer(createdLobby.isMultiplayer());
-                        main.useGameController(createdLobby);
+
+                        // Navigate
+                        viewGamePage(createdLobby);
                     }
 
                     @Override
@@ -85,5 +87,9 @@ public class CreateGameController extends Controller {
                 System.out.println("Failed to fetch user for lobby: " + e.getMessage());
             }
         });
+    }
+
+    public GameModel getLobby() {
+        return lobbyModel;
     }
 }

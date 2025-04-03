@@ -199,6 +199,22 @@ public class CreateGameView extends View {
         startGameButtonTexture.dispose();
         backButtonTexture.dispose();
         roundsToPlayTextTexture.dispose();
+        singleGrey.dispose();
+        singleWhite.dispose();
+        multiGrey.dispose();
+        multiWhite.dispose();
+        easyGrey.dispose();
+        easyWhite.dispose();
+        mediumGrey.dispose();
+        mediumWhite.dispose();
+        hardGrey.dispose();
+        hardWhite.dispose();
+        oneGrey.dispose();
+        oneWhite.dispose();
+        twoGrey.dispose();
+        twoWhite.dispose();
+        threeGrey.dispose();
+        threeWhite.dispose();
         font.dispose();
     }
 }

@@ -17,6 +17,7 @@ public class RoundController extends Controller {
     public RoundController(DatabaseManager databaseManager, Main main) {
         this.solutionService = new SolutionService(databaseManager);
         this.gameView= new RoundView(this);
+        enter();
     }
 
     public void setGameView(RoundView gameView) {
