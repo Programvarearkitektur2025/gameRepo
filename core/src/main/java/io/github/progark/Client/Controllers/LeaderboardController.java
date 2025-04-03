@@ -1,5 +1,6 @@
 package io.github.progark.Client.Controllers;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import io.github.progark.Client.Views.Game.LeaderBoardView;
@@ -16,11 +17,13 @@ public class LeaderboardController extends Controller {
     private final LeaderboardService leaderboardService;
     private final Main main;
     private LeaderboardModel leaderboardModel;
+    private AuthService authService;
 
     public LeaderboardController(DatabaseManager databaseManager, AuthService authService, Main main) {
         this.main = main;
         this.leaderboardService = new LeaderboardService(databaseManager, authService);
         this.view = new LeaderBoardView(this);
+        this.authService = authService;
     }
 
     @Override
@@ -92,10 +95,81 @@ public class LeaderboardController extends Controller {
             }
         });
     }
+    public void loadLoggedInUserScore(String username) {
+        leaderboardService.getUserLeaderboardScore(username, new DataCallback() {
+            @Override
+            public void onSuccess(Object data) {
+                if (data instanceof Integer) {
+                    int userScore = (Integer) data;
+                    System.out.println("User " + username + " has score: " + userScore);
+                }
+            }
+            @Override
+            public void onFailure(Exception e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
 
     public Main getMain() {
         return main;
     }
+
+
+    public void loadUsername(String userId) {
+        leaderboardService.getAuthService().getUsernameFromUserId(userId, new DataCallback() {
+            @Override
+            public void onSuccess(Object data) {
+                if (data instanceof String) {
+                    String username = (String) data;
+                    System.out.println("Brukernavn for userId=" + userId + " er: " + username);
+                    // Her kan du evt. sette username i Model,
+                    // eller kalle en View-metode for å vise navnet
+                }
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    public void loadOwnScore(DataCallback callback) {
+        // 1) Hent brukernavn fra innlogget bruker
+        authService.getLoggedInUsername(new DataCallback() {
+            @Override
+            public void onSuccess(Object data) {
+                if (data instanceof String) {
+                    String myUsername = (String) data;
+                    // 2) Hent scoren for myUsername
+                    leaderboardService.getUserLeaderboardScore(myUsername, new DataCallback() {
+                        @Override
+                        public void onSuccess(Object scoreObj) {
+                            if (scoreObj instanceof Integer) {
+                                int score = (Integer) scoreObj;
+                                // 3) Returner data
+                                Map<String,Object> result = new HashMap<>();
+                                result.put("username", myUsername);
+                                result.put("score", score);
+                                callback.onSuccess(result);
+                            }
+                        }
+                        @Override
+                        public void onFailure(Exception e) {
+                            callback.onFailure(e);
+                        }
+                    });
+                }
+            }
+            @Override
+            public void onFailure(Exception e) {
+                callback.onFailure(e);
+            }
+        });
+    }
+
 
 
 }

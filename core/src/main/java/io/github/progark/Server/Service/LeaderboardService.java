@@ -2,10 +2,14 @@ package io.github.progark.Server.Service;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import io.github.progark.Server.Model.Game.LeaderboardModel;
 import io.github.progark.Server.database.DataCallback;
 import io.github.progark.Server.database.DatabaseManager;
+import java.util.LinkedHashMap;
+
+
 
 public class LeaderboardService {
 
@@ -18,45 +22,23 @@ public class LeaderboardService {
         this.authService = authService;
     }
 
-    public void loadLeaderboard(DataCallback callback) {
+    public void getUserLeaderboardScore(String username, DataCallback callback) {
         databaseManager.readData(LEADERBOARD_DOC, new DataCallback() {
             @Override
             public void onSuccess(Object data) {
                 if (!(data instanceof Map)) {
-                    callback.onFailure(new Exception("Malformed leaderboard data (not a Map)."));
+                    callback.onFailure(new Exception("Malformed scoreboard data"));
                     return;
                 }
-                @SuppressWarnings("unchecked")
-                Map<String, Object> rawMap = (Map<String, Object>) data;
-                Map<String, Integer> nameScoreMap = new HashMap<>();
-
-                for (String userId : rawMap.keySet()) {
-                    Object val = rawMap.get(userId);
-                    if (val instanceof Number) {
-                        int score = ((Number) val).intValue();
-
-                        String username = authService.getUsernameFromUserId(userId);
-                        nameScoreMap.put(username, score);
-                    }
+                Map<String,Object> rawMap = (Map<String,Object>) data;
+                if (!rawMap.containsKey(username)) {
+                    callback.onFailure(new Exception("No scoreboard entry for user: " + username));
+                    return;
                 }
-
-                Map<String, Integer> sortedTop10 = nameScoreMap.entrySet()
-                        .stream()
-                        .sorted((a, b) -> b.getValue().compareTo(a.getValue())) // sort descending
-                        .limit(10)
-                        .collect(java.util.stream.Collectors.toMap(
-                                Map.Entry::getKey,
-                                Map.Entry::getValue,
-                                (e1, e2) -> e1,
-                                java.util.LinkedHashMap::new
-                        ));
-
-                LeaderboardModel leaderboard = new LeaderboardModel(sortedTop10);
-                callback.onSuccess(leaderboard);
-
-                callback.onSuccess(leaderboard);
+                Object val = rawMap.get(username);
+                int score = (val instanceof Number) ? ((Number) val).intValue() : 0;
+                callback.onSuccess(score);
             }
-
             @Override
             public void onFailure(Exception e) {
                 callback.onFailure(e);
@@ -65,9 +47,54 @@ public class LeaderboardService {
     }
 
 
-    public void getUserLeaderboardScore(String username, DataCallback callback) {
 
+    public AuthService getAuthService() {
+        return this.authService;
     }
+
+
+
+    public void loadLeaderboard(DataCallback callback) {
+        databaseManager.readData(LEADERBOARD_DOC, new DataCallback() {
+            @Override
+            public void onSuccess(Object data) {
+                if (!(data instanceof Map)) {
+                    callback.onFailure(new Exception("Malformed leaderboard data (not a Map)."));
+                    return;
+                }
+                Map<String, Object> rawMap = (Map<String, Object>) data; // "Marcus"->score etc.
+
+                Map<String, Integer> nameScoreMap = new HashMap<>();
+                for (Map.Entry<String, Object> e : rawMap.entrySet()) {
+                    int score = 0;
+                    if (e.getValue() instanceof Number) {
+                        score = ((Number) e.getValue()).intValue();
+                    }
+                    // Her er e.getKey() = "Marcus"
+                    nameScoreMap.put(e.getKey(), score);
+                }
+                // Sorter 10
+                Map<String, Integer> sortedTop10 = nameScoreMap.entrySet()
+                    .stream()
+                    .sorted((a,b)->b.getValue().compareTo(a.getValue()))
+                    .limit(10)
+                    .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (e1,e2)->e1,
+                        LinkedHashMap::new
+                    ));
+                callback.onSuccess(new LeaderboardModel(sortedTop10));
+            }
+            @Override
+            public void onFailure(Exception e) {
+                callback.onFailure(e);
+            }
+        });
+    }
+
+
+
 
     /**
      * Øker scoren til en gitt userId med +1 i databasen.

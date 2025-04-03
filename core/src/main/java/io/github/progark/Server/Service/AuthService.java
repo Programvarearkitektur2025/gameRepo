@@ -10,5 +10,7 @@ public interface AuthService {
     boolean isUserLoggedIn();
     String getCurrentUserEmail();
     String getCurrentUser(DataCallback callback);
-    String getUsernameFromUserId(String userId);
+    void getUsernameFromUserId(String userId, DataCallback callback);
+    void getLoggedInUsername(DataCallback callback);
+
 }

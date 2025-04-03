@@ -140,9 +140,56 @@ public class FirebaseAuthManager implements AuthService { // Change interface
     }
 
     @Override
-    public String getUsernameFromUserId(String userId) {
+    public void getUsernameFromUserId(String userId, DataCallback callback) {
+        FirebaseFirestore.getInstance()
+            .collection("Users")
+            .document(userId)
+            .get()
+            .addOnSuccessListener(documentSnapshot -> {
+                if (documentSnapshot.exists()) {
+                    String email = documentSnapshot.getString("email");
+                    String username = documentSnapshot.getString("username");
 
-        return userId;
+                    if (username != null) {
+                        // Returner brukernavn som suksess
+                        callback.onSuccess(username);
+                    } else {
+                        callback.onFailure(new Exception("User doc found, but 'username' field is null"));
+                    }
+                } else {
+                    callback.onFailure(new Exception("No user document for userId=" + userId));
+                }
+            })
+            .addOnFailureListener(callback::onFailure);
     }
+    @Override
+    public void getLoggedInUsername(DataCallback callback) {
+        FirebaseUser firebaseUser = auth.getCurrentUser();
+        if (firebaseUser == null) {
+            callback.onFailure(new Exception("No user is currently logged in"));
+            return;
+        }
+
+        String uid = firebaseUser.getUid();
+
+        FirebaseFirestore.getInstance()
+            .collection("Users")
+            .document(uid)
+            .get()
+            .addOnSuccessListener(documentSnapshot -> {
+                if (documentSnapshot.exists()) {
+                    String username = documentSnapshot.getString("username");
+                    if (username != null) {
+                        callback.onSuccess(username);
+                    } else {
+                        callback.onFailure(new Exception("Username is null in user doc"));
+                    }
+                } else {
+                    callback.onFailure(new Exception("User document does not exist for " + uid));
+                }
+            })
+            .addOnFailureListener(callback::onFailure);
+    }
+
 
 }
