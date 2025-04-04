@@ -50,8 +50,7 @@ public class RegistrationView extends View {
         Table table = new Table();
         table.setFillParent(true);
         stage.addActor(table);
-        table.add(logo).size(600, 600).center().padBottom(20).row();
-
+        table.add(logo).size(600, 600).center().padLeft(150).padBottom(20).row();
 
         // Title
         Label titleLabel = new Label("Create Account", skin);
@@ -121,8 +120,7 @@ public class RegistrationView extends View {
             public void clicked(InputEvent event, float x, float y) {
                 controller.viewLoginPage();
             }
-        });
-    }
+        });}
 
     @Override
     public void dispose() {
