@@ -24,37 +24,53 @@ import io.github.progark.Main;
 
 public class GameView extends View {
 
+    /*
     private final Skin skin;
-    private final Texture backgroundTexture, profileTexture, startGameTexture, textFieldTexture, waitingForOpponentTexture, gamePinTexture, backButtonTexture;
+    private final Texture backgroundTexture, profileTexture, startGameTexture, textFieldTexture, backButtonTexture;
     private final BitmapFont font;
+
+     */
+    private final Texture backgroundTexture;
+    private final Image background;
     private final GameController controller;
 
     public GameView(GameController controller){
         super();
         this.controller = controller;
 
+        /*
+
         this.skin = new Skin(Gdx.files.internal("uiskin.json"));
+         */
+
         this.backgroundTexture = new Texture(Gdx.files.internal("Background2.png"));
+        this.background = new Image(backgroundTexture);
+
+        /*
         this.profileTexture = new Texture(Gdx.files.internal("Person.png"));
         this.textFieldTexture = new Texture(Gdx.files.internal("TextField.png"));
         this.startGameTexture = new Texture(Gdx.files.internal("Start_Game_Button.png"));
-        this.waitingForOpponentTexture = new Texture(Gdx.files.internal("Waiting_For_Opponent.png"));
-        this.gamePinTexture = new Texture(Gdx.files.internal("Game_Pin.png"));
+        //this.waitingForOpponentTexture = new Texture(Gdx.files.internal("Waiting_For_Opponent.png"));
+        //this.gamePinTexture = new Texture(Gdx.files.internal("Game_Pin.png"));
         this.backButtonTexture = new Texture(Gdx.files.internal("backButtonBlue.png"));
 
         FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("OpenSans.ttf"));
         FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
         parameter.size = 40;
-        font = generator.generateFont(parameter);
+        this.font = generator.generateFont(parameter);
         generator.dispose();
+
+         */
     }
 
     @Override
     protected void initialize() {
+
         // Bakgrunn
-        Image background = new Image(backgroundTexture);
         background.setFillParent(true);
         stage.addActor(background);
+        System.out.println("Hello from gameView");
+        /*
 
         // Tilbake knapp
         ImageButton backButton = new ImageButton(new TextureRegionDrawable(backButtonTexture));
@@ -137,19 +153,25 @@ public class GameView extends View {
             }
         });
         stage.addActor(startGameButton);
+
+         */
     }
 
     @Override
     public void dispose() {
         super.dispose();
+        backgroundTexture.dispose();
+
+        /*
         skin.dispose();
         font.dispose();
-        backgroundTexture.dispose();
         profileTexture.dispose();
         startGameTexture.dispose();
         textFieldTexture.dispose();
-        waitingForOpponentTexture.dispose();
-        gamePinTexture.dispose();
+        //waitingForOpponentTexture.dispose();
+        //gamePinTexture.dispose();
+
+         */
     }
 }
 

@@ -86,7 +86,6 @@ public class HomeView extends View {
 
             @Override
             public void onSuccess(Object data) {
-                System.out.println("This is what we like: " + data);
                 List<Map<String, GameModel>> createdLobby = (List<Map<String, GameModel>>) data;
                 renderGames(createdLobby);
             }
@@ -186,6 +185,7 @@ public class HomeView extends View {
 
     public void renderGames(List<Map<String, GameModel>> gameList){
         // Logic for rendering games in the UI. Someone help
+        System.out.println(gameList);
     }
 
     @Override

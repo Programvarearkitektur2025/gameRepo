@@ -33,7 +33,6 @@ public class HomeService {
                     return;
                 }
                 Map<String,Object> lobbyMap = (Map<String,Object>) data;
-                System.out.println(lobbyMap);
             }
 
             @Override

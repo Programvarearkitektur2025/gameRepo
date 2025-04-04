@@ -15,6 +15,8 @@ import java.util.function.IntConsumer;
 
 import io.github.progark.Client.Controllers.CreateGameController;
 import io.github.progark.Client.Views.View;
+import io.github.progark.Server.Model.Game.GameModel;
+import io.github.progark.Server.database.DataCallback;
 
 public class CreateGameView extends View {
 
@@ -142,7 +144,18 @@ public class CreateGameView extends View {
             public void clicked(InputEvent event, float x, float y) {
                 int rounds = selectedRounds + 1;
                 boolean isMultiplayer = selectedMode == 1;
-                controller.createLobby(selectedDifficulty, rounds, isMultiplayer);
+                controller.createLobby(selectedDifficulty, rounds, isMultiplayer, new DataCallback() {
+                    @Override
+                    public void onSuccess(Object data) {
+                        GameModel ourGame = (GameModel) data;
+                        controller.viewGamePage(ourGame);
+                    }
+
+                    @Override
+                    public void onFailure(Exception e) {
+                        System.out.println("Could not create game: " + e);
+                    }
+                });
             }
         });
 

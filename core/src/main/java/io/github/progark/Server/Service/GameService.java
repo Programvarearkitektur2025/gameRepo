@@ -35,9 +35,6 @@ public class GameService {
                             GameModel game = GameModel.fromMap(gameId, gameMap);
 
 
-                            System.out.println("Game: " + game);
-                            System.out.println("User: " + user);
-
                                 if (game.getPlayerOne().equals(user.getUsername()) || (game.getPlayerTwo() != null && game.getPlayerTwo().equals(user.getUsername()))) {
                                     Map<String, Object> gameEntry = new HashMap<>();
                                     gameEntry.put("gameId", gameId);
