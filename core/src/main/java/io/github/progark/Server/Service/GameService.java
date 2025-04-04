@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import io.github.progark.Server.Model.Game.GameModel;
+import io.github.progark.Server.Model.Game.RoundModel;
 import io.github.progark.Server.Model.Login.UserModel;
 import io.github.progark.Server.database.DataCallback;
 import io.github.progark.Server.database.DatabaseManager;
@@ -54,6 +55,15 @@ public class GameService {
                 callback.onFailure(e);
             }
         });
+    }
+
+    public void setNewGameRounds(GameModel gameModel, List<RoundModel> rounds) {
+        gameModel.setGames(rounds);
+        Map<String, Object> gameData = new HashMap<>();
+        gameData.put("games", rounds);
+        databaseManager.writeData("lobbies/" + gameModel.getLobbyCode(), gameData);
+
+        System.out.println("New game rounds set and updated in Firebase for lobby: " + gameModel.getLobbyCode());
     }
 
 }
