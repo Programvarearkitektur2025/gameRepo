@@ -6,9 +6,11 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.ui.Stack;
@@ -24,43 +26,39 @@ import io.github.progark.Main;
 
 public class GameView extends View {
 
-    /*
     private final Skin skin;
-    private final Texture backgroundTexture, profileTexture, startGameTexture, textFieldTexture, backButtonTexture;
-    private final BitmapFont font;
-
-     */
-    private final Texture backgroundTexture;
-    private final Image background;
+    private final Texture backgroundTexture, profileTexture, startGameTexture, textFieldTexture, backButtonTexture, startGameDisabledTexture;
+    private final BitmapFont smallFont, largerFont;
     private final GameController controller;
+    private Image background;
 
     public GameView(GameController controller){
         super();
         this.controller = controller;
+        skin = new Skin(Gdx.files.internal("uiskin.json"));
 
-        /*
-
-        this.skin = new Skin(Gdx.files.internal("uiskin.json"));
-         */
-
-        this.backgroundTexture = new Texture(Gdx.files.internal("Background2.png"));
-        this.background = new Image(backgroundTexture);
-
-        /*
-        this.profileTexture = new Texture(Gdx.files.internal("Person.png"));
-        this.textFieldTexture = new Texture(Gdx.files.internal("TextField.png"));
-        this.startGameTexture = new Texture(Gdx.files.internal("Start_Game_Button.png"));
-        //this.waitingForOpponentTexture = new Texture(Gdx.files.internal("Waiting_For_Opponent.png"));
-        //this.gamePinTexture = new Texture(Gdx.files.internal("Game_Pin.png"));
-        this.backButtonTexture = new Texture(Gdx.files.internal("backButtonBlue.png"));
+        backgroundTexture = new Texture(Gdx.files.internal("Background2.png"));
+        profileTexture = new Texture(Gdx.files.internal("Person.png"));
+        textFieldTexture = new Texture(Gdx.files.internal("TextField.png"));
+        startGameTexture = new Texture(Gdx.files.internal("Start_Game_Button.png"));
+        startGameDisabledTexture = new Texture(Gdx.files.internal("Start_Game_Button_Disabled.png"));
+        backButtonTexture = new Texture(Gdx.files.internal("backButtonBlue.png"));
 
         FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("OpenSans.ttf"));
+        // Small font
         FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
-        parameter.size = 40;
-        this.font = generator.generateFont(parameter);
+        parameter.size = 20;
+        this.smallFont = generator.generateFont(parameter);
+        // Larger font
+        FreeTypeFontGenerator.FreeTypeFontParameter parameter2 = new FreeTypeFontGenerator.FreeTypeFontParameter();
+        parameter2.size = 30;
+        this.largerFont = generator.generateFont(parameter2);
+
         generator.dispose();
 
-         */
+        background = new Image(backgroundTexture);
+
+        enter();
     }
 
     @Override
@@ -70,7 +68,6 @@ public class GameView extends View {
         background.setFillParent(true);
         stage.addActor(background);
         System.out.println("Hello from gameView");
-        /*
 
         // Tilbake knapp
         ImageButton backButton = new ImageButton(new TextureRegionDrawable(backButtonTexture));
@@ -91,87 +88,130 @@ public class GameView extends View {
         table.top().padTop(40);
         stage.addActor(table);
 
-        // Headline
-        String headlineText;
         if (controller.isMultiplayer()) {
-            headlineText = "Waiting for opponent" + "Game pin:" + controller.getLobbyCode();
+            // Headline
+            String headlineText = "Game Pin: " + controller.getLobbyCode();
+            Label headline = new Label(headlineText, new Label.LabelStyle(largerFont, skin.getColor("white")));
+            headline.setFontScale(2.5f);
+            table.add(headline).padBottom(50).padTop(150).row();
+            headline.setPosition(230, Gdx.graphics.getHeight() - 250);
+            stage.addActor(headline);
+
+            // Profilbilder og score
+            Table scoreRow = new Table();
+
+            // Left player (profile + name)
+            Table leftProfileCol = new Table();
+            Image leftProfile = new Image(profileTexture);
+            Label leftNameLabel = new Label(controller.getPlayerOne(), new Label.LabelStyle(smallFont, skin.getColor("white")));
+            leftNameLabel.setAlignment(Align.center);
+            leftNameLabel.setFontScale(2f);
+            leftProfileCol.add(leftProfile).size(250).row();
+            leftProfileCol.add(leftNameLabel).padTop(40).width(250).center();
+
+            // Right player (profile + name)
+            Table rightProfileCol = new Table();
+            Image rightProfile = new Image(profileTexture);
+            Label rightNameLabel = new Label(controller.getPlayerTwo(), new Label.LabelStyle(smallFont, skin.getColor("white")));
+            rightNameLabel.setAlignment(Align.center);
+            rightNameLabel.setFontScale(2f);
+            rightProfileCol.add(rightProfile).size(250).row();
+            rightProfileCol.add(rightNameLabel).padTop(40).width(250).center();
+
+            // Score label
+            Label scoreLabel = new Label(controller.getPlayerOnePoints() + " - " + controller.getPlayerTwoPoints(), new Label.LabelStyle(largerFont, skin.getColor("white")));
+            scoreLabel.setFontScale(2f);
+
+            // Add to horizontal score row
+            scoreRow.add(leftProfileCol).padRight(80);
+            scoreRow.add(scoreLabel).padRight(80).center();
+            scoreRow.add(rightProfileCol);
+
+            // Position the row manually
+            scoreRow.setPosition(530, Gdx.graphics.getHeight() - 500);
+            stage.addActor(scoreRow);
+
         } else {
-            headlineText = "Press Start Game to play";
+            // Headline
+            String headlineText = "Press Start Game to play";
+            Label headline = new Label(headlineText, new Label.LabelStyle(largerFont, skin.getColor("white")));
+            headline.setFontScale(2.5f);
+            table.add(headline).padBottom(50).padTop(150).row();
+            headline.setPosition(120, Gdx.graphics.getHeight() - 250);
+            stage.addActor(headline);
+
+            // Profilbilde med navn
+            Table scoreRow = new Table();
+            Table profileCol = new Table();
+            Image profile = new Image(profileTexture);
+            Label nameLabel = new Label(controller.getPlayerOne(), new Label.LabelStyle(smallFont, skin.getColor("white")));
+            nameLabel.setAlignment(Align.center);
+            nameLabel.setFontScale(2f);
+            profileCol.add(profile).size(250).row();
+            profileCol.add(nameLabel).padTop(40).width(250).center();
+            scoreRow.add(profileCol).padRight(80);
+            scoreRow.setPosition(580, Gdx.graphics.getHeight() - 500);
+            stage.addActor(scoreRow);
+
         }
-        Label headline = new Label(headlineText, new Label.LabelStyle(font, Color.WHITE));
-        headline.setFontScale(2.5f);
-        table.add(headline).padBottom(50).padTop(150).row();
-        stage.addActor(headline);
 
-        // Profilbilder og score
-        Table scoreRow = new Table();
-        Image leftProfile = new Image(profileTexture);
-        Image rightProfile = new Image(profileTexture);
-        Label scoreLabel = new Label(controller.getPlayerOnePoints() + " - " + controller.getPlayerTwoPoints(), new Label.LabelStyle(font, Color.WHITE));
-        scoreRow.add(leftProfile).size(120).padRight(40);
-        scoreRow.add(scoreLabel).padRight(40);
-        scoreRow.add(rightProfile).size(120);
-        table.add(scoreRow).padTop(60).padBottom(100).row();
-        stage.addActor(scoreRow);
-
-        // Resultatboks med prompt og svar (bruker TextField.png som bakgrunn)
+        // Background for result box
         Drawable textFieldBackground = new TextureRegionDrawable(textFieldTexture);
         Image boxBackground = new Image(textFieldBackground);
-        Stack resultBox = new Stack();
-        resultBox.add(boxBackground);
         Table resultTable = new Table();
         resultTable.top().padTop(30);
-        Label promptLabel = new Label("Girlsname starting with ‘L’", new Label.LabelStyle(font, Color.DARK_GRAY));
-        promptLabel.setAlignment(Align.center);
-        resultTable.add(promptLabel).padBottom(30).row();
-        resultBox.add(resultTable);
-        table.add(resultBox).width(850).height(1050).padBottom(40).row();
+        // ScrollPane to make the content scrollable
+        ScrollPane scrollPane = new ScrollPane(resultTable);
+        scrollPane.setScrollingDisabled(true, false);
+        scrollPane.setFadeScrollBars(false);
+        Stack resultBox = new Stack();
+        resultBox.add(boxBackground);
+        resultBox.add(scrollPane);
+        resultBox.setSize(850f, 1200f);
+        resultBox.setPosition((Gdx.graphics.getWidth() - 850f) / 2f, 450f);
         stage.addActor(resultBox);
 
-        // Start Game knapp
-        ImageButton startGameButton = new ImageButton(new TextureRegionDrawable(startGameTexture));
-        startGameButton.setSize(800, 300);
-        startGameButton.setPosition(Gdx.graphics.getWidth() / 2 - startGameButton.getWidth() / 2, 100); // Adjust as needed
-        // Disable the button if multiplayer and second player hasn't joined
+        // Start Game Button, disabled and active
+        TextureRegionDrawable startGameUp = new TextureRegionDrawable(startGameTexture);
+        TextureRegionDrawable startGameDisabled = new TextureRegionDrawable(startGameDisabledTexture);
+        Button.ButtonStyle startGameStyle = new Button.ButtonStyle();
+        startGameStyle.up = startGameUp;
+        startGameStyle.disabled = startGameDisabled;
+        Button startGame = new Button(startGameStyle);
+        startGame.setSize(850f, 200);
+        startGame.setPosition(Gdx.graphics.getWidth() / 2 - startGame.getWidth() / 2, 200);
         if (controller.isMultiplayer()) {
-            // Check if second player has joined the game
-            if (controller.getPlayerTwo() == null || controller.getPlayerTwo().isEmpty()) {
-                startGameButton.setDisabled(true);  // Disable the button
-            } else {
-                startGameButton.setDisabled(false);  // Enable the button
-            }
+            boolean playerTwoJoined = controller.getPlayerTwo() != null && !controller.getPlayerTwo().isEmpty();
+            startGame.setDisabled(!playerTwoJoined);
         } else {
-            // Enable the button in single player mode
-            startGameButton.setDisabled(false);  // Always enabled for single player
+            startGame.setDisabled(false);
         }
-        startGameButton.addListener(new ClickListener() {
+
+        // Add listener for the button
+        startGame.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                if (!startGameButton.isDisabled()) {
+                if (!startGame.isDisabled()) {
                     controller.goToRound();
                 }
             }
         });
-        stage.addActor(startGameButton);
 
-         */
+        // Add button to stage
+        stage.addActor(startGame);
     }
 
     @Override
     public void dispose() {
         super.dispose();
         backgroundTexture.dispose();
-
-        /*
+        backButtonTexture.dispose();
         skin.dispose();
-        font.dispose();
+        smallFont.dispose();
+        largerFont.dispose();
         profileTexture.dispose();
         startGameTexture.dispose();
         textFieldTexture.dispose();
-        //waitingForOpponentTexture.dispose();
-        //gamePinTexture.dispose();
-
-         */
     }
 }
 

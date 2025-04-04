@@ -1,34 +1,56 @@
 package io.github.progark.Client.Controllers;
 
-import java.util.ArrayList;
 import java.util.List;
-
 import io.github.progark.Client.Views.Game.GameView;
 import io.github.progark.Main;
-import io.github.progark.Server.Model.Game.RoundModel;
 import io.github.progark.Server.Model.Game.GameModel;
-import io.github.progark.Server.Service.GameService;
+import io.github.progark.Server.Model.Game.RoundModel;
 import io.github.progark.Server.database.DatabaseManager;
 
 public class GameController extends Controller {
 
     private GameModel gameModel;
-    private GameService lobbyService;
     private GameView gameView;
-    private GameService gameService;
     private Main main;
 
     public GameController(DatabaseManager databaseManager, Main main, GameModel gameModel) {
-        this.gameView = new GameView(this);
         this.gameModel = gameModel;
         this.main = main;
-        enter();
     }
 
-    public void setgameView(GameView gameView) {
-        this.gameView = gameView;
+    @Override
+    public void enter() {
+        if (gameView == null) {
+            gameView = new GameView(this);
+        }
+        gameView.enter();
     }
 
+    @Override
+    public void update(float delta) {
+        if (gameView != null) {
+            gameView.update(delta);
+            gameView.render();
+        }
+    }
+
+    @Override
+    public void dispose() {
+        if (gameView != null) {
+            gameView.dispose();
+            gameView = null;
+        }
+    }
+
+    public void goToHome() {
+        main.useHomeController();
+    }
+
+    public void goToRound() {
+        main.useRoundController();
+    }
+
+    // Gettere
     public String getLobbyCode() {
         return gameModel.getLobbyCode();
     }
@@ -62,48 +84,6 @@ public class GameController extends Controller {
     }
 
     public boolean isMultiplayer() {
-        return gameModel.isMultiplayer();  // Assuming gameModel has isMultiplayer method
-    }
-
-    @Override
-    public void enter() {
-        gameView.enter();
-    }
-
-    @Override
-    public void update(float delta) {
-        gameView.update(delta);
-        gameView.render();
-    }
-
-    @Override
-    public void dispose() {
-        gameView.dispose();
-    }
-
-    public void setGameRounds() {
-        int totalRounds = gameModel.getRounds();
-        List<RoundModel> rounds = new ArrayList<>();
-
-        // Ensure the game has the correct number of rounds
-        for (int i = 0; i < totalRounds; i++) {
-            rounds.add(new RoundModel()); // Creating new round instances
-        }
-
-        gameModel.setGames(rounds); // Updating the GameModel with the new rounds
-
-        if (gameService != null) {
-            gameService.setNewGameRounds(gameModel, rounds); // Delegate to service for database update
-        } else {
-            System.out.println("GameService is not initialized.");
-        }
-    }
-
-    public void goToHome() {
-        main.useHomeController();
-    }
-
-    public void goToRound() {
-        main.useRoundController();
+        return gameModel.isMultiplayer();
     }
 }
