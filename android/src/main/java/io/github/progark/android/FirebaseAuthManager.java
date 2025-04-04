@@ -33,45 +33,43 @@ public class FirebaseAuthManager implements AuthService { // Change interface
             .addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
                     FirebaseUser user = auth.getCurrentUser();
-
                     if (user != null) {
                         String uid = user.getUid();
-
                         UserModel userModel = new UserModel(uid, email, username);
 
+                        // Opprett bruker i "Users"
                         FirebaseFirestore.getInstance()
                             .collection("Users")
                             .document(uid)
                             .set(userModel)
                             .addOnSuccessListener(aVoid -> {
-                                Log.d("FirebaseAuth", "User registered and saved to Firestore!");
-                                if (callback != null) {
-                                    callback.onSuccess(userModel);
-                                }
+                                // Legg brukernavn med score=0 til i "leaderboard" -> "Leaderboard - 2025"
+                                FirebaseFirestore.getInstance()
+                                    .collection("leaderboard")
+                                    .document("Leaderboard - 2025")
+                                    .update(username, 0)
+                                    .addOnSuccessListener(unused -> {
+                                        if (callback != null) callback.onSuccess(userModel);
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        if (callback != null) callback.onFailure(e);
+                                    });
                             })
                             .addOnFailureListener(e -> {
-                                Log.e("FirebaseAuth", "User saved to Firestore failed", e);
-                                if (callback != null) {
-                                    callback.onFailure(e);
-                                }
+                                if (callback != null) callback.onFailure(e);
                             });
-
                     } else {
-                        Log.e("FirebaseAuth", "User is null after successful auth");
                         if (callback != null) {
                             callback.onFailure(new Exception("FirebaseUser is null after registration"));
                         }
                     }
-
                 } else {
-                    Log.e("FirebaseAuth", "Auth registration failed", task.getException());
                     if (callback != null) {
                         callback.onFailure(task.getException());
                     }
                 }
             })
             .addOnFailureListener(e -> {
-                Log.e("FirebaseAuth", "Sign-up failed completely: " + e.getMessage(), e);
                 if (callback != null) {
                     callback.onFailure(e);
                 }
@@ -79,7 +77,8 @@ public class FirebaseAuthManager implements AuthService { // Change interface
     }
 
 
-        @Override
+
+    @Override
     public void signIn(String email, String password, DataCallback dataCallback) {
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener(task -> {
