@@ -9,7 +9,7 @@ import io.github.progark.Client.Controllers.GameController;
 import io.github.progark.Client.Controllers.RoundController;
 import io.github.progark.Client.Controllers.HomeController;
 import io.github.progark.Client.Controllers.JoinGameController;
-import io.github.progark.Client.Controllers.LeaderBoardController;
+import io.github.progark.Client.Controllers.LeaderboardController;
 import io.github.progark.Client.Controllers.LoginController;
 import io.github.progark.Client.Controllers.RegistrationController;
 import io.github.progark.Client.Controllers.SettingsController;
@@ -105,7 +105,7 @@ public class Main extends Game {
 
 
     public void useLeaderBoardController() {
-        controllerManager.setController(new LeaderBoardController(this));
+        controllerManager.setController(new LeaderboardController(databaseManager, authService, this));
     }
 
     public void useSettingsController() {
