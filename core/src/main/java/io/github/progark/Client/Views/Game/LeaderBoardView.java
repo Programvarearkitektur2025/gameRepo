@@ -101,19 +101,6 @@ public class LeaderBoardView extends View {
             }
         });
 
-        // Tilbake-knapp
-        ImageButton backButton = new ImageButton(new TextureRegionDrawable(backButtonTexture));
-        backButton.setSize(100, 100);
-        backButton.setPosition(30, Gdx.graphics.getHeight() - 130);
-        backButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                // Eksempel på å gå tilbake eller noe slikt
-                // controller.goBackHome();
-            }
-        });
-        stage.addActor(backButton);
-
         // Navbar
         navBar = new NavBar(stage, controller.getMain());
 
@@ -177,18 +164,25 @@ public class LeaderBoardView extends View {
             String uname = entry.getKey();
             int pts = entry.getValue();
 
-            Label playerNameLabel = new Label(uname, labelStyle);
-            playerNameLabel.setAlignment(Align.left);
-            usernamesTable.add(playerNameLabel).left().padLeft(250).padTop(20).row();
+            if (uname.length() > 15) {
+                String shortname = uname.substring(0, 15) + "..";
+                Label shortNameLabel = new Label(shortname, labelStyle);
+                shortNameLabel.setAlignment(Align.left);
+                usernamesTable.add(shortNameLabel).left().width(300).padLeft(300).padTop(20).row();
+            } else {
+                Label playerNameLabel = new Label(uname, labelStyle);
+                playerNameLabel.setAlignment(Align.left);
+                usernamesTable.add(playerNameLabel).left().width(300).padLeft(300).padTop(20).row();
+            }
 
             Label pointsLabel = new Label(String.valueOf(pts), labelStyle);
-            pointsLabel.setAlignment(Align.right);
-            pointsTable.add(pointsLabel).right().padLeft(100).padTop(20).row();
+            pointsLabel.setAlignment(Align.left);
+            pointsTable.add(pointsLabel).left().width(200).padLeft(100).padTop(20).row();
         }
 
         // Plasser tabellene
         usernamesTable.setPosition(50, Gdx.graphics.getHeight() - 480);
-        pointsTable.setPosition(Gdx.graphics.getWidth() - 320, Gdx.graphics.getHeight() - 480);
+        pointsTable.setPosition(Gdx.graphics.getWidth() - 250, Gdx.graphics.getHeight() - 480);
 
         // Legg til i stage
         stage.addActor(usernamesTable);
@@ -201,16 +195,16 @@ public class LeaderBoardView extends View {
     private void showUserScore(String username, int score) {
         Label.LabelStyle labelStyle = new Label.LabelStyle(font, skin.getColor("white"));
 
-        Label myScoreLabel = new Label(username + ": " + score, labelStyle);
-        myScoreLabel.setAlignment(Align.left);
+        Label myUserName = new Label(username, labelStyle);
+        Label myPoints = new Label(score + "", labelStyle);
+        myUserName.setAlignment(Align.left);
+        myPoints.setAlignment(Align.left);
 
+        myUserName.setPosition(50, Gdx.graphics.getHeight() - 2000);
+        myPoints.setPosition(Gdx.graphics.getWidth() - 300, Gdx.graphics.getHeight() - 2000);
 
-        float x = 650f;
-        float y = Gdx.graphics.getHeight() - 1850;
-
-        myScoreLabel.setPosition(x, y);
-
-        stage.addActor(myScoreLabel);
+        stage.addActor(myUserName);
+        stage.addActor(myPoints);
     }
 
     @Override
