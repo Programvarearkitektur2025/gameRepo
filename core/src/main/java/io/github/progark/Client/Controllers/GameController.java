@@ -47,7 +47,7 @@ public class GameController extends Controller {
     }
 
     public void goToRound() {
-        main.useRoundController();
+        main.useRoundController(gameModel);
     }
 
     // Gettere

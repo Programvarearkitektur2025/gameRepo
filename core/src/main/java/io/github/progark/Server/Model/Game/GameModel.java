@@ -157,6 +157,16 @@ public class GameModel {
         this.games = games;
     }
 
+
+    // Function for updating the list of rounds played. It is assumed that the game-variable
+    // is supposed to contain the rounds of the entire game and that it is populated throughout the
+    // game. The function underneeth is called by roundController whenever a round finishes.
+    // Function that takes a roundModel and adds it to the List<GameModel> game variable.
+    public void setFinishedRound(RoundModel roundModel){
+        games.add(roundModel);
+        // UpdateUI(); After updating the list of played rounds, we should update the UI.
+    }
+
     @Override
     public String toString() {
         return "LobbyModel{" +

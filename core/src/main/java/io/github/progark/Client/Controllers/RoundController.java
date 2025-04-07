@@ -1,6 +1,7 @@
 package io.github.progark.Client.Controllers;
 
 import io.github.progark.Main;
+import io.github.progark.Server.Model.Game.GameModel;
 import io.github.progark.Server.Model.Game.RoundModel;
 import io.github.progark.Server.Service.RoundService;
 import io.github.progark.Client.Views.Game.RoundView;
@@ -11,12 +12,18 @@ import io.github.progark.Server.database.DatabaseManager;
 public class RoundController extends Controller {
     private RoundService gameService;
     private SolutionService solutionService;
-    private RoundModel gameModel;
+    private RoundModel roundModel;
     private RoundView gameView;
+    // Dette er variabler jeg har initiert og som må dobbeltsjekkes mot ditt arbeid Stian
+    private GameModel parentGameModel;
+    private Main main;
 
-    public RoundController(DatabaseManager databaseManager, Main main) {
+
+    public RoundController(GameModel gameModel, DatabaseManager databaseManager, Main main) {
         this.solutionService = new SolutionService(databaseManager);
         this.gameView= new RoundView(this);
+        this.parentGameModel = gameModel;
+        this.main = main;
         enter();
     }
 
@@ -28,50 +35,50 @@ public class RoundController extends Controller {
 
     public void handleAnswerSubmission(String input) {
         String answer = input.trim().toLowerCase();
-        if (answer.isEmpty() || gameModel.hasAlreadySubmitted(answer)) {
+        if (answer.isEmpty() || roundModel.hasAlreadySubmitted(answer)) {
             gameView.showMessage("Invalid answer. Please try again.");
             return;
         }
-        boolean success = gameModel.submitAnswer(answer);
+        boolean success = roundModel.submitAnswer(answer);
         if (success) {
-            gameView.updateScore(gameModel.getScore());
-            gameView.updateSubmittedAnswers(gameModel.getSubmittedAnswers());
+            gameView.updateScore(roundModel.getScore());
+            gameView.updateSubmittedAnswers(roundModel.getSubmittedAnswers());
         }
     }
 
 
     public void updateGameState(float delta) {
-        gameModel.updateTime(delta);
-        gameView.updateTimeRemaining(gameModel.getTimeRemaining());
+        roundModel.updateTime(delta);
+        gameView.updateTimeRemaining(roundModel.getTimeRemaining());
 
-        if (gameModel.isTimeUp()) {
+        if (roundModel.isTimeUp()) {
             gameView.showGameOver();
         }
     }
 
     public boolean isTimeUp() {
-        return gameModel.isTimeUp();
+        return roundModel.isTimeUp();
     }
 
     public int getScore() {
-        return gameModel.getScore();
+        return roundModel.getScore();
     }
 
     public float getTimeRemaining() {
-        return gameModel.getTimeRemaining();
+        return roundModel.getTimeRemaining();
     }
 
     public void updateTime(float delta){
         // Add logic as necessary
     };
 
-    public boolean trySubmitAnswer(String answer){
-        // Add logic as necessary
-        return true;
+    public boolean submitAnswer(String answer){
+        boolean isAnswerCorrect = roundModel.submitAnswer(answer);
+        return isAnswerCorrect;
     }
 
     public java.util.Map<String, Integer> getSubmittedAnswers() {
-        return gameModel.getSubmittedAnswers();
+        return roundModel.getSubmittedAnswers();
     }
 
     public void getQuestionByID(String ID) {
@@ -83,10 +90,25 @@ public class RoundController extends Controller {
 
             @Override
             public void onFailure(Exception e) {
-                System.out.println("Stupid");
+                System.out.println("Stupid: "+ e);
                 return;
             }
         });
+    }
+
+    // Function should not take anything and should return the question for the given round.
+    // Used by RoundView to initialize question to display
+    public String getQuestion(){
+        String question = roundModel.getQuestion();
+        return question;
+    }
+
+    // Function that takes a roundModel object that is populated and sets it in the parentGameModel
+    // and sends the user back to the gameView through the controller. This function is called from
+    // roundview whenever a round is finished.
+    public void returnToGameView(RoundModel roundModel){
+        parentGameModel.setFinishedRound(roundModel);
+        main.useGameController(parentGameModel);
     }
 
     @Override

@@ -78,11 +78,15 @@ public class RoundModel {
         return timeRemaining <= 0;
     }
 
-    public String getCategoryTitle() {
+
+    // Function takes nothing and returns the question. Used by gameController to communicate with UI.
+    // Assuming CateGoryTitle is the question to be answered
+    public String getQuestion() {
         return category.title;
     }
 
     public Map<String, Integer> getAllValidAnswers() {
         return category.getAllAnswers();
     }
+
 }

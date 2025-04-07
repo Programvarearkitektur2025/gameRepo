@@ -13,6 +13,7 @@ import com.badlogic.gdx.utils.Align;
 
 import io.github.progark.Client.Views.View;
 import io.github.progark.Client.Controllers.RoundController;
+import io.github.progark.Server.Model.Game.RoundModel;
 
 public class RoundView extends View {
 
@@ -28,6 +29,9 @@ public class RoundView extends View {
 
     private Table answerContainer;
     private List<String> answers;
+
+    // Variable for displaying question
+    private String question;
 
 
 
@@ -51,6 +55,7 @@ public class RoundView extends View {
         // Initializing with dummy values, needs to be fixed.
         //user1 = new UserModel("1","bastetest@test.com", "bastetest1");
         //user2 = new UserModel("2","bastetest@test.com", "bastetest2");
+        question = controller.getQuestion();
     }
 
     @Override
@@ -78,7 +83,8 @@ public class RoundView extends View {
         this.timerLabel = timerLabelTop; // Assign to use in update()
 
         // === CATEGORY LABEL ===
-        categoryLabel = new Label("Mmmmmmmmmolly", skin);
+        // === SAME AS QUESTION? ===
+        categoryLabel = new Label(question, skin);
         categoryLabel.setFontScale(2.5f);
         categoryLabel.setAlignment(Align.center);
         root.add(categoryLabel).padTop(20).padBottom(20).row();
@@ -105,12 +111,16 @@ public class RoundView extends View {
         submitButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                submitAnswer();
+                //submitAnswer();
             }
         });
 
         inputField.setTextFieldListener((field, c) -> {
-            if (c == '\r' || c == '\n') submitAnswer();
+            if (c == '\r' || c == '\n') {
+                return;
+                // Her må logikk for å kalle submitAnswer-funksjon være
+                //submitAnswer();
+            }
         });
 
         inputRow.add(inputField).expandX().fillX().padRight(10).height(80);
@@ -150,7 +160,17 @@ public class RoundView extends View {
          */
     }
 
-    private void submitAnswer() {
+    // Takes a string and should update the UI based on if the answer is accepted or not
+    // is called whenever a user submits an answer
+    private void submitAnswer(String answer) {
+        boolean isAnswerCorrect = controller.submitAnswer(answer);
+        if (isAnswerCorrect) {
+            // Logic for updating UI with correct answer.
+            // updateUI(); Not necessary correct function
+        }else{
+            // Logic for updating UI with incorrect answer.
+            // updateUI(); Not necessary correct function
+        }
         /*
         String input = inputField.getText();
         boolean accepted = controller.trySubmitAnswer(input);
@@ -159,8 +179,6 @@ public class RoundView extends View {
         }
         inputField.setText("");
         */
-
-        controller.getQuestionByID("C02rSsE1DU2E9gGPR4UC");
     }
 
     private void updateUI() {
@@ -184,6 +202,12 @@ public class RoundView extends View {
 
             answerContainer.add(row).padBottom(10).row();
         });
+    }
+
+    // Function that should take a RoundModel object and send it to the gameController for updated
+    // gameView with the information of the newly executed round.
+    public void roundIsFinished(RoundModel roundModel){
+        controller.returnToGameView(roundModel);
     }
 
     @Override

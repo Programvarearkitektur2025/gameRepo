@@ -18,6 +18,7 @@ import io.github.progark.Client.Controllers.SolutionController;
 import io.github.progark.Client.Controllers.TutorialController;
 import io.github.progark.Client.Controllers.UserController;
 import io.github.progark.Server.Model.Game.GameModel;
+import io.github.progark.Server.Model.Game.RoundModel;
 import io.github.progark.Server.Service.AuthService;
 import io.github.progark.Server.database.DatabaseManager;
 import io.github.progark.Client.Audio.MusicManager;
@@ -123,7 +124,11 @@ public class Main extends Game {
         controllerManager.setController(new ResultsController(this));
     }
 
-    public void useRoundController() {
-        controllerManager.setController(new RoundController(databaseManager, this));
+    public void useRoundController(GameModel gameModel) {
+        controllerManager.setController(new RoundController(gameModel,databaseManager, this));
+    }
+
+    public void returnToGameControllerFromRound(RoundModel roundModel, GameModel gameModel){
+
     }
 }

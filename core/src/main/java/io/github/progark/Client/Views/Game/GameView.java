@@ -67,7 +67,6 @@ public class GameView extends View {
         // Bakgrunn
         background.setFillParent(true);
         stage.addActor(background);
-        System.out.println("Hello from gameView");
 
         // Tilbake knapp
         ImageButton backButton = new ImageButton(new TextureRegionDrawable(backButtonTexture));
@@ -199,6 +198,12 @@ public class GameView extends View {
 
         // Add button to stage
         stage.addActor(startGame);
+    }
+
+    // This view should have an update method that updates the UI with whatever the newest updates to
+    // the round objects are.
+    public void update(){
+        return;
     }
 
     @Override
