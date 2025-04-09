@@ -86,8 +86,9 @@ public class HomeView extends View {
 
             @Override
             public void onSuccess(Object data) {
-                List<Map<String, GameModel>> createdLobby = (List<Map<String, GameModel>>) data;
-                renderGames(createdLobby);
+                List<Map<String, Object>> rawLobbies = (List<Map<String, Object>>) data;
+                System.out.println("Raw game data: " + data);
+                renderGames(rawLobbies);
             }
 
             @Override
@@ -133,6 +134,8 @@ public class HomeView extends View {
          */
         controller.getMain().getMusicManager().setVolume(1.0f);
 
+        contentTable = new Table();
+        mainLayout.add(contentTable).colspan(2).expand().fill().row();
 
 
 
@@ -140,53 +143,104 @@ public class HomeView extends View {
 
     public void updateGameLists(HomeModel homeModel) {
         contentTable.clear();
+        float sectionWidth = Gdx.graphics.getWidth() * 0.9f;
+        float rowHeight = 120f;
 
-        contentTable.add(new Image(yourTurnTexture)).size(200, 60).left().pad(30).row();
+        Label yourTurnLabel = new Label("Your turn", skin);
+        yourTurnLabel.setFontScale(1.5f);
+        yourTurnLabel.setColor(0.4f, 0.6f, 0.2f, 1);
+        contentTable.add(yourTurnLabel).left().pad(20).row();
+
         for (HomeModel.GameEntry game : homeModel.getYourTurnGames()) {
             Table entry = createGameEntry(game);
             entry.setTouchable(Touchable.enabled);
             entry.addListener(new ClickListener() {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
-                    System.out.println("ClickedGameEntry");
+                    controller.getGameToOpen(game.getGameId());
                 }
             });
-            contentTable.add(entry).width(Gdx.graphics.getWidth() * 0.8f).height(100).padLeft(120).row();
+            contentTable.add(entry).width(sectionWidth).height(rowHeight).padBottom(10).row();
         }
 
-        contentTable.add(new Image(theirTurnTexture)).size(200, 60).left().pad(30).row();
+        Label theirTurnLabel = new Label("Their turn", skin);
+        theirTurnLabel.setFontScale(1.5f);
+        theirTurnLabel.setColor(1.0f, 0.6f, 0.2f, 1);
+        contentTable.add(theirTurnLabel).left().padTop(40).padBottom(10).row();
+
         for (HomeModel.GameEntry game : homeModel.getTheirTurnGames()) {
             Table entry = createGameEntry(game);
             entry.setTouchable(Touchable.enabled);
             entry.addListener(new ClickListener() {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
-                    System.out.println("ClickedGameEntry");
+                    controller.getGameToOpen(game.getGameId());
                 }
             });
-            contentTable.add(entry).width(Gdx.graphics.getWidth() * 0.8f).height(100).padLeft(120).row();
+            contentTable.add(entry).width(sectionWidth).height(rowHeight).padBottom(10).row();
         }
-
-        Table buttonTable = new Table();
-        ImageButton joinGameButton = new ImageButton(new TextureRegionDrawable(new TextureRegion(joinGameTexture)));
-        ImageButton createGameButton = new ImageButton(new TextureRegionDrawable(new TextureRegion(createGameTexture)));
-
-        float buttonWidth = Gdx.graphics.getWidth() * 0.4f;
-        float buttonHeight = buttonWidth * 0.3f;
-
-        buttonTable.add(joinGameButton).size(buttonWidth, buttonHeight).pad(20);
-        buttonTable.add(createGameButton).size(buttonWidth, buttonHeight).pad(20);
-        contentTable.add(buttonTable).colspan(2).padTop(20).padBottom(20).row();
     }
+
 
     private Table createGameEntry(HomeModel.GameEntry game) {
-        return new Table(); // Placeholder
+        Table row = new Table(skin);
+        row.setBackground(skin.newDrawable("white"));
+
+        float avatarSize = Gdx.graphics.getWidth() * 0.12f;
+        Image avatar = new Image(new TextureRegionDrawable(new TextureRegion(avatarTexture)));
+        avatar.setSize(avatarSize, avatarSize);
+
+        String opponent = game.getOpponentName() != null ? game.getOpponentName() : "Unknown";
+        Label nameLabel = new Label(opponent, skin);
+        nameLabel.setFontScale(1.5f);
+        nameLabel.setColor(0, 0, 0, 1);
+
+        row.add(avatar).size(avatarSize).pad(20);
+        row.add(nameLabel).left().expandX();
+
+        return row;
     }
 
-    public void renderGames(List<Map<String, GameModel>> gameList){
-        // Logic for rendering games in the UI. Someone help
-        System.out.println(gameList);
+
+
+    public void renderGames(List<Map<String, Object>> rawGameList) {
+        controller.getLoggedInUserHome(new DataCallback() {
+            @Override
+            public void onSuccess(Object result) {
+                String currentUser = (String) result;
+                HomeModel homeModel = new HomeModel();
+
+                for (Map<String, Object> entry : rawGameList) {
+                    String gameId = (String) entry.get("gameId");
+                    GameModel game = (GameModel) entry.get("game");
+
+                    if (game == null) continue;
+
+                    String opponent = game.getOpponent(currentUser);
+                    String status = game.getStatus();
+                    HomeModel.GameEntry gameEntry = new HomeModel.GameEntry(gameId, opponent, status);
+
+                    boolean isMyTurn = (currentUser.equals(game.getPlayerOne()) && game.isPlayerOneTurn()) ||
+                        (currentUser.equals(game.getPlayerTwo()) && !game.isPlayerOneTurn());
+
+                    if (isMyTurn) {
+                        homeModel.getYourTurnGames().add(gameEntry);
+                    } else {
+                        homeModel.getTheirTurnGames().add(gameEntry);
+                    }
+                }
+
+                updateGameLists(homeModel);
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                System.out.println("Failed to fetch current user: " + e.getMessage());
+            }
+        });
     }
+
+
 
     @Override
     public void dispose() {

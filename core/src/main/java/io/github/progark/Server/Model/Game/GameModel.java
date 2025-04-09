@@ -20,6 +20,8 @@ public class GameModel {
     private Number playerTwoPoints;
 
     private List<RoundModel> games;
+    private Number currentRound;
+
 
     public static GameModel fromMap(String lobbyCode, Map<String, Object> data) {
         GameModel lobby = new GameModel();
@@ -27,37 +29,54 @@ public class GameModel {
         lobby.setLobbyCode(lobbyCode);
         lobby.setPlayerOne((String) data.get("playerOne"));
         lobby.setPlayerTwo((String) data.get("playerTwo"));
-        lobby.setDifficulty(((Number) data.get("difficulty")).intValue());
-        lobby.setStatus((String) data.get("status"));
-        lobby.setRounds(((Number) data.get("rounds")).intValue());
-        lobby.setMultiplayer((Boolean) data.get("multiplayer"));
-        lobby.setPlayerOnePoints(((Number) data.get("playerOnePoints")).intValue());
-        lobby.setPlayerTwoPoints(((Number) data.get("playerTwoPoints")).intValue());
 
-        // Handle createdAt as Map or Long
+        Object difficultyObj = data.get("difficulty");
+        if (difficultyObj instanceof Number) {
+            lobby.setDifficulty(((Number) difficultyObj).intValue());
+        } else {
+            lobby.setDifficulty(1); // Default fallback
+        }
+
+        lobby.setStatus((String) data.getOrDefault("status", "waiting"));
+
+        Object roundsObj = data.get("rounds");
+        if (roundsObj instanceof Number) {
+            lobby.setRounds(((Number) roundsObj).intValue());
+        } else {
+            lobby.setRounds(3); // Default fallback
+        }
+
+        Object multiObj = data.get("multiplayer");
+        lobby.setMultiplayer(multiObj instanceof Boolean ? (Boolean) multiObj : false);
+
+        Object p1Points = data.get("playerOnePoints");
+        lobby.setPlayerOnePoints(p1Points instanceof Number ? (Number) p1Points : 0);
+
+        Object p2Points = data.get("playerTwoPoints");
+        lobby.setPlayerTwoPoints(p2Points instanceof Number ? (Number) p2Points : 0);
+
+        Object currentRound = data.get("currentRound");
+        lobby.setCurrentRound(currentRound instanceof Number ? ((Number) currentRound).intValue() : 1);
+
+        // createdAt handling stays the same
         Object createdRaw = data.get("createdAt");
         if (createdRaw instanceof Map) {
             Map<String, Object> tsMap = (Map<String, Object>) createdRaw;
-
             if (tsMap.containsKey("seconds")) {
                 long seconds = ((Number) tsMap.get("seconds")).longValue();
-                long nanos = tsMap.containsKey("nanoseconds")
-                    ? ((Number) tsMap.get("nanoseconds")).longValue()
-                    : 0;
-
+                long nanos = tsMap.containsKey("nanoseconds") ? ((Number) tsMap.get("nanoseconds")).longValue() : 0;
                 long millis = (seconds * 1000) + (nanos / 1_000_000);
                 lobby.setCreatedAt(new Timestamp(millis));
             }
         } else if (createdRaw instanceof Long) {
-            // Fallback: if createdAt is just a long millis
             lobby.setCreatedAt(new Timestamp((Long) createdRaw));
         }
 
-        // Placeholder for games (deserialize later if needed)
-        lobby.setGames((List) data.get("games"));
+        lobby.setGames((List<RoundModel>) data.get("games")); // Still a placeholder
 
         return lobby;
     }
+
 
     public boolean isFull() {
         return "full".equalsIgnoreCase(status);
@@ -165,6 +184,22 @@ public class GameModel {
     public void setFinishedRound(RoundModel roundModel){
         games.add(roundModel);
         // UpdateUI(); After updating the list of played rounds, we should update the UI.
+    }
+
+    public boolean isPlayerOneTurn() {
+        return playerOneTurn;
+    }
+
+    public void setPlayerOneTurn(boolean playerOneTurn) {
+        this.playerOneTurn = playerOneTurn;
+    }
+
+    public Number getCurrentRound() {
+        return currentRound;
+    }
+
+    public void setCurrentRound(int currentRound) {
+        this.currentRound = currentRound;
     }
 
     @Override

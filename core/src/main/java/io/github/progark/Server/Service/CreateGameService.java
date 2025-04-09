@@ -33,6 +33,8 @@ public class CreateGameService {
             lobby.setPlayerOnePoints(0);
             lobby.setPlayerTwoPoints(0);
             lobby.setGames(new java.util.ArrayList<>());
+            lobby.setPlayerOneTurn(true);
+            lobby.setCurrentRound(1);
 
             databaseManager.writeData("lobbies/" + lobbyCode, lobby);
             callback.onSuccess(lobby);

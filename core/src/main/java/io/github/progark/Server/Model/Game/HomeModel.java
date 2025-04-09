@@ -33,7 +33,7 @@ public class HomeModel {
         private String opponentAvatar;
         private String status;
 
-        public GameEntry(String gameId, String opponentName, String opponentAvatar, String status) {
+        public GameEntry(String gameId, String opponentName, String opponentAvatar) {
             this.gameId = gameId;
             this.opponentName = opponentName;
             this.opponentAvatar = opponentAvatar;

@@ -37,21 +37,12 @@ public class JoinGameController extends Controller {
                 createGameService.joinLobby(lobbyCode, user.getUsername(), new DataCallback() {
                     @Override
                     public void onSuccess(Object result) {
-                        Map<String, Object> dataMap = (Map<String, Object>) result;
-                        GameModel lobby = GameModel.fromMap(lobbyCode, dataMap);
+                        GameModel lobby = (GameModel) result;
 
-                        if (lobby.isFull() || "started".equalsIgnoreCase(lobby.getStatus())) {
-                            System.out.println("Lobby is full or already started.");
-                            return;
-                        }
 
-                        lobby.setPlayerTwo(user.getUsername());
-                        lobby.setStatus("started");
-
-                        databaseManager.writeData("lobbies/" + lobbyCode, lobby);
-                        System.out.println("Successfully joined lobby: " + lobby);
                         viewGamePage(lobby);
                     }
+
 
                     @Override
                     public void onFailure(Exception e) {

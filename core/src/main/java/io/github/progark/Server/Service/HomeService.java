@@ -42,6 +42,12 @@ public class HomeService {
         });
     }
 
+    public void getGameByLobbyCode(String lobbyCode, DataCallback callback) {
+        databaseManager.readData("lobbies/" + lobbyCode, callback);
+    }
+
+
+
     public void loadUserGames(String userId, DataCallback callback) {
 /*        String gamesPath = "games/";
         databaseManager.readData(gamesPath, new DataCallback() {

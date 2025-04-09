@@ -63,6 +63,8 @@ public class GameView extends View {
 
     @Override
     protected void initialize() {
+        controller.checkForRounds();
+        //controller.seedSampleQuestions();
 
         // Bakgrunn
         background.setFillParent(true);

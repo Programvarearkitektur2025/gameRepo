@@ -1,44 +1,38 @@
 package io.github.progark.Server.Model.Game;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class RoundModel {
 
-    /*
-    private final PlayerModel playerOne;
-    private final PlayerModel playerTwo;
-     */
+    private final Map<String, Integer> playerOneAnswers = new HashMap<>();
+    private final Map<String, Integer> playerTwoAnswers = new HashMap<>();
 
-    private final Map<String, Integer> submittedAnswers = new HashMap<>();
-    private int score = 0;
+    private int playerOneScore = 0;
+    private int playerTwoScore = 0;
     private float timeRemaining = 60f;
 
-    private final CategoryData.Category category;
+    private final QuestionModel question;
 
-    private String categoryId;
+    private List<String> hasPlayedList = new ArrayList<>();
 
-    public RoundModel() {
-        /*
-        this.playerOne = new PlayerModel(user1);
-        this.playerTwo = new PlayerModel(user2);
-         */
-        categoryId = "2";
+    public RoundModel(QuestionModel question) {
+        this.question = question;
 
-
-        this.category = CategoryData.getCategory(categoryId);
-
-        if (this.category == null) {
-            throw new IllegalArgumentException("Invalid category ID: " + categoryId);
+        if (question == null || question.getAnswer() == null) {
+            throw new IllegalArgumentException("Invalid question or missing answers.");
         }
     }
-    /*
-    public PlayerModel getPlayerOne() { return playerOne; }
-    public PlayerModel getPlayerTwo() { return playerTwo; }
-    */
 
     public boolean hasAlreadySubmitted(String answer) {
-        return submittedAnswers.keySet().contains(answer.toLowerCase());
+        String normalized = answer.toLowerCase();
+        if (hasPlayedList.isEmpty()) {
+            return playerOneAnswers.containsKey(normalized);
+        } else {
+            return playerTwoAnswers.containsKey(normalized);
+        }
     }
 
     public boolean submitAnswer(String answer) {
@@ -48,22 +42,28 @@ public class RoundModel {
 
         int points = getPoints(normalized);
 
-        submittedAnswers.put(normalized, points);
-        score += points;
+        if (hasPlayedList.isEmpty()) {
+            playerOneAnswers.put(normalized, points);
+            playerOneScore += points;
+        } else {
+            playerTwoAnswers.put(normalized, points);
+            playerTwoScore += points;
+        }
 
         return true;
     }
 
-    private Integer getPoints(String answer){
-        return category.getPoints(answer);
+    private Integer getPoints(String answer) {
+        Map<String, Integer> validAnswers = question.getAnswer();
+        return validAnswers.getOrDefault(answer.toLowerCase(), 0);
     }
 
-    public Map<String, Integer> getSubmittedAnswers() {
-        return submittedAnswers;
+    public Map<String, Integer> getPlayerOneAnswers() {
+        return playerOneAnswers;
     }
 
-    public int getScore() {
-        return score;
+    public int getPlayerOneScore() {
+        return playerOneScore;
     }
 
     public float getTimeRemaining() {
@@ -78,15 +78,27 @@ public class RoundModel {
         return timeRemaining <= 0;
     }
 
-
-    // Function takes nothing and returns the question. Used by gameController to communicate with UI.
-    // Assuming CateGoryTitle is the question to be answered
     public String getQuestion() {
-        return category.title;
+        return question.getQuestion() != null ? question.question : "Unknown Question";
+    }
+
+    public Map<String, Integer> getPlayerTwoAnswers() {
+        return playerTwoAnswers;
+    }
+
+    public void setPlayerOneScore(int playerOneScore) {
+        this.playerOneScore = playerOneScore;
+    }
+
+    public int getPlayerTwoScore() {
+        return playerTwoScore;
+    }
+
+    public void setPlayerTwoScore(int playerTwoScore) {
+        this.playerTwoScore = playerTwoScore;
     }
 
     public Map<String, Integer> getAllValidAnswers() {
-        return category.getAllAnswers();
+        return question.getAnswer();
     }
-
 }

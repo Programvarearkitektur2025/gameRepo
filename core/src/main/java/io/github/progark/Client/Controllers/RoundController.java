@@ -41,8 +41,8 @@ public class RoundController extends Controller {
         }
         boolean success = roundModel.submitAnswer(answer);
         if (success) {
-            gameView.updateScore(roundModel.getScore());
-            gameView.updateSubmittedAnswers(roundModel.getSubmittedAnswers());
+            gameView.updateScore(roundModel.getPlayerOneScore());
+            gameView.updateSubmittedAnswers(roundModel.getPlayerOneAnswers());
         }
     }
 
@@ -61,7 +61,7 @@ public class RoundController extends Controller {
     }
 
     public int getScore() {
-        return roundModel.getScore();
+        return roundModel.getPlayerOneScore();
     }
 
     public float getTimeRemaining() {
@@ -78,7 +78,7 @@ public class RoundController extends Controller {
     }
 
     public java.util.Map<String, Integer> getSubmittedAnswers() {
-        return roundModel.getSubmittedAnswers();
+        return roundModel.getPlayerOneAnswers();
     }
 
     public void getQuestionByID(String ID) {
