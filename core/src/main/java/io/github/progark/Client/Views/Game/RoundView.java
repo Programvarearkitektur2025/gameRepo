@@ -160,19 +160,16 @@ public class RoundView extends View {
         answerContainer.clear();
         if (submittedAnswers == null || submittedAnswers.isEmpty()) return;
 
-        // Use the same working font as score/timer
         BitmapFont customFont = largeFont;
 
         submittedAnswers.forEach((answer, points) -> {
             Table row = new Table();
             row.left();
 
-            // Label style for answer text (always white)
             Label.LabelStyle answerStyle = new Label.LabelStyle();
             answerStyle.font = customFont;
             answerStyle.fontColor = Color.WHITE;
 
-            // Label style for points (green or gray)
             Label.LabelStyle pointStyle = new Label.LabelStyle();
             pointStyle.font = customFont;
             pointStyle.fontColor = points > 0 ? Color.GREEN : Color.LIGHT_GRAY;

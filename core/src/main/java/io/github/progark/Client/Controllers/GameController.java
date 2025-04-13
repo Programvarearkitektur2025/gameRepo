@@ -116,6 +116,22 @@ public class GameController extends Controller {
         });
     }
 
+    public GameModel getGameModel() {
+        return this.gameModel;
+    }
+
+
+    private int activeRoundIndex = 0;
+
+    public void setActiveRoundIndex(int index) {
+        this.activeRoundIndex = index;
+    }
+
+    public int getActiveRoundIndex() {
+        return activeRoundIndex;
+    }
+
+
 
 
 

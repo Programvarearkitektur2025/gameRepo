@@ -24,6 +24,8 @@ public class HomeController extends Controller {
     private final HomeService homeService;
     private final GameService gameService;
     private final DatabaseManager databaseManager;
+    private final Map<String, GameModel> loadedGames = new HashMap<>();
+
 
     public HomeController(AuthService authService, Main main, DatabaseManager databaseManager) {
         this.authService = authService;
@@ -45,6 +47,16 @@ public class HomeController extends Controller {
         view.update(delta);
         view.render();
     }
+
+    public void storeLoadedGame(String gameId, GameModel game) {
+        loadedGames.put(gameId, game);
+    }
+
+    public boolean isMultiplayer(String gameId) {
+        GameModel game = loadedGames.get(gameId);
+        return game != null && game.isMultiplayer();
+    }
+
 
     @Override
     public void dispose() {

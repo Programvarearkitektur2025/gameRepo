@@ -35,7 +35,7 @@ public class GameModel {
         if (difficultyObj instanceof Number) {
             lobby.setDifficulty(((Number) difficultyObj).intValue());
         } else {
-            lobby.setDifficulty(1); // Default fallback
+            lobby.setDifficulty(1);
         }
 
         lobby.setStatus((String) data.getOrDefault("status", "waiting"));
@@ -44,7 +44,7 @@ public class GameModel {
         if (roundsObj instanceof Number) {
             lobby.setRounds(((Number) roundsObj).intValue());
         } else {
-            lobby.setRounds(3); // Default fallback
+            lobby.setRounds(3);
         }
 
         Object multiObj = data.get("multiplayer");
@@ -59,7 +59,6 @@ public class GameModel {
         Object currentRound = data.get("currentRound");
         lobby.setCurrentRound(currentRound instanceof Number ? ((Number) currentRound).intValue() : 1);
 
-        // createdAt handling stays the same
         Object createdRaw = data.get("createdAt");
         if (createdRaw instanceof Map) {
             Map<String, Object> tsMap = (Map<String, Object>) createdRaw;
@@ -73,7 +72,22 @@ public class GameModel {
             lobby.setCreatedAt(new Timestamp((Long) createdRaw));
         }
 
-        lobby.setGames((List<RoundModel>) data.get("games")); // Still a placeholder
+        Object gamesObj = data.get("games");
+        if (gamesObj instanceof List<?>) {
+            List<?> rawGames = (List<?>) gamesObj;
+            List<RoundModel> rounds = new ArrayList<>();
+
+            for (Object obj : rawGames) {
+                if (obj instanceof Map) {
+                    rounds.add(RoundModel.fromMap((Map<String, Object>) obj));
+                }
+            }
+
+            lobby.setGames(rounds);
+        } else {
+            lobby.setGames(new ArrayList<>());
+        }
+
 
         return lobby;
     }
@@ -182,7 +196,7 @@ public class GameModel {
     // is supposed to contain the rounds of the entire game and that it is populated throughout the
     // game. The function underneeth is called by roundController whenever a round finishes.
     // Function that takes a roundModel and adds it to the List<GameModel> game variable.
-    public void setFinishedRound(RoundModel roundModel){
+    public void setFinishedRound(RoundModel roundModel) {
         games.add(roundModel);
     }
 

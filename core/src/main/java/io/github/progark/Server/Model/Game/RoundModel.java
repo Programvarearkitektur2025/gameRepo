@@ -138,15 +138,19 @@ public class RoundModel {
         if (map == null) return null;
 
         String questionText = (String) map.get("question");
-        Map<String, Integer> answers = null;
 
+        Map<String, Integer> answers = new HashMap<>();
         Object answersObj = map.get("allValidAnswers");
         if (answersObj instanceof Map) {
-            answers = (Map<String, Integer>) answersObj;
+            Map<?, ?> raw = (Map<?, ?>) answersObj;
+            for (Map.Entry<?, ?> entry : raw.entrySet()) {
+                Object val = entry.getValue();
+                int score = val instanceof Number ? ((Number) val).intValue() : 0;
+                answers.put(String.valueOf(entry.getKey()), score);
+            }
         }
 
-        Integer difficulty = (Integer) map.get("difficulty");
-
+        int difficulty = map.get("difficulty") instanceof Number ? ((Number) map.get("difficulty")).intValue() : 1;
         QuestionModel question = new QuestionModel(questionText, answers, difficulty);
 
         if (question.getAnswer() == null) {
@@ -155,7 +159,6 @@ public class RoundModel {
 
         RoundModel round = new RoundModel(question, null, null);
 
-        // ✅ Restore usernames
         if (map.get("playerOneUsername") instanceof String) {
             round.playerOneUsername = (String) map.get("playerOneUsername");
         }
@@ -163,23 +166,40 @@ public class RoundModel {
             round.playerTwoUsername = (String) map.get("playerTwoUsername");
         }
 
-        if (map.get("playerOneAnswers") instanceof Map)
-            round.playerOneAnswers.putAll((Map<String, Integer>) map.get("playerOneAnswers"));
+        Object p1Ans = map.get("playerOneAnswers");
+        if (p1Ans instanceof Map) {
+            Map<?, ?> raw = (Map<?, ?>) p1Ans;
+            for (Map.Entry<?, ?> entry : raw.entrySet()) {
+                Object val = entry.getValue();
+                int score = val instanceof Number ? ((Number) val).intValue() : 0;
+                round.playerOneAnswers.put(String.valueOf(entry.getKey()), score);
+            }
+        }
 
-        if (map.get("playerTwoAnswers") instanceof Map)
-            round.playerTwoAnswers.putAll((Map<String, Integer>) map.get("playerTwoAnswers"));
+        Object p2Ans = map.get("playerTwoAnswers");
+        if (p2Ans instanceof Map) {
+            Map<?, ?> raw = (Map<?, ?>) p2Ans;
+            for (Map.Entry<?, ?> entry : raw.entrySet()) {
+                Object val = entry.getValue();
+                int score = val instanceof Number ? ((Number) val).intValue() : 0;
+                round.playerTwoAnswers.put(String.valueOf(entry.getKey()), score);
+            }
+        }
 
         Object p1Score = map.get("playerOneScore");
-        if (p1Score instanceof Number)
+        if (p1Score instanceof Number) {
             round.setPlayerOneScore(((Number) p1Score).intValue());
+        }
 
         Object p2Score = map.get("playerTwoScore");
-        if (p2Score instanceof Number)
+        if (p2Score instanceof Number) {
             round.setPlayerTwoScore(((Number) p2Score).intValue());
+        }
 
         Object timeLeft = map.get("timeRemaining");
-        if (timeLeft instanceof Number)
+        if (timeLeft instanceof Number) {
             round.timeRemaining = ((Number) timeLeft).floatValue();
+        }
 
         return round;
     }

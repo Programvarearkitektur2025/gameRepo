@@ -62,10 +62,14 @@ public class CreateGameController extends Controller {
                         GameModel createdLobby = (GameModel) result;
 
                         if (!multiplayer) {
+                            createdLobby.setPlayerTwo("");
+                            createdLobby.setStatus("full");
+
                             lobbyModel.setPlayerTwo("");
+                            lobbyModel.setStatus("full");
                         }
 
-                        // Update internal model
+
                         lobbyModel.setLobbyCode(createdLobby.getLobbyCode());
                         lobbyModel.setPlayerOne(createdLobby.getPlayerOne());
                         lobbyModel.setPlayerTwo(createdLobby.getPlayerTwo());
@@ -76,7 +80,6 @@ public class CreateGameController extends Controller {
                         lobbyModel.setMultiplayer(createdLobby.isMultiplayer());
                         lobbyModel.setCurrentRound(1);
 
-                        // Call the callback to notify the operation is complete
                         if (callBack != null) {
                             callBack.onSuccess(createdLobby);
                         }

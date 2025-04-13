@@ -51,7 +51,7 @@ public class GameService {
                                         relevantGames.add(gameEntry);
                                     }
                                 } catch (Exception e) {
-                                    System.out.println("⚠️ Failed to parse game with lobbyCode: " + lobbyCode + " — " + e.getMessage());
+                                    System.out.println("Failed to parse game with lobbyCode: " + lobbyCode + " — " + e.getMessage());
                                 }
                             }
                         }
@@ -80,26 +80,23 @@ public class GameService {
                 if (data instanceof Map) {
                     Map<String, Object> existingData = new HashMap<>((Map<String, Object>) data);
 
-                    // 🔁 Convert each RoundModel into a Map<String, Object>
                     List<Map<String, Object>> roundMaps = new ArrayList<>();
                     for (RoundModel round : rounds) {
                         roundMaps.add(round.toMap());
                     }
 
-                    // ✅ Replace the "games" field with serialized rounds
                     existingData.put("games", roundMaps);
 
-                    // 🔃 Write back the full map to Firebase
                     databaseManager.writeData(path, existingData);
-                    System.out.println("✅ Serialized and saved game rounds to lobby: " + gameModel.getLobbyCode());
+                    System.out.println("Serialized and saved game rounds to lobby: " + gameModel.getLobbyCode());
                 } else {
-                    System.err.println("⚠️ Unexpected data type when reading lobby: " + data.getClass().getSimpleName());
+                    System.err.println("Unexpected data type when reading lobby: " + data.getClass().getSimpleName());
                 }
             }
 
             @Override
             public void onFailure(Exception e) {
-                System.err.println("❌ Failed to read existing lobby data: " + e.getMessage());
+                System.err.println("Failed to read existing lobby data: " + e.getMessage());
             }
         });
     }

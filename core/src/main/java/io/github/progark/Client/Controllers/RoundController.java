@@ -7,6 +7,7 @@ import io.github.progark.Main;
 import io.github.progark.Server.Model.Game.GameModel;
 import io.github.progark.Server.Model.Game.RoundModel;
 import io.github.progark.Server.Service.AuthService;
+import io.github.progark.Server.Service.GameService;
 import io.github.progark.Server.Service.RoundService;
 import io.github.progark.Client.Views.Game.RoundView;
 import io.github.progark.Server.Service.SolutionService;
@@ -131,8 +132,52 @@ public class RoundController extends Controller {
 
         if (roundModel.isTimeUp()) {
             gameView.showGameOver();
+
+            int roundIndex = parentGameModel.getCurrentRound().intValue() - 1;
+            parentGameModel.getGames().set(roundIndex, roundModel);
+
+            if (parentGameModel.isMultiplayer()) {
+                if (bothPlayersHavePlayed(roundModel)) {
+                    System.out.println("🎯 Multiplayer round finished.");
+                    awardPointToRoundWinner();
+                    parentGameModel.setCurrentRound(parentGameModel.getCurrentRound().intValue() + 1);
+                } else {
+                    System.out.println("Waiting for the other player...");
+                    return;
+                }
+            } else {
+                System.out.println("Singleplayer round finished.");
+                parentGameModel.setPlayerOnePoints(parentGameModel.getPlayerOnePoints().intValue() + roundModel.getPlayerOneScore());
+                parentGameModel.setCurrentRound(parentGameModel.getCurrentRound().intValue() + 1);
+            }
+
+            GameService gameService = new GameService(main.getDatabaseManager());
+            gameService.setNewGameRounds(parentGameModel, parentGameModel.getGames());
+
+            returnToGameView(roundModel);
         }
     }
+
+    private void awardPointToRoundWinner() {
+        int p1Score = roundModel.getPlayerOneScore();
+        int p2Score = roundModel.getPlayerTwoScore();
+
+        if (p1Score > p2Score) {
+            int currentPoints = parentGameModel.getPlayerOnePoints().intValue();
+            parentGameModel.setPlayerOnePoints(currentPoints + 1);
+            System.out.println("🏆 Player One wins the round. +1 point");
+        } else if (p2Score > p1Score) {
+            int currentPoints = parentGameModel.getPlayerTwoPoints().intValue();
+            parentGameModel.setPlayerTwoPoints(currentPoints + 1);
+            System.out.println("🏆 Player Two wins the round. +1 point");
+        } else {
+            System.out.println("🤝 Round is a tie. No points awarded.");
+        }
+    }
+
+
+
+
 
     public boolean isTimeUp() {
         return roundModel.isTimeUp();
@@ -167,6 +212,12 @@ public class RoundController extends Controller {
     public String getQuestion() {
         return roundModel.getQuestion();
     }
+
+    private boolean bothPlayersHavePlayed(RoundModel round) {
+        return round.getPlayerOneAnswers() != null && !round.getPlayerOneAnswers().isEmpty() &&
+            round.getPlayerTwoAnswers() != null && !round.getPlayerTwoAnswers().isEmpty();
+    }
+
 
     public void returnToGameView(RoundModel roundModel) {
         parentGameModel.setFinishedRound(roundModel);
