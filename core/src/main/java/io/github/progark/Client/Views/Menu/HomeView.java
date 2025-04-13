@@ -9,7 +9,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -18,32 +17,24 @@ import io.github.progark.Client.Views.View;
 import io.github.progark.Server.Model.Game.GameModel;
 import io.github.progark.Server.Model.Game.HomeModel;
 import io.github.progark.Client.Views.Components.NavBar;
+import io.github.progark.Server.Model.Game.RoundModel;
 import io.github.progark.Server.database.DataCallback;
 
 public class HomeView extends View {
 
     private final Skin skin;
-    private final Texture backgroundTexture;
-    private final Texture yourTurnTexture;
-    private final Texture theirTurnTexture;
-    private final Texture joinGameTexture;
-    private final Texture createGameTexture;
-    private final Texture avatarTexture;
-    private final Texture navBarTexture;
-    private final Texture howToButtonTexture;
-    private final Texture transparentTexture;
-    private NavBar navBar;
+    private final Texture backgroundTexture, yourTurnTexture, theirTurnTexture, joinGameTexture,
+        createGameTexture, avatarTexture, navBarTexture, howToButtonTexture, transparentTexture;
 
-    private Image background;
     private final HomeController controller;
     private Table contentTable;
+    private Image background;
+    private NavBar navBar;
 
     public HomeView(HomeController controller) {
         super();
-        this.navBar = navBar;
         this.controller = controller;
 
-        // Load assets
         skin = new Skin(Gdx.files.internal("uiskin.json"));
         backgroundTexture = new Texture(Gdx.files.internal("Background2.png"));
         yourTurnTexture = new Texture(Gdx.files.internal("yourTurn.png"));
@@ -56,17 +47,15 @@ public class HomeView extends View {
         transparentTexture = new Texture(Gdx.files.internal("Transparent.png"));
 
         background = new Image(backgroundTexture);
-
         enter();
     }
 
     @Override
     protected void initialize() {
-        background.setFillParent(true);
         stage.addActor(background);
 
-        // How To button (top-right corner)
-        ImageButton howToButton = new ImageButton(new TextureRegionDrawable(new TextureRegion(howToButtonTexture)));
+        // How To Play button
+        ImageButton howToButton = new ImageButton(new TextureRegionDrawable(howToButtonTexture));
         howToButton.setSize(200, 200);
         howToButton.setPosition(Gdx.graphics.getWidth() - 200, Gdx.graphics.getHeight() - 200);
         howToButton.addListener(new ClickListener() {
@@ -79,33 +68,15 @@ public class HomeView extends View {
 
         Table mainLayout = new Table();
         mainLayout.setFillParent(true);
-        mainLayout.bottom();
+        mainLayout.top().padTop(30);
         stage.addActor(mainLayout);
 
-        controller.getRelevantGames(new DataCallback(){
+        mainLayout.add(new Image(yourTurnTexture)).left().padBottom(20).row();
 
-            @Override
-            public void onSuccess(Object data) {
-                List<Map<String, Object>> rawLobbies = (List<Map<String, Object>>) data;
-                System.out.println("Raw game data: " + data);
-                renderGames(rawLobbies);
-            }
-
-            @Override
-            public void onFailure(Exception e) {
-                System.out.println("Failed to display relevant games: " + e.getMessage());
-
-            }
-        });
-
-        mainLayout.top();
-        mainLayout.add(new Image(yourTurnTexture)).left().pad(30);
-        mainLayout.row();
-
-        // Game Buttons
+        // Game buttons
         Table buttonTable = new Table();
-        ImageButton joinGameButton = new ImageButton(new TextureRegionDrawable(new TextureRegion(joinGameTexture)));
-        ImageButton createGameButton = new ImageButton(new TextureRegionDrawable(new TextureRegion(createGameTexture)));
+        ImageButton joinGameButton = new ImageButton(new TextureRegionDrawable(joinGameTexture));
+        ImageButton createGameButton = new ImageButton(new TextureRegionDrawable(createGameTexture));
 
         joinGameButton.addListener(new ClickListener() {
             @Override
@@ -123,22 +94,49 @@ public class HomeView extends View {
 
         buttonTable.add(joinGameButton).pad(20).size(480);
         buttonTable.add(createGameButton).pad(20).size(500);
-        mainLayout.add(buttonTable).colspan(2).padTop(20).padBottom(20);
-        mainLayout.row();
+        mainLayout.add(buttonTable).colspan(2).padBottom(20).row();
 
-        navBar = new NavBar(stage, controller.getMain());
-        /*
-        if (!controller.getMain().getMusicManager().isPlaying()) {
-            controller.getMain().getMusicManager().play("ThinkingOutLoud.mp3");
-        }
-         */
-        controller.getMain().getMusicManager().setVolume(1.0f);
-
+        // Content area
         contentTable = new Table();
         mainLayout.add(contentTable).colspan(2).expand().fill().row();
 
+        // Navigation bar
+        navBar = new NavBar(stage, controller.getMain());
 
+        controller.getMain().getMusicManager().setVolume(1.0f);
 
+        // Fetch and render games
+        controller.getRelevantGames(new DataCallback() {
+            @Override
+            public void onSuccess(Object data) {
+                List<Map<String, Object>> rawLobbies = (List<Map<String, Object>>) data;
+                renderGames(rawLobbies);
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                System.out.println("Failed to display relevant games: " + e.getMessage());
+            }
+        });
+    }
+
+    private Table createGameEntry(HomeModel.GameEntry game) {
+        Table row = new Table(skin);
+        row.setBackground(skin.newDrawable("white"));
+
+        float avatarSize = Gdx.graphics.getWidth() * 0.12f;
+        Image avatar = new Image(new TextureRegionDrawable(new TextureRegion(avatarTexture)));
+        avatar.setSize(avatarSize, avatarSize);
+
+        String opponent = game.getOpponentName() != null ? game.getOpponentName() : "Waiting for Player to join";
+        Label nameLabel = new Label(opponent, skin);
+        nameLabel.setFontScale(1.5f);
+        nameLabel.setColor(0, 0, 0, 1);
+
+        row.add(avatar).size(avatarSize).pad(20);
+        row.add(nameLabel).left().expandX();
+
+        return row;
     }
 
     public void updateGameLists(HomeModel homeModel) {
@@ -181,28 +179,6 @@ public class HomeView extends View {
         }
     }
 
-
-    private Table createGameEntry(HomeModel.GameEntry game) {
-        Table row = new Table(skin);
-        row.setBackground(skin.newDrawable("white"));
-
-        float avatarSize = Gdx.graphics.getWidth() * 0.12f;
-        Image avatar = new Image(new TextureRegionDrawable(new TextureRegion(avatarTexture)));
-        avatar.setSize(avatarSize, avatarSize);
-
-        String opponent = game.getOpponentName() != null ? game.getOpponentName() : "Unknown";
-        Label nameLabel = new Label(opponent, skin);
-        nameLabel.setFontScale(1.5f);
-        nameLabel.setColor(0, 0, 0, 1);
-
-        row.add(avatar).size(avatarSize).pad(20);
-        row.add(nameLabel).left().expandX();
-
-        return row;
-    }
-
-
-
     public void renderGames(List<Map<String, Object>> rawGameList) {
         controller.getLoggedInUserHome(new DataCallback() {
             @Override
@@ -220,10 +196,19 @@ public class HomeView extends View {
                     String status = game.getStatus();
                     HomeModel.GameEntry gameEntry = new HomeModel.GameEntry(gameId, opponent, status);
 
-                    boolean isMyTurn = (currentUser.equals(game.getPlayerOne()) && game.isPlayerOneTurn()) ||
-                        (currentUser.equals(game.getPlayerTwo()) && !game.isPlayerOneTurn());
+                    // Refactored logic: determine turn based on whether player has played the current round
+                    int currentRound = game.getCurrentRound().intValue() - 1;
+                    boolean hasPlayed = false;
 
-                    if (isMyTurn) {
+                    if (currentRound >= 0 && currentRound < game.getGames().size()) {
+                        Object roundObj = game.getGames().get(currentRound);
+                        if (roundObj instanceof Map) {
+                            RoundModel round = RoundModel.fromMap((Map<String, Object>) roundObj);
+                            hasPlayed = round.hasPlayerCompleted(currentUser);
+                        }
+                    }
+
+                    if (!hasPlayed) {
                         homeModel.getYourTurnGames().add(gameEntry);
                     } else {
                         homeModel.getTheirTurnGames().add(gameEntry);
@@ -240,8 +225,6 @@ public class HomeView extends View {
         });
     }
 
-
-
     @Override
     public void dispose() {
         super.dispose();
@@ -254,6 +237,6 @@ public class HomeView extends View {
         navBarTexture.dispose();
         howToButtonTexture.dispose();
         transparentTexture.dispose();
-        navBar.dispose();
+        if (navBar != null) navBar.dispose();
     }
 }

@@ -9,6 +9,8 @@ public class RoundModel {
 
     private final Map<String, Integer> playerOneAnswers = new HashMap<>();
     private final Map<String, Integer> playerTwoAnswers = new HashMap<>();
+    public String playerOneUsername;
+    public String playerTwoUsername;
 
     private int playerOneScore = 0;
     private int playerTwoScore = 0;
@@ -18,31 +20,42 @@ public class RoundModel {
 
     private List<String> hasPlayedList = new ArrayList<>();
 
-    public RoundModel(QuestionModel question) {
+    public RoundModel(QuestionModel question, String playerOneUsername, String playerTwoUsername) {
         this.question = question;
 
         if (question == null || question.getAnswer() == null) {
             throw new IllegalArgumentException("Invalid question or missing answers.");
         }
+
+        this.playerOneUsername = playerOneUsername;
+        this.playerTwoUsername = playerTwoUsername;
     }
 
-    public boolean hasAlreadySubmitted(String answer) {
-        String normalized = answer.toLowerCase();
-        if (hasPlayedList.isEmpty()) {
-            return playerOneAnswers.containsKey(normalized);
-        } else {
-            return playerTwoAnswers.containsKey(normalized);
-        }
+
+    private Map<String, Integer> getAnswerMapForPlayer(String username) {
+        if (username.equals(playerOneUsername)) return playerOneAnswers;
+        return playerTwoAnswers;
     }
 
-    public boolean submitAnswer(String answer) {
-        String normalized = answer.toLowerCase();
+    public boolean hasAlreadySubmitted(String username, String answer) {
+        String normalized = capitalizeFirstLetter(answer.trim());
+        return getAnswerMapForPlayer(username).containsKey(normalized);
+    }
 
-        if (hasAlreadySubmitted(normalized)) return false;
+
+    private static String capitalizeFirstLetter(String str) {
+        if (str == null || str.isEmpty()) return str;
+        return str.substring(0, 1).toUpperCase() + str.substring(1).toLowerCase();
+    }
+
+
+    public boolean submitAnswer(String username, String answer) {
+        String normalized = capitalizeFirstLetter(answer.trim());
+
+        if (hasAlreadySubmitted(username, normalized)) return false;
 
         int points = getPoints(normalized);
-
-        if (hasPlayedList.isEmpty()) {
+        if (username.equals(playerOneUsername)) {
             playerOneAnswers.put(normalized, points);
             playerOneScore += points;
         } else {
@@ -50,13 +63,32 @@ public class RoundModel {
             playerTwoScore += points;
         }
 
+        markPlayerCompleted(username);
         return true;
     }
 
+    public void setPlayerUsernames(String playerOne, String playerTwo) {
+        this.playerOneUsername = playerOne;
+        this.playerTwoUsername = playerTwo;
+    }
+
+
     private Integer getPoints(String answer) {
         Map<String, Integer> validAnswers = question.getAnswer();
-        return validAnswers.getOrDefault(answer.toLowerCase(), 0);
+        String normalized = capitalizeFirstLetter(answer.trim());
+
+        System.out.println("Valid keys: " + validAnswers.keySet());
+        System.out.println("Normalized input: " + normalized);
+
+        Object value = validAnswers.get(normalized);
+        System.out.println("Answer points: " + value); // <- ADD THIS
+
+        if (value instanceof Number) {
+            return ((Number) value).intValue();
+        }
+        return 0;
     }
+
 
     public Map<String, Integer> getPlayerOneAnswers() {
         return playerOneAnswers;
@@ -101,4 +133,84 @@ public class RoundModel {
     public Map<String, Integer> getAllValidAnswers() {
         return question.getAnswer();
     }
+
+    public static RoundModel fromMap(Map<String, Object> map) {
+        if (map == null) return null;
+
+        String questionText = (String) map.get("question");
+        Map<String, Integer> answers = null;
+
+        Object answersObj = map.get("allValidAnswers");
+        if (answersObj instanceof Map) {
+            answers = (Map<String, Integer>) answersObj;
+        }
+
+        Integer difficulty = (Integer) map.get("difficulty");
+
+        QuestionModel question = new QuestionModel(questionText, answers, difficulty);
+
+        if (question.getAnswer() == null) {
+            throw new IllegalArgumentException("Invalid question or missing answers.");
+        }
+
+        RoundModel round = new RoundModel(question, null, null);
+
+        // ✅ Restore usernames
+        if (map.get("playerOneUsername") instanceof String) {
+            round.playerOneUsername = (String) map.get("playerOneUsername");
+        }
+        if (map.get("playerTwoUsername") instanceof String) {
+            round.playerTwoUsername = (String) map.get("playerTwoUsername");
+        }
+
+        if (map.get("playerOneAnswers") instanceof Map)
+            round.playerOneAnswers.putAll((Map<String, Integer>) map.get("playerOneAnswers"));
+
+        if (map.get("playerTwoAnswers") instanceof Map)
+            round.playerTwoAnswers.putAll((Map<String, Integer>) map.get("playerTwoAnswers"));
+
+        Object p1Score = map.get("playerOneScore");
+        if (p1Score instanceof Number)
+            round.setPlayerOneScore(((Number) p1Score).intValue());
+
+        Object p2Score = map.get("playerTwoScore");
+        if (p2Score instanceof Number)
+            round.setPlayerTwoScore(((Number) p2Score).intValue());
+
+        Object timeLeft = map.get("timeRemaining");
+        if (timeLeft instanceof Number)
+            round.timeRemaining = ((Number) timeLeft).floatValue();
+
+        return round;
+    }
+
+
+
+    public boolean hasPlayerCompleted(String username) {
+        return hasPlayedList.contains(username);
+    }
+
+    public void markPlayerCompleted(String username) {
+        if (!hasPlayedList.contains(username)) {
+            hasPlayedList.add(username);
+        }
+    }
+
+    public Map<String, Object> toMap() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("question", question.getQuestion());
+        map.put("allValidAnswers", question.getAnswer());
+        map.put("playerOneUsername", playerOneUsername);
+        map.put("playerTwoUsername", playerTwoUsername);
+        map.put("playerOneAnswers", playerOneAnswers);
+        map.put("playerTwoAnswers", playerTwoAnswers);
+        map.put("playerOneScore", playerOneScore);
+        map.put("playerTwoScore", playerTwoScore);
+        map.put("timeRemaining", timeRemaining);
+        map.put("timeUp", isTimeUp());
+        return map;
+    }
+
+
+
 }

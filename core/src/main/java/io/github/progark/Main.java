@@ -125,7 +125,7 @@ public class Main extends Game {
     }
 
     public void useRoundController(GameModel gameModel) {
-        controllerManager.setController(new RoundController(gameModel,databaseManager, this));
+        controllerManager.setController(new RoundController(gameModel,databaseManager, this, authService));
     }
 
     public void returnToGameControllerFromRound(RoundModel roundModel, GameModel gameModel){

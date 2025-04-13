@@ -1,5 +1,6 @@
 package io.github.progark.Server.Model.Game;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import io.github.progark.Client.Controllers.RoundController;
@@ -43,4 +44,40 @@ public class QuestionModel {
     public void setDifficulty(Integer difficulty) {
         this.difficulty = difficulty;
     }
+
+    public static QuestionModel fromMap(Map<String, Object> map) {
+        if (map == null) return null;
+
+        String questionText = (String) map.get("Question");
+        Integer difficulty = null;
+
+        Object diffObj = map.get("Difficulty");
+        if (diffObj instanceof Number) {
+            difficulty = ((Number) diffObj).intValue();
+        }
+
+        Map<String, Integer> answers = new HashMap<>();
+        Object answersObj = map.get("Answers");
+        if (answersObj instanceof Map) {
+            Map<?, ?> raw = (Map<?, ?>) answersObj;
+            for (Map.Entry<?, ?> entry : raw.entrySet()) {
+                String key = capitalizeFirstLetter(entry.getKey().toString());
+
+                Object value = entry.getValue();
+                if (value instanceof Number) {
+                    answers.put(key, ((Number) value).intValue()); // ✅ Safe conversion
+                }
+            }
+        }
+
+        return new QuestionModel(questionText, answers, difficulty);
+    }
+
+    private static String capitalizeFirstLetter(String str) {
+        if (str == null || str.isEmpty()) return str;
+        return str.substring(0, 1).toUpperCase() + str.substring(1).toLowerCase();
+    }
+
+
+
 }

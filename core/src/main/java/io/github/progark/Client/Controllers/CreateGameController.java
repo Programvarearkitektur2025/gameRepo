@@ -75,7 +75,6 @@ public class CreateGameController extends Controller {
                         lobbyModel.setRounds(createdLobby.getRounds());
                         lobbyModel.setMultiplayer(createdLobby.isMultiplayer());
                         lobbyModel.setCurrentRound(1);
-                        lobbyModel.setPlayerOneTurn(true);
 
                         // Call the callback to notify the operation is complete
                         if (callBack != null) {

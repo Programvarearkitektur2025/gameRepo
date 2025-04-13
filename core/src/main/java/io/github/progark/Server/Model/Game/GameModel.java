@@ -1,6 +1,8 @@
 package io.github.progark.Server.Model.Game;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -14,7 +16,6 @@ public class GameModel {
     private Timestamp createdAt;
     private int rounds;
     private boolean multiplayer;
-    private boolean playerOneTurn;
 
     private Number playerOnePoints;
     private Number playerTwoPoints;
@@ -183,16 +184,8 @@ public class GameModel {
     // Function that takes a roundModel and adds it to the List<GameModel> game variable.
     public void setFinishedRound(RoundModel roundModel){
         games.add(roundModel);
-        // UpdateUI(); After updating the list of played rounds, we should update the UI.
     }
 
-    public boolean isPlayerOneTurn() {
-        return playerOneTurn;
-    }
-
-    public void setPlayerOneTurn(boolean playerOneTurn) {
-        this.playerOneTurn = playerOneTurn;
-    }
 
     public Number getCurrentRound() {
         return currentRound;
@@ -212,4 +205,42 @@ public class GameModel {
             ", createdAt=" + createdAt +
             '}';
     }
+
+    public Map<String, Object> toMap() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("lobbyCode", lobbyCode);
+        map.put("playerOne", playerOne);
+        map.put("playerTwo", playerTwo);
+        map.put("difficulty", difficulty);
+        map.put("status", status);
+        map.put("rounds", rounds);
+        map.put("multiplayer", multiplayer);
+        map.put("playerOnePoints", playerOnePoints != null ? playerOnePoints : 0);
+        map.put("playerTwoPoints", playerTwoPoints != null ? playerTwoPoints : 0);
+        map.put("currentRound", currentRound != null ? currentRound : 1);
+
+        if (createdAt != null) {
+            Map<String, Object> ts = new HashMap<>();
+            ts.put("seconds", createdAt.getTime() / 1000);
+            ts.put("nanoseconds", (createdAt.getTime() % 1000) * 1_000_000);
+            map.put("createdAt", ts);
+        }
+
+        if (games != null && !games.isEmpty()) {
+            List<Map<String, Object>> roundMaps = new ArrayList<>();
+            for (Object roundObj : games) {
+                if (roundObj instanceof RoundModel) {
+                    roundMaps.add(((RoundModel) roundObj).toMap());
+                } else if (roundObj instanceof Map) {
+                    // Already stored as a map — no need to reprocess
+                    roundMaps.add((Map<String, Object>) roundObj);
+                }
+            }
+            map.put("games", roundMaps);
+        }
+
+
+        return map;
+    }
+
 }

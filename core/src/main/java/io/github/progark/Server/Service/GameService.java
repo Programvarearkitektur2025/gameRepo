@@ -72,7 +72,6 @@ public class GameService {
 
 
     public void setNewGameRounds(GameModel gameModel, List<RoundModel> rounds) {
-        // Read existing game data first
         String path = "lobbies/" + gameModel.getLobbyCode();
 
         databaseManager.readData(path, new DataCallback() {
@@ -81,12 +80,18 @@ public class GameService {
                 if (data instanceof Map) {
                     Map<String, Object> existingData = new HashMap<>((Map<String, Object>) data);
 
-                    // Replace or insert only the "games" field
-                    existingData.put("games", rounds);
+                    // 🔁 Convert each RoundModel into a Map<String, Object>
+                    List<Map<String, Object>> roundMaps = new ArrayList<>();
+                    for (RoundModel round : rounds) {
+                        roundMaps.add(round.toMap());
+                    }
 
-                    // Write back the full map
+                    // ✅ Replace the "games" field with serialized rounds
+                    existingData.put("games", roundMaps);
+
+                    // 🔃 Write back the full map to Firebase
                     databaseManager.writeData(path, existingData);
-                    System.out.println("✅ Merged game rounds into existing lobby data for lobby: " + gameModel.getLobbyCode());
+                    System.out.println("✅ Serialized and saved game rounds to lobby: " + gameModel.getLobbyCode());
                 } else {
                     System.err.println("⚠️ Unexpected data type when reading lobby: " + data.getClass().getSimpleName());
                 }
@@ -98,6 +103,7 @@ public class GameService {
             }
         });
     }
+
 
 
     public void loadRoundsFromFirebase(GameModel gameModel, int totalRounds, DataCallback callback) {
@@ -155,7 +161,9 @@ public class GameService {
                         }
 
                         QuestionModel question = new QuestionModel(questionText, answers, difficulty);
-                        rounds.add(new RoundModel(question));
+                        RoundModel round = new RoundModel(question, gameModel.getPlayerOne(), gameModel.getPlayerTwo());
+                        System.out.println("Setting playernames:" + gameModel.getPlayerOne() + gameModel.getPlayerTwo());
+                        rounds.add(round);
 
                     } catch (Exception e) {
                         System.out.println("⚠️ Error parsing question: " + e.getMessage());

@@ -1,8 +1,12 @@
 package io.github.progark.Client.Controllers;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import io.github.progark.Main;
 import io.github.progark.Server.Model.Game.GameModel;
 import io.github.progark.Server.Model.Game.RoundModel;
+import io.github.progark.Server.Service.AuthService;
 import io.github.progark.Server.Service.RoundService;
 import io.github.progark.Client.Views.Game.RoundView;
 import io.github.progark.Server.Service.SolutionService;
@@ -14,16 +18,33 @@ public class RoundController extends Controller {
     private SolutionService solutionService;
     private RoundModel roundModel;
     private RoundView gameView;
-    // Dette er variabler jeg har initiert og som må dobbeltsjekkes mot ditt arbeid Stian
     private GameModel parentGameModel;
     private Main main;
+    private AuthService authService;
 
-
-    public RoundController(GameModel gameModel, DatabaseManager databaseManager, Main main) {
+    public RoundController(GameModel gameModel, DatabaseManager databaseManager, Main main, AuthService authService) {
         this.solutionService = new SolutionService(databaseManager);
-        this.gameView= new RoundView(this);
         this.parentGameModel = gameModel;
         this.main = main;
+        this.authService = authService;
+
+        int roundIndex = parentGameModel.getCurrentRound().intValue() - 1;
+
+        if (roundIndex >= 0 && roundIndex < parentGameModel.getGames().size()) {
+            Object roundRaw = parentGameModel.getGames().get(roundIndex);
+
+            if (roundRaw instanceof RoundModel) {
+                this.roundModel = (RoundModel) roundRaw;
+            } else if (roundRaw instanceof Map) {
+                this.roundModel = RoundModel.fromMap((Map<String, Object>) roundRaw);
+            } else {
+                System.err.println("⚠️ Unknown round data type: " + roundRaw.getClass().getSimpleName());
+            }
+        } else {
+            System.err.println("⚠️ Invalid round index: " + roundIndex);
+        }
+
+        this.gameView = new RoundView(this);
         enter();
     }
 
@@ -31,21 +52,78 @@ public class RoundController extends Controller {
         this.gameView = gameView;
     }
 
-    // Submit user input to game model
-
     public void handleAnswerSubmission(String input) {
-        String answer = input.trim().toLowerCase();
-        if (answer.isEmpty() || roundModel.hasAlreadySubmitted(answer)) {
-            gameView.showMessage("Invalid answer. Please try again.");
-            return;
-        }
-        boolean success = roundModel.submitAnswer(answer);
-        if (success) {
-            gameView.updateScore(roundModel.getPlayerOneScore());
-            gameView.updateSubmittedAnswers(roundModel.getPlayerOneAnswers());
+        String answer = input.trim();
+        System.out.println("Checking answer: " + answer);
+
+        authService.getLoggedInUsername(new DataCallback() {
+            @Override
+            public void onSuccess(Object data) {
+                String currentPlayer = (String) data;
+                System.out.println("Current player: " + currentPlayer);
+
+                if (answer.isEmpty() || roundModel.hasAlreadySubmitted(currentPlayer, answer)) {
+                    gameView.showMessage("Invalid answer. Please try again.");
+                    return;
+                }
+
+                boolean success = submitAnswer(currentPlayer, answer);
+                if (success) {
+                    // 💡 Ensure the updated roundModel is saved back to the game list
+                    int roundIndex = parentGameModel.getCurrentRound().intValue() - 1;
+                    parentGameModel.getGames().set(roundIndex, roundModel);
+
+                    gameView.updateScore(getCurrentPlayerScore(currentPlayer));
+                    gameView.updateSubmittedAnswers(getCurrentPlayerAnswers(currentPlayer));
+                } else {
+                    gameView.showMessage("Answer already submitted.");
+                }
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                gameView.showMessage("Failed to get logged in user.");
+                System.err.println("❌ Failed to fetch username: " + e.getMessage());
+            }
+        });
+    }
+
+
+    public boolean submitAnswer(String username, String answer) {
+        return roundModel.submitAnswer(username, answer);
+    }
+
+    public Map<String, Integer> getSubmittedAnswers(String username) {
+        return getCurrentPlayerAnswers(username);
+    }
+
+    public int getCurrentPlayerScore(String username) {
+        System.out.println("player one username: + " + roundModel.playerOneUsername);
+        if (username.equals(roundModel.playerOneUsername)) {
+            return roundModel.getPlayerOneScore();
+        } else if (username.equals(roundModel.playerTwoUsername)) {
+            return roundModel.getPlayerTwoScore();
+        } else {
+            System.err.println("⚠️ Username not matched in round model.");
+            return 0;
         }
     }
 
+    public Map<String, Integer> getCurrentPlayerAnswers(String username) {
+        if (username.equals(roundModel.playerOneUsername)) {
+            return roundModel.getPlayerOneAnswers();
+        } else if (username.equals(roundModel.playerTwoUsername)) {
+            return roundModel.getPlayerTwoAnswers();
+        } else {
+            System.err.println("⚠️ Username not matched in round model.");
+            return new HashMap<>();
+        }
+    }
+
+
+    public void goToGame() {
+        main.useGameController(parentGameModel);
+    }
 
     public void updateGameState(float delta) {
         roundModel.updateTime(delta);
@@ -61,24 +139,15 @@ public class RoundController extends Controller {
     }
 
     public int getScore() {
-        return roundModel.getPlayerOneScore();
+        return roundModel.getPlayerOneScore(); // Might be obsolete in multiplayer
     }
 
     public float getTimeRemaining() {
         return roundModel.getTimeRemaining();
     }
 
-    public void updateTime(float delta){
-        // Add logic as necessary
-    };
-
-    public boolean submitAnswer(String answer){
-        boolean isAnswerCorrect = roundModel.submitAnswer(answer);
-        return isAnswerCorrect;
-    }
-
-    public java.util.Map<String, Integer> getSubmittedAnswers() {
-        return roundModel.getPlayerOneAnswers();
+    public void updateTime(float delta) {
+        // Optional
     }
 
     public void getQuestionByID(String ID) {
@@ -90,23 +159,16 @@ public class RoundController extends Controller {
 
             @Override
             public void onFailure(Exception e) {
-                System.out.println("Stupid: "+ e);
-                return;
+                System.out.println("❌ Failed to fetch question: " + e.getMessage());
             }
         });
     }
 
-    // Function should not take anything and should return the question for the given round.
-    // Used by RoundView to initialize question to display
-    public String getQuestion(){
-        String question = roundModel.getQuestion();
-        return question;
+    public String getQuestion() {
+        return roundModel.getQuestion();
     }
 
-    // Function that takes a roundModel object that is populated and sets it in the parentGameModel
-    // and sends the user back to the gameView through the controller. This function is called from
-    // roundview whenever a round is finished.
-    public void returnToGameView(RoundModel roundModel){
+    public void returnToGameView(RoundModel roundModel) {
         parentGameModel.setFinishedRound(roundModel);
         main.useGameController(parentGameModel);
     }
@@ -119,7 +181,6 @@ public class RoundController extends Controller {
     @Override
     public void update(float delta) {
         gameView.update(delta);
-        //view.handleInput();
         gameView.render();
     }
 
@@ -128,4 +189,3 @@ public class RoundController extends Controller {
         gameView.dispose();
     }
 }
-
