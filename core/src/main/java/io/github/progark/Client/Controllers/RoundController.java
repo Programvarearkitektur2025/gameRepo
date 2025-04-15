@@ -15,16 +15,19 @@ import io.github.progark.Server.database.DataCallback;
 import io.github.progark.Server.database.DatabaseManager;
 
 public class RoundController extends Controller {
-    private RoundService gameService;
+    private GameService gameService;
     private SolutionService solutionService;
     private RoundModel roundModel;
     private RoundView gameView;
     private GameModel parentGameModel;
     private Main main;
     private AuthService authService;
+    private boolean roundAlreadyProcessed = false;
+
 
     public RoundController(GameModel gameModel, DatabaseManager databaseManager, Main main, AuthService authService) {
         this.solutionService = new SolutionService(databaseManager);
+        this.gameService = new GameService(databaseManager);
         this.parentGameModel = gameModel;
         this.main = main;
         this.authService = authService;
@@ -130,7 +133,9 @@ public class RoundController extends Controller {
         roundModel.updateTime(delta);
         gameView.updateTimeRemaining(roundModel.getTimeRemaining());
 
-        if (roundModel.isTimeUp()) {
+        if (roundModel.isTimeUp() && !roundAlreadyProcessed) {
+            roundAlreadyProcessed = true;
+
             gameView.showGameOver();
 
             int roundIndex = parentGameModel.getCurrentRound().intValue() - 1;
@@ -151,12 +156,11 @@ public class RoundController extends Controller {
                 parentGameModel.setCurrentRound(parentGameModel.getCurrentRound().intValue() + 1);
             }
 
-            GameService gameService = new GameService(main.getDatabaseManager());
             gameService.setNewGameRounds(parentGameModel, parentGameModel.getGames());
-
             returnToGameView(roundModel);
         }
     }
+
 
     private void awardPointToRoundWinner() {
         int p1Score = roundModel.getPlayerOneScore();
@@ -192,7 +196,6 @@ public class RoundController extends Controller {
     }
 
     public void updateTime(float delta) {
-        // Optional
     }
 
     public void getQuestionByID(String ID) {
@@ -220,7 +223,6 @@ public class RoundController extends Controller {
 
 
     public void returnToGameView(RoundModel roundModel) {
-        parentGameModel.setFinishedRound(roundModel);
         main.useGameController(parentGameModel);
     }
 

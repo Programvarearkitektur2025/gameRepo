@@ -20,7 +20,4 @@ public class LeaderboardModel {
         userScore.put(userId,currentScore);
     }
 
-
-
-
 }

@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import io.github.progark.Server.Model.Game.GameModel;
 import io.github.progark.Server.Model.Game.LeaderboardModel;
 import io.github.progark.Server.database.DataCallback;
 import io.github.progark.Server.database.DatabaseManager;
@@ -45,14 +46,6 @@ public class LeaderboardService {
             }
         });
     }
-
-
-
-    public AuthService getAuthService() {
-        return this.authService;
-    }
-
-
 
     public void loadLeaderboard(DataCallback callback) {
         databaseManager.readData(LEADERBOARD_DOC, new DataCallback() {
@@ -132,4 +125,47 @@ public class LeaderboardService {
             }
         });
     }
+
+    public void updateLeaderBoard(GameModel gameModel) {
+        String playerOne = gameModel.getPlayerOne();
+        String playerTwo = gameModel.getPlayerTwo();
+        int playerOnePoints = gameModel.getPlayerOnePoints().intValue();
+        int playerTwoPoints = gameModel.getPlayerTwoPoints().intValue();
+
+        databaseManager.readData(LEADERBOARD_DOC, new DataCallback() {
+            @Override
+            public void onSuccess(Object data) {
+                Map<String, Object> leaderboard;
+
+                if (data instanceof Map) {
+                    leaderboard = (Map<String, Object>) data;
+                } else {
+                    leaderboard = new HashMap<>();
+                }
+
+                // Update player one
+                Object val1 = leaderboard.getOrDefault(playerOne, 0);
+                int existingScore1 = val1 instanceof Number ? ((Number) val1).intValue() : 0;
+                if (playerOnePoints > existingScore1) {
+                    leaderboard.put(playerOne, playerOnePoints);
+                }
+
+                // Update player two
+                Object val2 = leaderboard.getOrDefault(playerTwo, 0);
+                int existingScore2 = val2 instanceof Number ? ((Number) val2).intValue() : 0;
+                if (playerTwoPoints > existingScore2) {
+                    leaderboard.put(playerTwo, playerTwoPoints);
+                }
+
+                // Save updated leaderboard
+                databaseManager.writeData(LEADERBOARD_DOC, leaderboard);
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                System.err.println("Failed to read leaderboard: " + e.getMessage());
+            }
+        });
+    }
+
 }

@@ -131,6 +131,18 @@ public class GameController extends Controller {
         return activeRoundIndex;
     }
 
+    public void updateLeaderBoard(){
+        gameService.updateLeaderBoard(gameModel, main.getAuthService());
+    }
+
+    public void goToLeaderBoard(){
+        main.useLeaderBoardController();
+    }
+
+    public int getCurrentRound(){
+        return (int) gameModel.getCurrentRound();
+    }
+
 
 
 

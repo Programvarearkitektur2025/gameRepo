@@ -71,7 +71,7 @@ public class GameService {
     }
 
 
-    public void setNewGameRounds(GameModel gameModel, List<RoundModel> rounds) {
+    public void setNewGameRounds(GameModel gameModel, List<RoundModel> newRounds) {
         String path = "lobbies/" + gameModel.getLobbyCode();
 
         databaseManager.readData(path, new DataCallback() {
@@ -80,26 +80,53 @@ public class GameService {
                 if (data instanceof Map) {
                     Map<String, Object> existingData = new HashMap<>((Map<String, Object>) data);
 
-                    List<Map<String, Object>> roundMaps = new ArrayList<>();
-                    for (RoundModel round : rounds) {
-                        roundMaps.add(round.toMap());
+                    List<Map<String, Object>> existingRoundMaps = (List<Map<String, Object>>) existingData.get("games");
+                    List<Map<String, Object>> updatedRoundMaps = new ArrayList<>();
+
+                    // Reuse existing rounds if present, update only if different
+                    if (existingRoundMaps != null && !existingRoundMaps.isEmpty()) {
+                        int minSize = Math.min(existingRoundMaps.size(), newRounds.size());
+
+                        // Copy unchanged rounds
+                        for (int i = 0; i < minSize; i++) {
+                            Map<String, Object> existingRound = existingRoundMaps.get(i);
+                            Map<String, Object> newRound = newRounds.get(i).toMap();
+
+                            // Replace only if round changed
+                            if (!existingRound.equals(newRound)) {
+                                updatedRoundMaps.add(newRound);
+                            } else {
+                                updatedRoundMaps.add(existingRound);
+                            }
+                        }
+
+                        // Add any additional new rounds (if there are more)
+                        for (int i = minSize; i < newRounds.size(); i++) {
+                            updatedRoundMaps.add(newRounds.get(i).toMap());
+                        }
+
+                    } else {
+                        // No existing rounds, just add all
+                        for (RoundModel round : newRounds) {
+                            updatedRoundMaps.add(round.toMap());
+                        }
                     }
 
-                    existingData.put("games", roundMaps);
-
+                    existingData.put("games", updatedRoundMaps);
                     databaseManager.writeData(path, existingData);
-                    System.out.println("Serialized and saved game rounds to lobby: " + gameModel.getLobbyCode());
+
                 } else {
-                    System.err.println("Unexpected data type when reading lobby: " + data.getClass().getSimpleName());
+                    System.err.println("⚠️ Unexpected data type when reading lobby: " + data.getClass().getSimpleName());
                 }
             }
 
             @Override
             public void onFailure(Exception e) {
-                System.err.println("Failed to read existing lobby data: " + e.getMessage());
+                System.err.println("❌ Failed to read existing lobby data: " + e.getMessage());
             }
         });
     }
+
 
 
 
@@ -159,7 +186,6 @@ public class GameService {
 
                         QuestionModel question = new QuestionModel(questionText, answers, difficulty);
                         RoundModel round = new RoundModel(question, gameModel.getPlayerOne(), gameModel.getPlayerTwo());
-                        System.out.println("Setting playernames:" + gameModel.getPlayerOne() + gameModel.getPlayerTwo());
                         rounds.add(round);
 
                     } catch (Exception e) {
@@ -183,6 +209,11 @@ public class GameService {
         for (Map<String, Object> q : questions) {
             databaseManager.writeQuestion("questions", q);
         }
+    }
+
+    public void updateLeaderBoard(GameModel gamemodel, AuthService authService){
+        LeaderboardService leaderboardService = new LeaderboardService(databaseManager, authService);
+        leaderboardService.updateLeaderBoard(gamemodel);
     }
 
 }

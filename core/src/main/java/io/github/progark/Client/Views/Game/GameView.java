@@ -8,7 +8,6 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 
@@ -23,7 +22,7 @@ import io.github.progark.Server.Model.Game.RoundModel;
 public class GameView extends View {
 
     private final Skin skin;
-    private final Texture backgroundTexture, profileTexture, startGameTexture, textFieldTexture, backButtonTexture, startGameDisabledTexture;
+    private final Texture backgroundTexture, nextRoundTexture, nextRoundDisabledTexture, showLeaderBoardTexture, profileTexture, startGameTexture, textFieldTexture, backButtonTexture, startGameDisabledTexture;
     private final BitmapFont smallFont, largerFont, roundFont, answerFont;
     private final GameController controller;
     private Image background;
@@ -32,6 +31,8 @@ public class GameView extends View {
     private Table resultTable;
     private List<RoundModel> playedRounds;
 
+    private boolean initialized = false;
+    private Label headlineLabel;
 
     public GameView(GameController controller){
         super();
@@ -39,6 +40,9 @@ public class GameView extends View {
         skin = new Skin(Gdx.files.internal("uiskin.json"));
 
         backgroundTexture = new Texture(Gdx.files.internal("Background2.png"));
+        nextRoundTexture = new Texture(Gdx.files.internal("nextRound.png"));
+        nextRoundDisabledTexture = new Texture(Gdx.files.internal("nextRoundDisabled.png"));
+        showLeaderBoardTexture = new Texture(Gdx.files.internal("showResults.png"));
         profileTexture = new Texture(Gdx.files.internal("Person.png"));
         textFieldTexture = new Texture(Gdx.files.internal("TextField.png"));
         startGameTexture = new Texture(Gdx.files.internal("Start_Game_Button.png"));
@@ -66,12 +70,13 @@ public class GameView extends View {
 
         background = new Image(backgroundTexture);
 
-        enter();
     }
-
 
     @Override
     protected void initialize() {
+        if (initialized) return;
+        initialized = true;
+
         controller.checkForRounds();
 
         background.setFillParent(true);
@@ -95,10 +100,11 @@ public class GameView extends View {
 
         if (controller.isMultiplayer()) {
             String headlineText = "Game Pin: " + controller.getLobbyCode();
-            Label headline = new Label(headlineText, new Label.LabelStyle(largerFont, skin.getColor("white")));
-            headline.setFontScale(2.5f);
-            headline.setPosition(230, Gdx.graphics.getHeight() - 250);
-            stage.addActor(headline);
+            headlineLabel = new Label(headlineText, new Label.LabelStyle(largerFont, skin.getColor("white")));
+            headlineLabel.setFontScale(2.5f);
+            headlineLabel.setPosition(120, Gdx.graphics.getHeight() - 250);
+            stage.addActor(headlineLabel);
+
 
             Table scoreRow = new Table();
             Table leftProfileCol = new Table();
@@ -124,11 +130,21 @@ public class GameView extends View {
             scoreRow.setPosition(530, Gdx.graphics.getHeight() - 500);
             stage.addActor(scoreRow);
         } else {
-            String headlineText = "Press Start Game to play";
-            Label headline = new Label(headlineText, new Label.LabelStyle(largerFont, skin.getColor("white")));
-            headline.setFontScale(2.5f);
-            headline.setPosition(120, Gdx.graphics.getHeight() - 250);
-            stage.addActor(headline);
+            String headlineText;
+            if (playedRounds == null) playedRounds = new ArrayList<>();
+            else playedRounds.clear();
+            if ((playedRounds.size()) == controller.getRounds()) {
+                headlineText = "Game over! View the leaderboard.";
+            } else if (playedRounds.isEmpty()) {
+                headlineText = "Press Start Game to play";
+            } else {
+                headlineText = "Press Next Round to continue";
+            }
+            headlineLabel = new Label(headlineText, new Label.LabelStyle(largerFont, skin.getColor("white")));
+            headlineLabel.setFontScale(1.5f);
+            headlineLabel.setPosition(120, Gdx.graphics.getHeight() - 250);
+            stage.addActor(headlineLabel);
+
 
             Table scoreRow = new Table();
             Table profileCol = new Table();
@@ -143,7 +159,9 @@ public class GameView extends View {
         }
 
         resultTable = new Table();
-        playedRounds = new ArrayList<>();
+        if (playedRounds == null) playedRounds = new ArrayList<>();
+        else playedRounds.clear();
+
         for (Object obj : controller.getGames()) {
             RoundModel round;
 
@@ -162,8 +180,8 @@ public class GameView extends View {
                 playedRounds.add(round);
             }
         }
+        updateHeadline();
 
-        // ScrollPane setup
         ScrollPane scrollPane = new ScrollPane(resultTable);
         scrollPane.setScrollingDisabled(true, false);
         scrollPane.setFadeScrollBars(false);
@@ -175,7 +193,6 @@ public class GameView extends View {
         resultBox.setPosition((Gdx.graphics.getWidth() - 850f) / 2f, 450f);
         stage.addActor(resultBox);
 
-        // Navigation buttons
         Table navButtons = new Table();
         navButtons.setFillParent(true);
         navButtons.bottom().padBottom(100);
@@ -209,39 +226,63 @@ public class GameView extends View {
         navButtons.add(nextBtn);
         stage.addActor(navButtons);
 
-        // Display first round
         if (!playedRounds.isEmpty()) {
             showRoundResult(displayedRoundIndex);
         }
 
-        // Start button
-        TextureRegionDrawable startGameUp = new TextureRegionDrawable(startGameTexture);
-        TextureRegionDrawable startGameDisabled = new TextureRegionDrawable(startGameDisabledTexture);
-        Button.ButtonStyle startGameStyle = new Button.ButtonStyle();
-        startGameStyle.up = startGameUp;
-        startGameStyle.disabled = startGameDisabled;
-        Button startGame = new Button(startGameStyle);
-        startGame.setSize(850f, 200);
-        startGame.setPosition(Gdx.graphics.getWidth() / 2 - startGame.getWidth() / 2, 200);
-        startGame.setDisabled(controller.isMultiplayer() && (controller.getPlayerTwo() == null || controller.getPlayerTwo().isEmpty()));
-
-        startGame.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                if (!startGame.isDisabled()) {
-                    int currentRoundIndex = controller.getGameModel().getCurrentRound().intValue() - 1;
-
-                    List<RoundModel> rounds = controller.getGames();
-                    if (currentRoundIndex < 0) currentRoundIndex = 0;
-                    if (currentRoundIndex >= rounds.size()) currentRoundIndex = rounds.size() - 1;
-
-                    controller.setActiveRoundIndex(currentRoundIndex);
-                    controller.goToRound();
-                }
+        if (playedRounds.size() != controller.getRounds()) {
+            TextureRegionDrawable nextRoundUp;
+            TextureRegionDrawable nextRoundDisabled;
+            if (playedRounds.isEmpty()) {
+                nextRoundUp = new TextureRegionDrawable(startGameTexture);
+                nextRoundDisabled = new TextureRegionDrawable(startGameDisabledTexture);
+            } else {
+                nextRoundUp = new TextureRegionDrawable(nextRoundTexture);
+                nextRoundDisabled = new TextureRegionDrawable(nextRoundDisabledTexture);
             }
-        });
 
-        stage.addActor(startGame);
+            Button.ButtonStyle nextRoundStyle = new Button.ButtonStyle();
+            nextRoundStyle.up = nextRoundUp;
+            nextRoundStyle.disabled = nextRoundDisabled;
+            Button nextRound = new Button(nextRoundStyle);
+            nextRound.setSize(850f, 200);
+            nextRound.setPosition(Gdx.graphics.getWidth() / 2 - nextRound.getWidth() / 2, 200);
+            nextRound.setDisabled(controller.isMultiplayer() && (controller.getPlayerTwo() == null || controller.getPlayerTwo().isEmpty()));
+
+            nextRound.addListener(new ClickListener() {
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    if (!nextRound.isDisabled()) {
+                        int currentRoundIndex = controller.getGameModel().getCurrentRound().intValue() - 1;
+
+                        List<RoundModel> rounds = controller.getGames();
+                        if (currentRoundIndex < 0) currentRoundIndex = 0;
+                        if (currentRoundIndex >= rounds.size()) currentRoundIndex = rounds.size() - 1;
+
+                        controller.setActiveRoundIndex(currentRoundIndex);
+                        controller.goToRound();
+                    }
+                }
+            });
+            stage.addActor(nextRound);
+        } else {
+            TextureRegionDrawable showLeaderBoardUp = new TextureRegionDrawable(showLeaderBoardTexture);
+            Button.ButtonStyle showLeaderBoardStyle = new Button.ButtonStyle();
+            showLeaderBoardStyle.up = showLeaderBoardUp;
+            Button showLeaderBoard = new Button(showLeaderBoardStyle);
+            showLeaderBoard.setSize(850f, 200);
+            showLeaderBoard.setPosition(Gdx.graphics.getWidth() / 2 - showLeaderBoard.getWidth() / 2, 200);
+            showLeaderBoard.setDisabled(controller.isMultiplayer() && (controller.getPlayerTwo() == null || controller.getPlayerTwo().isEmpty()));
+            controller.updateLeaderBoard();
+
+            showLeaderBoard.addListener(new ClickListener() {
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    controller.goToLeaderBoard();
+                }
+            });
+            stage.addActor(showLeaderBoard);
+        }
     }
 
     private void showRoundResult(int index) {
@@ -290,6 +331,18 @@ public class GameView extends View {
         }
     }
 
+    public void updateHeadline() {
+        if (headlineLabel == null) return;
+
+        if ((playedRounds.size()) == controller.getRounds()) {
+            headlineLabel.setText("Game over! View the leaderboard.");
+        } else if (playedRounds.isEmpty()) {
+            headlineLabel.setText("Press Start Game to play");
+        } else {
+            headlineLabel.setText("Press Next Round to continue");
+        }
+    }
+
 
     public void update() {}
 
@@ -305,5 +358,9 @@ public class GameView extends View {
         profileTexture.dispose();
         startGameTexture.dispose();
         textFieldTexture.dispose();
+        nextRoundTexture.dispose();
+        nextRoundDisabledTexture.dispose();
+        showLeaderBoardTexture.dispose();
+        startGameDisabledTexture.dispose();
     }
 }
