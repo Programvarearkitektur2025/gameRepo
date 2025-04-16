@@ -55,7 +55,32 @@ public class GameController extends Controller {
     }
 
     public void goToRound() {
-        main.useRoundController(gameModel);
+        gameService.fetchCurrentRound(gameModel, new DataCallback() {
+            @Override
+            public void onSuccess(Object data) {
+                if (data instanceof RoundModel) {
+                    int index = (int) gameModel.getCurrentRound();
+                    List<RoundModel> rounds = gameModel.getGames();
+
+                    if (index >= 0 && index < rounds.size()) {
+                        rounds.set(index, (RoundModel) data); // Update existing round
+                    } else {
+                        // If out of bounds, just add it (edge case)
+                        rounds.add((RoundModel) data);
+                    }
+
+                    gameModel.setGames(rounds); // Apply updated list
+                }
+
+                main.useRoundController(gameModel); // Now go to the round
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                System.err.println("❌ Failed to fetch current round: " + e.getMessage());
+                // Optionally still proceed, or show error to user
+            }
+        });
     }
 
     // Gettere

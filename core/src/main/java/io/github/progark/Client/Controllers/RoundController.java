@@ -134,29 +134,30 @@ public class RoundController extends Controller {
 
         if (roundModel.isTimeUp() && !roundAlreadyProcessed) {
             roundAlreadyProcessed = true;
-
             gameView.showGameOver();
 
-            int roundIndex = parentGameModel.getCurrentRound().intValue() - 1;
-            parentGameModel.getGames().set(roundIndex, roundModel);
+            fetchLatestRoundThenSave(() -> {
+                int roundIndex = parentGameModel.getCurrentRound().intValue() - 1;
+                parentGameModel.getGames().set(roundIndex, roundModel);
 
-            if (parentGameModel.isMultiplayer()) {
-                if (bothPlayersHavePlayed(roundModel)) {
-                    System.out.println("🎯 Multiplayer round finished.");
-                    awardPointToRoundWinner();
-                    parentGameModel.setCurrentRound(parentGameModel.getCurrentRound().intValue() + 1);
+                if (parentGameModel.isMultiplayer()) {
+                    if (bothPlayersHavePlayed(roundModel)) {
+                        System.out.println("🎯 Multiplayer round finished.");
+                        awardPointToRoundWinner();
+                        parentGameModel.setCurrentRound(parentGameModel.getCurrentRound().intValue() + 1);
+                    } else {
+                        gameService.setNewGameRounds(parentGameModel, parentGameModel.getGames());
+                        System.out.println("✅ Partial state saved — waiting for the other player...");
+                        return;
+                    }
                 } else {
-                    System.out.println("Waiting for the other player...");
-                    return;
+                    parentGameModel.setPlayerOnePoints(parentGameModel.getPlayerOnePoints().intValue() + roundModel.getPlayerOneScore());
+                    parentGameModel.setCurrentRound(parentGameModel.getCurrentRound().intValue() + 1);
                 }
-            } else {
-                System.out.println("Singleplayer round finished.");
-                parentGameModel.setPlayerOnePoints(parentGameModel.getPlayerOnePoints().intValue() + roundModel.getPlayerOneScore());
-                parentGameModel.setCurrentRound(parentGameModel.getCurrentRound().intValue() + 1);
-            }
 
-            gameService.setNewGameRounds(parentGameModel, parentGameModel.getGames());
-            returnToGameView(roundModel);
+                gameService.setNewGameRounds(parentGameModel, parentGameModel.getGames());
+                returnToGameView(roundModel);
+            });
         }
     }
 
@@ -245,6 +246,43 @@ public class RoundController extends Controller {
             }
         });
     }
+
+    private void fetchLatestRoundThenSave(Runnable onReadyToSave) {
+        gameService.fetchCurrentRound(parentGameModel, new DataCallback() {
+            @Override
+            public void onSuccess(Object data) {
+                if (data instanceof RoundModel) {
+                    int roundIndex = parentGameModel.getCurrentRound().intValue() - 1;
+
+                    mergeRoundModels((RoundModel) data, roundModel);
+                    parentGameModel.getGames().set(roundIndex, roundModel);
+                }
+                onReadyToSave.run();
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                System.err.println("⚠️ Could not fetch latest round before saving: " + e.getMessage());
+                // Proceed anyway (optional fallback)
+                onReadyToSave.run();
+            }
+        });
+    }
+
+    private void mergeRoundModels(RoundModel latest, RoundModel local) {
+        // Merge opponent's answers if they submitted something new
+        if (latest.getPlayerOneAnswers() != null) {
+            local.getPlayerOneAnswers().putAll(latest.getPlayerOneAnswers());
+        }
+        if (latest.getPlayerTwoAnswers() != null) {
+            local.getPlayerTwoAnswers().putAll(latest.getPlayerTwoAnswers());
+        }
+
+        // Also carry over score if needed
+        local.setPlayerOneScore(Math.max(latest.getPlayerOneScore(), local.getPlayerOneScore()));
+        local.setPlayerTwoScore(Math.max(latest.getPlayerTwoScore(), local.getPlayerTwoScore()));
+    }
+
 
     @Override
     public void enter() {

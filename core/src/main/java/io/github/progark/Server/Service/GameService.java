@@ -127,9 +127,6 @@ public class GameService {
         });
     }
 
-
-
-
     public void loadRoundsFromFirebase(GameModel gameModel, int totalRounds, DataCallback callback) {
         String path = "questions";
 
@@ -216,4 +213,54 @@ public class GameService {
         leaderboardService.updateLeaderBoard(gamemodel);
     }
 
+    public void fetchCurrentRound(GameModel gameModel, DataCallback callback) {
+        String path = "lobbies/" + gameModel.getLobbyCode();
+
+        databaseManager.readData(path, new DataCallback() {
+            @Override
+            public void onSuccess(Object data) {
+                if (!(data instanceof Map)) {
+                    callback.onFailure(new Exception("Invalid data format: Expected Map."));
+                    return;
+                }
+
+                Map<String, Object> lobbyData = (Map<String, Object>) data;
+                Object gamesObj = lobbyData.get("games");
+
+                if (!(gamesObj instanceof List)) {
+                    callback.onFailure(new Exception("Missing or invalid 'games' list in lobby data."));
+                    return;
+                }
+
+                List<?> gamesList = (List<?>) gamesObj;
+                // Firebase storage is 0-indexed
+                int currentIndex = (int) gameModel.getCurrentRound()-1;
+
+                if (currentIndex < 0 || currentIndex >= gamesList.size()) {
+                    callback.onFailure(new Exception("Current round index out of bounds."));
+                    return;
+                }
+
+                Object roundDataObj = gamesList.get(currentIndex);
+
+                if (!(roundDataObj instanceof Map)) {
+                    callback.onFailure(new Exception("Invalid round format at index " + currentIndex));
+                    return;
+                }
+
+                try {
+                    Map<String, Object> roundData = (Map<String, Object>) roundDataObj;
+                    RoundModel round = RoundModel.fromMap(roundData);
+                    callback.onSuccess(round);
+                } catch (Exception e) {
+                    callback.onFailure(new Exception("Failed to parse RoundModel: " + e.getMessage()));
+                }
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                callback.onFailure(e);
+            }
+        });
+    }
 }
