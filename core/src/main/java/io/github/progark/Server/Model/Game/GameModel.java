@@ -252,9 +252,10 @@ public class GameModel {
             }
             map.put("games", roundMaps);
         }
-
-
         return map;
     }
 
+    public void setActiveRound(Number index){
+        this.currentRound = (Number) ((int) index + 1);
+    }
 }

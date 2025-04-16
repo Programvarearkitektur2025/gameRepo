@@ -231,6 +231,7 @@ public class RoundModel {
         return map;
     }
 
-
-
+    public void setTimeRemaining(float number){
+        this.timeRemaining = number;
+    }
 }

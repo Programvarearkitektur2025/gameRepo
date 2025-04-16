@@ -121,15 +121,10 @@ public class GameController extends Controller {
     }
 
 
-    private int activeRoundIndex = 0;
-
     public void setActiveRoundIndex(int index) {
-        this.activeRoundIndex = index;
+        gameModel.setActiveRound(index);
     }
 
-    public int getActiveRoundIndex() {
-        return activeRoundIndex;
-    }
 
     public void updateLeaderBoard(){
         gameService.updateLeaderBoard(gameModel, main.getAuthService());

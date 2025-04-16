@@ -17,6 +17,7 @@ import com.badlogic.gdx.utils.Align;
 import io.github.progark.Client.Views.View;
 import io.github.progark.Client.Controllers.RoundController;
 import io.github.progark.Server.Model.Game.RoundModel;
+import io.github.progark.Server.Service.AuthService;
 
 public class RoundView extends View {
 
@@ -91,7 +92,7 @@ public class RoundView extends View {
         backButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                controller.goToGame();
+                forceEndRoundEarly();
             }
         });
 
@@ -234,6 +235,11 @@ public class RoundView extends View {
 
     public void showGameOver() {
         showMessage("⏱ Time's up!");
+    }
+
+    public void forceEndRoundEarly(){
+        controller.endRoundEarly();
+        controller.goToGame();
     }
 
     @Override

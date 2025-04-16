@@ -124,7 +124,6 @@ public class RoundController extends Controller {
         }
     }
 
-
     public void goToGame() {
         main.useGameController(parentGameModel);
     }
@@ -179,10 +178,6 @@ public class RoundController extends Controller {
         }
     }
 
-
-
-
-
     public boolean isTimeUp() {
         return roundModel.isTimeUp();
     }
@@ -224,6 +219,31 @@ public class RoundController extends Controller {
 
     public void returnToGameView(RoundModel roundModel) {
         main.useGameController(parentGameModel);
+    }
+
+    public void endRoundEarly() {
+        if (roundAlreadyProcessed) return;
+
+        authService.getLoggedInUsername(new DataCallback() {
+            @Override
+            public void onSuccess(Object data) {
+                String username = (String) data;
+                roundModel.markPlayerCompleted(username);
+
+                // Save the updated roundModel back to the parentGameModel
+                int roundIndex = parentGameModel.getCurrentRound().intValue() - 1;
+                parentGameModel.getGames().set(roundIndex, roundModel);
+                roundModel.setTimeRemaining(0);
+
+                updateGameState(0.01f);
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                System.err.println("❌ Failed to fetch username to mark player as completed: " + e.getMessage());
+                gameView.showMessage("Unable to end round. Failed to fetch current player.");
+            }
+        });
     }
 
     @Override

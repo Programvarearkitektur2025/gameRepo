@@ -132,6 +132,21 @@ public class LeaderboardService {
         int playerOnePoints = gameModel.getPlayerOnePoints().intValue();
         int playerTwoPoints = gameModel.getPlayerTwoPoints().intValue();
 
+        // Determine the winner
+        String winner;
+        int winnerPoints;
+
+        if (playerOnePoints > playerTwoPoints) {
+            winner = playerOne;
+            winnerPoints = playerOnePoints;
+        } else if (playerTwoPoints > playerOnePoints) {
+            winner = playerTwo;
+            winnerPoints = playerTwoPoints;
+        } else {
+            // It's a tie, don't update the leaderboard
+            return;
+        }
+
         databaseManager.readData(LEADERBOARD_DOC, new DataCallback() {
             @Override
             public void onSuccess(Object data) {
@@ -143,21 +158,13 @@ public class LeaderboardService {
                     leaderboard = new HashMap<>();
                 }
 
-                // Update player one
-                Object val1 = leaderboard.getOrDefault(playerOne, 0);
-                int existingScore1 = val1 instanceof Number ? ((Number) val1).intValue() : 0;
-                if (playerOnePoints > existingScore1) {
-                    leaderboard.put(playerOne, playerOnePoints);
+                Object existingVal = leaderboard.getOrDefault(winner, 0);
+                int existingScore = existingVal instanceof Number ? ((Number) existingVal).intValue() : 0;
+
+                if (winnerPoints > existingScore) {
+                    leaderboard.put(winner, winnerPoints);
                 }
 
-                // Update player two
-                Object val2 = leaderboard.getOrDefault(playerTwo, 0);
-                int existingScore2 = val2 instanceof Number ? ((Number) val2).intValue() : 0;
-                if (playerTwoPoints > existingScore2) {
-                    leaderboard.put(playerTwo, playerTwoPoints);
-                }
-
-                // Save updated leaderboard
                 databaseManager.writeData(LEADERBOARD_DOC, leaderboard);
             }
 
@@ -167,5 +174,6 @@ public class LeaderboardService {
             }
         });
     }
+
 
 }

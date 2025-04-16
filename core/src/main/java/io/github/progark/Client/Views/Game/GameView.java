@@ -253,11 +253,12 @@ public class GameView extends View {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
                     if (!nextRound.isDisabled()) {
-                        int currentRoundIndex = controller.getGameModel().getCurrentRound().intValue() - 1;
+                        int currentRoundIndex = playedRounds.size();
 
                         List<RoundModel> rounds = controller.getGames();
-                        if (currentRoundIndex < 0) currentRoundIndex = 0;
                         if (currentRoundIndex >= rounds.size()) currentRoundIndex = rounds.size() - 1;
+
+                        System.out.println("CurrentRound is: " + currentRoundIndex);
 
                         controller.setActiveRoundIndex(currentRoundIndex);
                         controller.goToRound();
@@ -273,7 +274,11 @@ public class GameView extends View {
             showLeaderBoard.setSize(850f, 200);
             showLeaderBoard.setPosition(Gdx.graphics.getWidth() / 2 - showLeaderBoard.getWidth() / 2, 200);
             showLeaderBoard.setDisabled(controller.isMultiplayer() && (controller.getPlayerTwo() == null || controller.getPlayerTwo().isEmpty()));
-            controller.updateLeaderBoard();
+
+            // Update only on multiplayer.
+            if (controller.isMultiplayer()) {
+                controller.updateLeaderBoard();
+            }
 
             showLeaderBoard.addListener(new ClickListener() {
                 @Override
