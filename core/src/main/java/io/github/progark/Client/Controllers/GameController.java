@@ -55,32 +55,63 @@ public class GameController extends Controller {
     }
 
     public void goToRound() {
+        final boolean loadViewImmediately = true; // Toggle this if you want to delay loading until data is ready
+
+        if (loadViewImmediately) {
+            // Transition first, then update once round is fetched
+            main.useRoundController(gameModel);
+        }
+
         gameService.fetchCurrentRound(gameModel, new DataCallback() {
             @Override
             public void onSuccess(Object data) {
-                if (data instanceof RoundModel) {
-                    int index = (int) gameModel.getCurrentRound();
-                    List<RoundModel> rounds = gameModel.getGames();
-
-                    if (index >= 0 && index < rounds.size()) {
-                        rounds.set(index, (RoundModel) data); // Update existing round
-                    } else {
-                        // If out of bounds, just add it (edge case)
-                        rounds.add((RoundModel) data);
-                    }
-
-                    gameModel.setGames(rounds); // Apply updated list
+                if (!(data instanceof RoundModel)) {
+                    System.err.println("Fetched data is not a RoundModel: " + (data != null ? data.getClass().getSimpleName() : "null"));
+                    return;
                 }
 
-                main.useRoundController(gameModel); // Now go to the round
+                RoundModel round = (RoundModel) data;
+                int index = (int) gameModel.getCurrentRound();
+
+                // Defensive: Ensure games list is not null
+                List<RoundModel> rounds = gameModel.getGames();
+                if (rounds == null) {
+                    System.out.println("Games list was null, initializing a new one.");
+                    rounds = new ArrayList<>();
+                }
+
+                // Add or replace round
+                if (index >= 0 && index < rounds.size()) {
+                    System.out.println("Updating round at index " + index);
+                    rounds.set(index, round);
+                } else {
+                    System.out.println("Adding round at index " + index + " (list size: " + rounds.size() + ")");
+                    // Fill gaps if needed (avoid IndexOutOfBounds)
+                    while (rounds.size() < index) {
+                        rounds.add(null);
+                    }
+                    rounds.add(round);
+                }
+
+                gameModel.setGames(rounds);
+
+                if (!loadViewImmediately) {
+                    main.useRoundController(gameModel); // Only if we waited to transition
+                } else {
+                    System.out.println("Round data updated post-view load");
+                }
             }
 
             @Override
             public void onFailure(Exception e) {
-                System.err.println("❌ Failed to fetch current round: " + e.getMessage());
-                // Optionally still proceed, or show error to user
+                System.err.println("Failed to fetch current round: " + e.getMessage());
             }
         });
+    }
+
+
+    public void goToRoundSingleplayer(){
+        main.useRoundController(gameModel);
     }
 
     // Gettere
