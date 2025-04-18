@@ -204,9 +204,14 @@ public class RoundModel {
         return round;
     }
 
-
+    public List<String> getHasPlayedList(){
+        return this.hasPlayedList;
+    }
 
     public boolean hasPlayerCompleted(String username) {
+        System.out.println("Question: " + question.getQuestion());
+        System.out.println("Answers from P1: " + playerOneAnswers);
+        System.out.println("Player one: " + playerOneUsername);
         return hasPlayedList.contains(username);
     }
 

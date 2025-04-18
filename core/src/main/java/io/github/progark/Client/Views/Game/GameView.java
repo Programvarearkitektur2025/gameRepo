@@ -18,11 +18,13 @@ import java.util.Map;
 import io.github.progark.Client.Controllers.GameController;
 import io.github.progark.Client.Views.View;
 import io.github.progark.Server.Model.Game.RoundModel;
+import io.github.progark.Server.Model.Login.UserModel;
+import io.github.progark.Server.database.DataCallback;
 
 public class GameView extends View {
 
     private final Skin skin;
-    private final Texture backgroundTexture, nextRoundTexture, nextRoundDisabledTexture, showLeaderBoardTexture, profileTexture, startGameTexture, textFieldTexture, backButtonTexture, startGameDisabledTexture;
+    private final Texture backgroundTexture, nextRoundTexture, nextRoundDisabledTexture, playRoundTexture, showLeaderBoardTexture, profileTexture, startGameTexture, textFieldTexture, backButtonTexture, startGameDisabledTexture;
     private final BitmapFont smallFont, largerFont, roundFont, answerFont;
     private final GameController controller;
     private Image background;
@@ -48,6 +50,7 @@ public class GameView extends View {
         startGameTexture = new Texture(Gdx.files.internal("Start_Game_Button.png"));
         startGameDisabledTexture = new Texture(Gdx.files.internal("Start_Game_Button_Disabled.png"));
         backButtonTexture = new Texture(Gdx.files.internal("backButtonBlue.png"));
+        playRoundTexture = new Texture(Gdx.files.internal("play round.png"));
 
         FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("OpenSans.ttf"));
         FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
@@ -189,90 +192,47 @@ public class GameView extends View {
             showRoundResult(displayedRoundIndex);
         }
 
-        if (playedRounds.size() != controller.getRounds()) {
-            TextureRegionDrawable nextRoundUp;
-            TextureRegionDrawable nextRoundDisabled;
-            if (playedRounds.isEmpty()) {
-                nextRoundUp = new TextureRegionDrawable(startGameTexture);
-                nextRoundDisabled = new TextureRegionDrawable(startGameDisabledTexture);
-            } else {
-                nextRoundUp = new TextureRegionDrawable(nextRoundTexture);
-                nextRoundDisabled = new TextureRegionDrawable(nextRoundDisabledTexture);
-            }
+        controller.whoAmI(new DataCallback() {
+            @Override
+            public void onSuccess(Object data) {
+                UserModel user = (UserModel) data;
+                String myUsername = user.getUsername();
 
-            Button.ButtonStyle nextRoundStyle = new Button.ButtonStyle();
-            nextRoundStyle.up = nextRoundUp;
-            nextRoundStyle.disabled = nextRoundDisabled;
-            Button nextRound = new Button(nextRoundStyle);
-            nextRound.setSize(850f, 200);
-            nextRound.setPosition(Gdx.graphics.getWidth() / 2 - nextRound.getWidth() / 2, 200);
-
-            if(!playedRounds.isEmpty()){
-                // Determine if both players have answered the current round
-                boolean bothPlayersAnswered = false;
-
-                int currentRoundIndex = playedRounds.size(); // The next round to play
+                int currentRoundIndex = playedRounds.size();
                 List<RoundModel> allRounds = controller.getGames();
 
                 if (currentRoundIndex < allRounds.size()) {
-                    RoundModel currentRound;
-                    Object obj = allRounds.get(currentRoundIndex);
-                    if (obj instanceof RoundModel) {
-                        currentRound = (RoundModel) obj;
-                    } else if (obj instanceof Map) {
-                        currentRound = RoundModel.fromMap((Map<String, Object>) obj);
-                    } else {
-                        currentRound = null;
-                    }
+                    RoundModel currentRound = allRounds.get(currentRoundIndex);
 
-                    if (currentRound != null) {
-                        boolean hasP1 = currentRound.getPlayerOneAnswers() != null && !currentRound.getPlayerOneAnswers().isEmpty();
-                        boolean hasP2 = currentRound.getPlayerTwoAnswers() != null && !currentRound.getPlayerTwoAnswers().isEmpty();
-                        bothPlayersAnswered = hasP1 && hasP2;
+                    boolean haveIAnswered = currentRound.hasPlayerCompleted(myUsername);
+                    if (!haveIAnswered) {
+                        TextureRegionDrawable playRoundDrawable = new TextureRegionDrawable(playRoundTexture);
+                        Button.ButtonStyle playRoundStyle = new Button.ButtonStyle();
+                        playRoundStyle.up = playRoundDrawable;
+
+                        Button playRoundButton = new Button(playRoundStyle);
+                        playRoundButton.setSize(850f, 200);
+                        playRoundButton.setPosition(Gdx.graphics.getWidth() / 2f - playRoundButton.getWidth() / 2f, 200);
+
+                        playRoundButton.addListener(new ClickListener() {
+                            @Override
+                            public void clicked(InputEvent event, float x, float y) {
+                                controller.setActiveRoundIndex(currentRoundIndex);
+                                controller.goToRound();
+                            }
+                        });
+
+                        stage.addActor(playRoundButton);
                     }
                 }
-
-                nextRound.setDisabled(!bothPlayersAnswered);
-            }else{
-                nextRound.setDisabled(controller.getPlayerTwo() == null || controller.getPlayerTwo().isEmpty());
             }
 
-            nextRound.addListener(new ClickListener() {
-                @Override
-                public void clicked(InputEvent event, float x, float y) {
-                    if (!nextRound.isDisabled()) {
-                        int currentRoundIndex = playedRounds.size();
+            @Override
+            public void onFailure(Exception e) {
+                System.err.println("❌ Could not determine current user: " + e.getMessage());
+            }
+        });
 
-                        List<RoundModel> rounds = controller.getGames();
-                        if (currentRoundIndex >= rounds.size()) currentRoundIndex = rounds.size() - 1;
-
-                        System.out.println("CurrentRound is: " + currentRoundIndex);
-
-                        controller.setActiveRoundIndex(currentRoundIndex);
-                        controller.goToRound();
-                    }
-                }
-            });
-            stage.addActor(nextRound);
-        } else {
-            TextureRegionDrawable showLeaderBoardUp = new TextureRegionDrawable(showLeaderBoardTexture);
-            Button.ButtonStyle showLeaderBoardStyle = new Button.ButtonStyle();
-            showLeaderBoardStyle.up = showLeaderBoardUp;
-            Button showLeaderBoard = new Button(showLeaderBoardStyle);
-            showLeaderBoard.setSize(850f, 200);
-            showLeaderBoard.setPosition(Gdx.graphics.getWidth() / 2 - showLeaderBoard.getWidth() / 2, 200);
-            showLeaderBoard.setDisabled(controller.getPlayerTwo() == null || controller.getPlayerTwo().isEmpty());
-
-            controller.updateLeaderBoard();
-
-            showLeaderBoard.addListener(new ClickListener() {
-                @Override
-                public void clicked(InputEvent event, float x, float y) {
-                    controller.goToLeaderBoard();
-                }
-            });
-            stage.addActor(showLeaderBoard);
-        }
     }
 
 

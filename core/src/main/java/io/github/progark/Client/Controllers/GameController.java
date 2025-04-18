@@ -9,6 +9,8 @@ import io.github.progark.Client.Views.Game.GameView;
 import io.github.progark.Main;
 import io.github.progark.Server.Model.Game.GameModel;
 import io.github.progark.Server.Model.Game.RoundModel;
+import io.github.progark.Server.Model.Login.UserModel;
+import io.github.progark.Server.Service.AuthService;
 import io.github.progark.Server.Service.GameService;
 import io.github.progark.Server.database.DataCallback;
 import io.github.progark.Server.database.DatabaseManager;
@@ -190,9 +192,23 @@ public class GameController extends Controller {
         main.useLeaderBoardController();
     }
 
-    public int getCurrentRound(){
-        return (int) gameModel.getCurrentRound();
+    public void whoAmI(DataCallback callback) {
+        AuthService authService = main.getAuthService();
+        authService.getCurrentUser(new DataCallback() {
+            @Override
+            public void onSuccess(Object data) {
+                UserModel user = (UserModel) data;
+                callback.onSuccess(user);
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                System.out.println("Error fetching user: " + e);
+                callback.onFailure(e);
+            }
+        });
     }
+
 
 
 
