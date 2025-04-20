@@ -31,26 +31,14 @@ public class RoundController extends Controller {
         this.main = main;
         this.authService = authService;
 
-        int roundIndex = parentGameModel.getCurrentRound().intValue();
+        int roundIndex = (int) parentGameModel.getCurrentRound();
 
-        if (roundIndex >= 0 && roundIndex < parentGameModel.getGames().size()) {
-            Object roundRaw = parentGameModel.getGames().get(roundIndex);
+        Object roundRaw = parentGameModel.getGames().get(roundIndex);
 
-            if (roundRaw instanceof RoundModel) {
-                this.roundModel = (RoundModel) roundRaw;
-            } else if (roundRaw instanceof Map) {
-                this.roundModel = RoundModel.fromMap((Map<String, Object>) roundRaw);
-            } else {
-                System.err.println("⚠️ Unknown round data type: " + roundRaw.getClass().getSimpleName());
-            }
+        if (roundRaw instanceof RoundModel) {
+            this.roundModel = (RoundModel) roundRaw;
         } else {
-            // Initialize a new round if one doesn't exist
-            this.roundModel = new RoundModel(null, parentGameModel.getPlayerOne(), parentGameModel.getPlayerTwo());
-            if (roundIndex >= parentGameModel.getGames().size()) {
-                parentGameModel.getGames().add(roundModel);
-            } else {
-                parentGameModel.getGames().set(roundIndex, roundModel);
-            }
+            System.err.println("⚠️ Unknown round data type: " + roundRaw.getClass().getSimpleName());
         }
 
         // Ensure player usernames are set correctly
@@ -71,13 +59,11 @@ public class RoundController extends Controller {
 
     public void handleAnswerSubmission(String input) {
         String answer = input.trim();
-        System.out.println("Checking answer: " + answer);
 
         authService.getLoggedInUsername(new DataCallback() {
             @Override
             public void onSuccess(Object data) {
                 String currentPlayer = (String) data;
-                System.out.println("Current player: " + currentPlayer);
 
                 if (answer.isEmpty() || roundModel.hasAlreadySubmitted(currentPlayer, answer)) {
                     gameView.showMessage("Invalid answer. Please try again.");
@@ -87,7 +73,7 @@ public class RoundController extends Controller {
                 boolean success = submitAnswer(currentPlayer, answer);
                 if (success) {
                     // 💡 Ensure the updated roundModel is saved back to the game list
-                    int roundIndex = parentGameModel.getCurrentRound().intValue();
+                    int roundIndex = (int) parentGameModel.getCurrentRound();
                     parentGameModel.getGames().set(roundIndex, roundModel);
 
                     gameView.updateScore(getCurrentPlayerScore(currentPlayer));
@@ -115,7 +101,6 @@ public class RoundController extends Controller {
     }
 
     public int getCurrentPlayerScore(String username) {
-        System.out.println("player one username: + " + roundModel.playerOneUsername);
         if (username.equals(roundModel.playerOneUsername)) {
             return roundModel.getPlayerOneScore();
         } else if (username.equals(roundModel.playerTwoUsername)) {
@@ -149,13 +134,13 @@ public class RoundController extends Controller {
             roundAlreadyProcessed = true;
             gameView.showGameOver();
 
+            /*
             fetchLatestRoundThenSave(() -> {
                 int roundIndex = parentGameModel.getCurrentRound().intValue();
                 parentGameModel.getGames().set(roundIndex, roundModel);
 
                 if (parentGameModel.isMultiplayer()) {
                     if (bothPlayersHavePlayed(roundModel)) {
-                        System.out.println("🎯 Multiplayer round finished.");
                         // Save the final state before awarding points and incrementing round
                         gameService.setNewGameRounds(parentGameModel, parentGameModel.getGames());
                         awardPointToRoundWinner();
@@ -164,7 +149,6 @@ public class RoundController extends Controller {
                         gameService.setNewGameRounds(parentGameModel, parentGameModel.getGames());
                     } else {
                         gameService.setNewGameRounds(parentGameModel, parentGameModel.getGames());
-                        System.out.println("✅ Partial state saved — waiting for the other player...");
                         return;
                     }
                 } else {
@@ -175,6 +159,8 @@ public class RoundController extends Controller {
 
                 returnToGameView(roundModel);
             });
+
+             */
         }
     }
 
@@ -186,11 +172,9 @@ public class RoundController extends Controller {
         if (p1Score > p2Score) {
             int currentPoints = parentGameModel.getPlayerOnePoints().intValue();
             parentGameModel.setPlayerOnePoints(currentPoints + 1);
-            System.out.println("🏆 Player One wins the round. +1 point");
         } else if (p2Score > p1Score) {
             int currentPoints = parentGameModel.getPlayerTwoPoints().intValue();
             parentGameModel.setPlayerTwoPoints(currentPoints + 1);
-            System.out.println("🏆 Player Two wins the round. +1 point");
         } else {
             System.out.println("🤝 Round is a tie. No points awarded.");
         }
@@ -215,7 +199,6 @@ public class RoundController extends Controller {
         solutionService.getQuestion(ID, new DataCallback() {
             @Override
             public void onSuccess(Object data) {
-                System.out.println(data);
             }
 
             @Override
@@ -243,39 +226,26 @@ public class RoundController extends Controller {
         return p1Completed;
     }
 
-
-    public void returnToGameView(RoundModel roundModel) {
-        main.useGameController(parentGameModel);
-    }
-
     public void endRoundEarly() {
         authService.getLoggedInUsername(new DataCallback() {
             @Override
             public void onSuccess(Object data) {
                 String username = (String) data;
                 roundModel.markPlayerCompleted(username);
-
-                int roundIndex = parentGameModel.getCurrentRound().intValue();
-                System.out.println("Current round 2: " + roundIndex);
-                parentGameModel.getGames().set(roundIndex, roundModel);
                 roundModel.setTimeRemaining(0);
 
-                // Save the current state to database
-                gameService.setNewGameRounds(parentGameModel, parentGameModel.getGames());
+                int roundIndex = (int) parentGameModel.getCurrentRound();
+                parentGameModel.getGames().set(roundIndex, roundModel);
 
-                // If both players have played, process the round completion
                 if (bothPlayersHavePlayed(roundModel)) {
                     roundAlreadyProcessed = true;
-                    gameView.showGameOver();
+
                     awardPointToRoundWinner();
+
                     parentGameModel.setCurrentRound(parentGameModel.getCurrentRound().intValue() + 1);
-                    // Save the final state with updated round number
-                    gameService.setNewGameRounds(parentGameModel, parentGameModel.getGames());
-                    returnToGameView(roundModel);
-                } else {
-                    // If only one player has played, just return to game view
-                    returnToGameView(roundModel);
                 }
+
+                gameService.setNewGameRounds(parentGameModel, parentGameModel.getGames());
             }
 
             @Override
@@ -286,6 +256,7 @@ public class RoundController extends Controller {
         });
     }
 
+    /*
     private void fetchLatestRoundThenSave(Runnable onReadyToSave) {
         gameService.fetchCurrentRound(parentGameModel, new DataCallback() {
             @Override
@@ -306,7 +277,10 @@ public class RoundController extends Controller {
                 onReadyToSave.run();
             }
         });
+
     }
+
+     */
 
     private void mergeRoundModels(RoundModel latest, RoundModel local) {
         // Merge player one's answers

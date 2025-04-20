@@ -77,11 +77,7 @@ public class RoundModel {
         Map<String, Integer> validAnswers = question.getAnswer();
         String normalized = capitalizeFirstLetter(answer.trim());
 
-        System.out.println("Valid keys: " + validAnswers.keySet());
-        System.out.println("Normalized input: " + normalized);
-
         Object value = validAnswers.get(normalized);
-        System.out.println("Answer points: " + value); // <- ADD THIS
 
         if (value instanceof Number) {
             return ((Number) value).intValue();
@@ -204,15 +200,13 @@ public class RoundModel {
         return round;
     }
 
-    public List<String> getHasPlayedList(){
-        return this.hasPlayedList;
-    }
-
     public boolean hasPlayerCompleted(String username) {
-        System.out.println("Question: " + question.getQuestion());
-        System.out.println("Answers from P1: " + playerOneAnswers);
-        System.out.println("Player one: " + playerOneUsername);
-        return hasPlayedList.contains(username);
+        boolean amIPlayerOne = username.equals(playerOneUsername);
+        if(amIPlayerOne){
+            return !playerOneAnswers.isEmpty();
+        }else{
+            return !playerTwoAnswers.isEmpty();
+        }
     }
 
     public void markPlayerCompleted(String username) {
@@ -238,5 +232,9 @@ public class RoundModel {
 
     public void setTimeRemaining(float number){
         this.timeRemaining = number;
+    }
+
+    public boolean hasBothPlayersAnswered(){
+        return !playerOneAnswers.isEmpty() && !playerTwoAnswers.isEmpty();
     }
 }

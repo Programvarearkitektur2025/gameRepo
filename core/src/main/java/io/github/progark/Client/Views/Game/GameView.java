@@ -218,11 +218,14 @@ public class GameView extends View {
 
                 int currentRoundIndex = controller.getCurrentRoundIndex();
                 List<RoundModel> allRounds = controller.getGames();
+                System.out.println("CurrentRound is: " + currentRoundIndex);
+
 
                 if (currentRoundIndex < allRounds.size()) {
                     RoundModel currentRound = allRounds.get(currentRoundIndex);
-
+                    System.out.println("Have both players answered: "+ currentRound.hasBothPlayersAnswered());
                     boolean haveIAnswered = currentRound.hasPlayerCompleted(myUsername);
+                    System.out.println("Have I answered: " + haveIAnswered);
                     if (!haveIAnswered) {
                         Button playRoundButton = createPlayRoundButton(currentRoundIndex);
                         stage.addActor(playRoundButton);
@@ -250,7 +253,6 @@ public class GameView extends View {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 controller.setActiveRoundIndex(currentRoundIndex);
-                System.out.println("Current round is: " + currentRoundIndex);
                 controller.goToRound();
             }
         });
@@ -389,8 +391,6 @@ public class GameView extends View {
 
                         List<RoundModel> rounds = controller.getGames();
                         if (currentRoundIndex >= rounds.size()) currentRoundIndex = rounds.size() - 1;
-
-                        System.out.println("CurrentRound is: " + currentRoundIndex);
 
                         controller.setActiveRoundIndex(currentRoundIndex);
                         controller.goToRoundSingleplayer();
