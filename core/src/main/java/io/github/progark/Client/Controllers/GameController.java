@@ -57,7 +57,7 @@ public class GameController extends Controller {
     }
 
     public void goToRound() {
-        final boolean loadViewImmediately = true; // Toggle this if you want to delay loading until data is ready
+        final boolean loadViewImmediately = true;
 
         if (loadViewImmediately) {
             // Transition first, then update once round is fetched
@@ -207,12 +207,14 @@ public class GameController extends Controller {
                 callback.onFailure(e);
             }
         });
+
     }
-
-
-
-
-
-
-
+    public int getCurrentRoundIndex(){
+        List<RoundModel> games = getGames();
+        int roundIndex=0;
+        for (RoundModel round : games){
+            if (round.getHasPlayedList().size() ==2) roundIndex++;
+        }
+        return roundIndex;
+    }
 }

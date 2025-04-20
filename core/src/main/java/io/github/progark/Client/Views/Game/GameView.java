@@ -89,61 +89,79 @@ public class GameView extends View {
 
     private void initializeMultiplayer() {
         commonInitialize();
+        addGamePinHeadline();
+        addPlayerScoreRow();
+        initializePlayedRounds();
+        addResultScrollBox();
+        addNavigationButtons();
+        if (!playedRounds.isEmpty()) showRoundResult(displayedRoundIndex);
+        addPlayRoundButtonIfAvailable();
+    }
 
+    private void addGamePinHeadline() {
         String headlineText = "Game Pin: " + controller.getLobbyCode();
         headlineLabel = new Label(headlineText, new Label.LabelStyle(largerFont, skin.getColor("white")));
         headlineLabel.setFontScale(2.5f);
         headlineLabel.setPosition(120, Gdx.graphics.getHeight() - 250);
         stage.addActor(headlineLabel);
+    }
 
+    private void addPlayerScoreRow() {
         Table scoreRow = new Table();
-        Table leftProfileCol = new Table();
-        Image leftProfile = new Image(profileTexture);
-        Label leftNameLabel = new Label(controller.getPlayerOne(), new Label.LabelStyle(smallFont, skin.getColor("white")));
-        leftNameLabel.setFontScale(2f);
-        leftProfileCol.add(leftProfile).size(250).row();
-        leftProfileCol.add(leftNameLabel).padTop(40).width(250).center();
-
-        Table rightProfileCol = new Table();
-        Image rightProfile = new Image(profileTexture);
-        Label rightNameLabel = new Label(controller.getPlayerTwo(), new Label.LabelStyle(smallFont, skin.getColor("white")));
-        rightNameLabel.setFontScale(2f);
-        rightProfileCol.add(rightProfile).size(250).row();
-        rightProfileCol.add(rightNameLabel).padTop(40).width(250).center();
-
-        Label scoreLabel = new Label(controller.getPlayerOnePoints() + " - " + controller.getPlayerTwoPoints(), new Label.LabelStyle(largerFont, skin.getColor("white")));
-        scoreLabel.setFontScale(2f);
-
-        scoreRow.add(leftProfileCol).padRight(80);
-        scoreRow.add(scoreLabel).padRight(80).center();
-        scoreRow.add(rightProfileCol);
+        scoreRow.add(createPlayerProfile(controller.getPlayerOne())).padRight(80);
+        scoreRow.add(createScoreLabel()).padRight(80).center();
+        scoreRow.add(createPlayerProfile(controller.getPlayerTwo()));
         scoreRow.setPosition(530, Gdx.graphics.getHeight() - 500);
         stage.addActor(scoreRow);
+    }
 
+    private Table createPlayerProfile(String playerName) {
+        Table profileCol = new Table();
+        Image profileImage = new Image(profileTexture);
+        Label nameLabel = new Label(playerName, new Label.LabelStyle(smallFont, skin.getColor("white")));
+        nameLabel.setFontScale(2f);
+
+        profileCol.add(profileImage).size(250).row();
+        profileCol.add(nameLabel).padTop(40).width(250).center();
+
+        return profileCol;
+    }
+
+    private Label createScoreLabel() {
+        String scoreText = controller.getPlayerOnePoints() + " - " + controller.getPlayerTwoPoints();
+        Label scoreLabel = new Label(scoreText, new Label.LabelStyle(largerFont, skin.getColor("white")));
+        scoreLabel.setFontScale(2f);
+        return scoreLabel;
+    }
+
+    private void initializePlayedRounds() {
         resultTable = new Table();
         if (playedRounds == null) playedRounds = new ArrayList<>();
         else playedRounds.clear();
 
         for (Object obj : controller.getGames()) {
-            RoundModel round;
-
-            if (obj instanceof RoundModel) {
-                round = (RoundModel) obj;
-            } else if (obj instanceof Map) {
-                round = RoundModel.fromMap((Map<String, Object>) obj);
-            } else {
-                System.err.println("⚠️ Unknown round object type: " + obj.getClass().getSimpleName());
-                continue;
-            }
+            RoundModel round = parseRound(obj);
+            if (round == null) continue;
 
             boolean hasP1 = round.getPlayerOneAnswers() != null && !round.getPlayerOneAnswers().isEmpty();
             boolean hasP2 = round.getPlayerTwoAnswers() != null && !round.getPlayerTwoAnswers().isEmpty();
-            if (hasP1 || hasP2) {
-                playedRounds.add(round);
-            }
+            if (hasP1 || hasP2) playedRounds.add(round);
         }
         updateHeadline();
+    }
 
+    private RoundModel parseRound(Object obj) {
+        if (obj instanceof RoundModel) {
+            return (RoundModel) obj;
+        } else if (obj instanceof Map) {
+            return RoundModel.fromMap((Map<String, Object>) obj);
+        } else {
+            System.err.println("⚠️ Unknown round object type: " + obj.getClass().getSimpleName());
+            return null;
+        }
+    }
+
+    private void addResultScrollBox() {
         ScrollPane scrollPane = new ScrollPane(resultTable);
         scrollPane.setScrollingDisabled(true, false);
         scrollPane.setFadeScrollBars(false);
@@ -154,7 +172,9 @@ public class GameView extends View {
         resultBox.setSize(850f, 1200f);
         resultBox.setPosition((Gdx.graphics.getWidth() - 850f) / 2f, 450f);
         stage.addActor(resultBox);
+    }
 
+    private void addNavigationButtons() {
         Table navButtons = new Table();
         navButtons.setFillParent(true);
         navButtons.bottom().padBottom(100);
@@ -187,18 +207,16 @@ public class GameView extends View {
         navButtons.add(prevBtn).padRight(30);
         navButtons.add(nextBtn);
         stage.addActor(navButtons);
+    }
 
-        if (!playedRounds.isEmpty()) {
-            showRoundResult(displayedRoundIndex);
-        }
-
+    private void addPlayRoundButtonIfAvailable() {
         controller.whoAmI(new DataCallback() {
             @Override
             public void onSuccess(Object data) {
                 UserModel user = (UserModel) data;
                 String myUsername = user.getUsername();
 
-                int currentRoundIndex = playedRounds.size();
+                int currentRoundIndex = controller.getCurrentRoundIndex();
                 List<RoundModel> allRounds = controller.getGames();
 
                 if (currentRoundIndex < allRounds.size()) {
@@ -206,22 +224,7 @@ public class GameView extends View {
 
                     boolean haveIAnswered = currentRound.hasPlayerCompleted(myUsername);
                     if (!haveIAnswered) {
-                        TextureRegionDrawable playRoundDrawable = new TextureRegionDrawable(playRoundTexture);
-                        Button.ButtonStyle playRoundStyle = new Button.ButtonStyle();
-                        playRoundStyle.up = playRoundDrawable;
-
-                        Button playRoundButton = new Button(playRoundStyle);
-                        playRoundButton.setSize(850f, 200);
-                        playRoundButton.setPosition(Gdx.graphics.getWidth() / 2f - playRoundButton.getWidth() / 2f, 200);
-
-                        playRoundButton.addListener(new ClickListener() {
-                            @Override
-                            public void clicked(InputEvent event, float x, float y) {
-                                controller.setActiveRoundIndex(currentRoundIndex);
-                                controller.goToRound();
-                            }
-                        });
-
+                        Button playRoundButton = createPlayRoundButton(currentRoundIndex);
                         stage.addActor(playRoundButton);
                     }
                 }
@@ -232,8 +235,29 @@ public class GameView extends View {
                 System.err.println("❌ Could not determine current user: " + e.getMessage());
             }
         });
-
     }
+
+    private Button createPlayRoundButton(int currentRoundIndex) {
+        TextureRegionDrawable playRoundDrawable = new TextureRegionDrawable(playRoundTexture);
+        Button.ButtonStyle playRoundStyle = new Button.ButtonStyle();
+        playRoundStyle.up = playRoundDrawable;
+
+        Button playRoundButton = new Button(playRoundStyle);
+        playRoundButton.setSize(850f, 200);
+        playRoundButton.setPosition(Gdx.graphics.getWidth() / 2f - playRoundButton.getWidth() / 2f, 200);
+
+        playRoundButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                controller.setActiveRoundIndex(currentRoundIndex);
+                System.out.println("Current round is: " + currentRoundIndex);
+                controller.goToRound();
+            }
+        });
+
+        return playRoundButton;
+    }
+
 
 
     private void initializeSingleplayer() {
