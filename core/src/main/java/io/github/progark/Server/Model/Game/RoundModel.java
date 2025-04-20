@@ -63,7 +63,7 @@ public class RoundModel {
             playerTwoScore += points;
         }
 
-        markPlayerCompleted(username);
+        // Don't mark as completed here - let endRoundEarly handle that
         return true;
     }
 
@@ -134,6 +134,22 @@ public class RoundModel {
         return question.getAnswer();
     }
 
+    public Map<String, Object> toMap() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("question", question.getQuestion());
+        map.put("allValidAnswers", question.getAnswer());
+        map.put("playerOneUsername", playerOneUsername);
+        map.put("playerTwoUsername", playerTwoUsername);
+        map.put("playerOneAnswers", playerOneAnswers);
+        map.put("playerTwoAnswers", playerTwoAnswers);
+        map.put("playerOneScore", playerOneScore);
+        map.put("playerTwoScore", playerTwoScore);
+        map.put("timeRemaining", timeRemaining);
+        map.put("timeUp", isTimeUp());
+        map.put("hasPlayedList", hasPlayedList);
+        return map;
+    }
+
     public static RoundModel fromMap(Map<String, Object> map) {
         if (map == null) return null;
 
@@ -201,39 +217,35 @@ public class RoundModel {
             round.timeRemaining = ((Number) timeLeft).floatValue();
         }
 
+        Object hasPlayedObj = map.get("hasPlayedList");
+        if (hasPlayedObj instanceof List) {
+            List<?> rawList = (List<?>) hasPlayedObj;
+            for (Object item : rawList) {
+                if (item instanceof String) {
+                    round.hasPlayedList.add((String) item);
+                }
+            }
+        }
+
         return round;
     }
 
-    public List<String> getHasPlayedList(){
+    public List<String> getHasPlayedList() {
         return this.hasPlayedList;
     }
 
     public boolean hasPlayerCompleted(String username) {
-        System.out.println("Question: " + question.getQuestion());
-        System.out.println("Answers from P1: " + playerOneAnswers);
-        System.out.println("Player one: " + playerOneUsername);
+        System.out.println("Checking completion for player: " + username);
+        System.out.println("Has played list: " + hasPlayedList);
         return hasPlayedList.contains(username);
     }
 
     public void markPlayerCompleted(String username) {
+        System.out.println("Marking player as completed: " + username);
         if (!hasPlayedList.contains(username)) {
             hasPlayedList.add(username);
+            System.out.println("Updated has played list: " + hasPlayedList);
         }
-    }
-
-    public Map<String, Object> toMap() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("question", question.getQuestion());
-        map.put("allValidAnswers", question.getAnswer());
-        map.put("playerOneUsername", playerOneUsername);
-        map.put("playerTwoUsername", playerTwoUsername);
-        map.put("playerOneAnswers", playerOneAnswers);
-        map.put("playerTwoAnswers", playerTwoAnswers);
-        map.put("playerOneScore", playerOneScore);
-        map.put("playerTwoScore", playerTwoScore);
-        map.put("timeRemaining", timeRemaining);
-        map.put("timeUp", isTimeUp());
-        return map;
     }
 
     public void setTimeRemaining(float number){

@@ -202,18 +202,12 @@ public class GameModel {
 
 
     public Number getCurrentRound() {
-        if (multiplayer){
-            List<RoundModel> games = getGames();
-            int roundIndex=0;
-            for (RoundModel round : games){
-                if (round.getHasPlayedList().size() ==2) roundIndex++;
-            }
-            return roundIndex;
-        }else return currentRound;
+        return currentRound;
     }
 
     public void setCurrentRound(int currentRound) {
-        this.currentRound = currentRound;
+        // Ensure currentRound is always at least 1
+        this.currentRound = Math.max(1, currentRound);
     }
 
     @Override
@@ -263,6 +257,7 @@ public class GameModel {
     }
 
     public void setActiveRound(Number index){
+        // Convert 0-based index to 1-based round number
         this.currentRound = (Number) ((int) index + 1);
     }
 }

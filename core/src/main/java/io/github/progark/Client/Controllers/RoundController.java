@@ -31,7 +31,7 @@ public class RoundController extends Controller {
         this.main = main;
         this.authService = authService;
 
-        int roundIndex = parentGameModel.getCurrentRound().intValue();
+        int roundIndex = parentGameModel.getCurrentRound().intValue() - 1; // Convert to 0-based index
 
         if (roundIndex >= 0 && roundIndex < parentGameModel.getGames().size()) {
             Object roundRaw = parentGameModel.getGames().get(roundIndex);
@@ -150,7 +150,7 @@ public class RoundController extends Controller {
             gameView.showGameOver();
 
             fetchLatestRoundThenSave(() -> {
-                int roundIndex = parentGameModel.getCurrentRound().intValue();
+                int roundIndex = parentGameModel.getCurrentRound().intValue() - 1; // Convert to 0-based index
                 parentGameModel.getGames().set(roundIndex, roundModel);
 
                 if (parentGameModel.isMultiplayer()) {
@@ -229,50 +229,45 @@ public class RoundController extends Controller {
         return roundModel.getQuestion();
     }
 
-    private boolean bothPlayersHavePlayed(RoundModel round) {
-        // Check if both players have been marked as completed
-        boolean p1Completed = round.hasPlayerCompleted(round.playerOneUsername);
-        boolean p2Completed = round.hasPlayerCompleted(round.playerTwoUsername);
-
-        // For multiplayer, both players must have completed
-        if (parentGameModel.isMultiplayer()) {
-            return p1Completed && p2Completed;
-        }
-
-        // For single player, only player one needs to complete
-        return p1Completed;
-    }
-
-
-    public void returnToGameView(RoundModel roundModel) {
-        main.useGameController(parentGameModel);
-    }
-
     public void endRoundEarly() {
         authService.getLoggedInUsername(new DataCallback() {
             @Override
             public void onSuccess(Object data) {
                 String username = (String) data;
-                roundModel.markPlayerCompleted(username);
+                System.out.println("Marking player as completed: " + username);
+                
+                // Only mark the player as completed if they haven't been marked yet
+                if (!roundModel.hasPlayerCompleted(username)) {
+                    roundModel.markPlayerCompleted(username);
+                }
 
-                int roundIndex = parentGameModel.getCurrentRound().intValue();
-                System.out.println("Current round 2: " + roundIndex);
+                int roundIndex = parentGameModel.getCurrentRound().intValue() - 1; // Convert to 0-based index
+                System.out.println("Current round index: " + roundIndex);
+                
+                // Only update the current round in the games list
                 parentGameModel.getGames().set(roundIndex, roundModel);
                 roundModel.setTimeRemaining(0);
 
                 // Save the current state to database
                 gameService.setNewGameRounds(parentGameModel, parentGameModel.getGames());
+                System.out.println("✅ Game state saved successfully");
 
                 // If both players have played, process the round completion
                 if (bothPlayersHavePlayed(roundModel)) {
+                    System.out.println("Both players have completed the round, proceeding to next round");
                     roundAlreadyProcessed = true;
                     gameView.showGameOver();
                     awardPointToRoundWinner();
+                    
+                    // Only increment the round number, don't modify any other rounds
                     parentGameModel.setCurrentRound(parentGameModel.getCurrentRound().intValue() + 1);
+                    
                     // Save the final state with updated round number
                     gameService.setNewGameRounds(parentGameModel, parentGameModel.getGames());
+                    System.out.println("✅ Final game state saved successfully");
                     returnToGameView(roundModel);
                 } else {
+                    System.out.println("Waiting for other player to complete the round");
                     // If only one player has played, just return to game view
                     returnToGameView(roundModel);
                 }
@@ -286,12 +281,31 @@ public class RoundController extends Controller {
         });
     }
 
+    private boolean bothPlayersHavePlayed(RoundModel round) {
+        // Check if both players have been marked as completed
+        boolean p1Completed = round.hasPlayerCompleted(parentGameModel.getPlayerOne());
+        boolean p2Completed = round.hasPlayerCompleted(parentGameModel.getPlayerTwo());
+
+        System.out.println("Checking player completion:");
+        System.out.println("Player 1 (" + parentGameModel.getPlayerOne() + ") completed: " + p1Completed);
+        System.out.println("Player 2 (" + parentGameModel.getPlayerTwo() + ") completed: " + p2Completed);
+        System.out.println("Has played list: " + round.getHasPlayedList());
+
+        // For multiplayer, both players must have completed
+        if (parentGameModel.isMultiplayer()) {
+            return p1Completed && p2Completed;
+        }
+
+        // For single player, only player one needs to complete
+        return p1Completed;
+    }
+
     private void fetchLatestRoundThenSave(Runnable onReadyToSave) {
         gameService.fetchCurrentRound(parentGameModel, new DataCallback() {
             @Override
             public void onSuccess(Object data) {
                 if (data instanceof RoundModel) {
-                    int roundIndex = parentGameModel.getCurrentRound().intValue();
+                    int roundIndex = parentGameModel.getCurrentRound().intValue() - 1; // Convert to 0-based index
 
                     mergeRoundModels((RoundModel) data, roundModel);
                     parentGameModel.getGames().set(roundIndex, roundModel);
@@ -344,6 +358,9 @@ public class RoundController extends Controller {
         local.setTimeRemaining(Math.min(latest.getTimeRemaining(), local.getTimeRemaining()));
     }
 
+    public void returnToGameView(RoundModel roundModel) {
+        main.useGameController(parentGameModel);
+    }
 
     @Override
     public void enter() {

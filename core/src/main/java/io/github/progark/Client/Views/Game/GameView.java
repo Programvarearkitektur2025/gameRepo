@@ -143,9 +143,16 @@ public class GameView extends View {
             RoundModel round = parseRound(obj);
             if (round == null) continue;
 
-            boolean hasP1 = round.getPlayerOneAnswers() != null && !round.getPlayerOneAnswers().isEmpty();
-            boolean hasP2 = round.getPlayerTwoAnswers() != null && !round.getPlayerTwoAnswers().isEmpty();
-            if (hasP1 || hasP2) playedRounds.add(round);
+            if (controller.isMultiplayer()) {
+                // For multiplayer, show rounds where at least one player has answered
+                boolean hasP1 = round.getPlayerOneAnswers() != null && !round.getPlayerOneAnswers().isEmpty();
+                boolean hasP2 = round.getPlayerTwoAnswers() != null && !round.getPlayerTwoAnswers().isEmpty();
+                if (hasP1 || hasP2) playedRounds.add(round);
+            } else {
+                // For singleplayer, just check if player one has answers
+                boolean hasP1 = round.getPlayerOneAnswers() != null && !round.getPlayerOneAnswers().isEmpty();
+                if (hasP1) playedRounds.add(round);
+            }
         }
         updateHeadline();
     }
@@ -219,11 +226,34 @@ public class GameView extends View {
                 int currentRoundIndex = controller.getCurrentRoundIndex();
                 List<RoundModel> allRounds = controller.getGames();
 
-                if (currentRoundIndex < allRounds.size()) {
-                    RoundModel currentRound = allRounds.get(currentRoundIndex);
+                System.out.println("Current round index: " + currentRoundIndex);
+                System.out.println("Total rounds: " + allRounds.size());
 
-                    boolean haveIAnswered = currentRound.hasPlayerCompleted(myUsername);
-                    if (!haveIAnswered) {
+                // Check if we're at the end of the game
+                if (currentRoundIndex >= allRounds.size()) {
+                    System.out.println("Game is finished!");
+                    return;
+                }
+
+                RoundModel currentRound = allRounds.get(currentRoundIndex);
+                
+                // For multiplayer, check if both players have completed the round
+                if (controller.isMultiplayer()) {
+                    boolean bothPlayersCompleted = currentRound.hasPlayerCompleted(controller.getPlayerOne()) && 
+                                                 currentRound.hasPlayerCompleted(controller.getPlayerTwo());
+                    
+                    System.out.println("Both players completed: " + bothPlayersCompleted);
+                    
+                    // If this is the first round or both players have completed the current round
+                    if (currentRoundIndex == 0 || bothPlayersCompleted) {
+                        // Show play button for the current round
+                        Button playRoundButton = createPlayRoundButton(currentRoundIndex);
+                        stage.addActor(playRoundButton);
+                    }
+                } else {
+                    // For single player, just check if player one has completed
+                    boolean playerOneCompleted = currentRound.hasPlayerCompleted(controller.getPlayerOne());
+                    if (currentRoundIndex == 0 || playerOneCompleted) {
                         Button playRoundButton = createPlayRoundButton(currentRoundIndex);
                         stage.addActor(playRoundButton);
                     }
