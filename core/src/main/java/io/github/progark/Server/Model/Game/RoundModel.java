@@ -23,8 +23,8 @@ public class RoundModel {
     public RoundModel(QuestionModel question, String playerOneUsername, String playerTwoUsername) {
         this.question = question;
 
-        if (question == null || question.getAnswer() == null) {
-            throw new IllegalArgumentException("Invalid question or missing answers.");
+        if (question == null) {
+            throw new IllegalArgumentException("Invalid question.");
         }
 
         this.playerOneUsername = playerOneUsername;

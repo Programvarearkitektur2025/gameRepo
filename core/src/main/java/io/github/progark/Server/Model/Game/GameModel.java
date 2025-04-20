@@ -202,7 +202,14 @@ public class GameModel {
 
 
     public Number getCurrentRound() {
-        return currentRound;
+        if (multiplayer){
+            List<RoundModel> games = getGames();
+            int roundIndex=0;
+            for (RoundModel round : games){
+                if (round.getHasPlayedList().size() ==2) roundIndex++;
+            }
+            return roundIndex;
+        }else return currentRound;
     }
 
     public void setCurrentRound(int currentRound) {
