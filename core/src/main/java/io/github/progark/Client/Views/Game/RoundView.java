@@ -221,15 +221,8 @@ public class RoundView extends View {
         }
     }
 
-    public void roundIsFinished(RoundModel roundModel) {
-        if (controller != null) {
-            controller.returnToGameView(roundModel);
-        }
-    }
-
     public void showMessage(String displayMessage) {
         if (displayMessage != null && !displayMessage.trim().isEmpty()) {
-            System.out.println("MESSAGE: " + displayMessage);
         }
     }
 

@@ -174,11 +174,6 @@ public class GameController extends Controller {
         });
     }
 
-    public GameModel getGameModel() {
-        return this.gameModel;
-    }
-
-
     public void setActiveRoundIndex(int index) {
         gameModel.setActiveRound(index);
     }
@@ -213,7 +208,7 @@ public class GameController extends Controller {
         List<RoundModel> games = getGames();
         int roundIndex=0;
         for (RoundModel round : games){
-            if (round.getHasPlayedList().size() ==2) roundIndex++;
+            if (round.hasBothPlayersAnswered()) roundIndex++;
         }
         return roundIndex;
     }

@@ -191,22 +191,12 @@ public class GameModel {
         this.games = games;
     }
 
-
-    // Function for updating the list of rounds played. It is assumed that the game-variable
-    // is supposed to contain the rounds of the entire game and that it is populated throughout the
-    // game. The function underneeth is called by roundController whenever a round finishes.
-    // Function that takes a roundModel and adds it to the List<GameModel> game variable.
-    public void setFinishedRound(RoundModel roundModel) {
-        games.add(roundModel);
-    }
-
-
     public Number getCurrentRound() {
         if (multiplayer){
             List<RoundModel> games = getGames();
             int roundIndex=0;
             for (RoundModel round : games){
-                if (round.getHasPlayedList().size() ==2) roundIndex++;
+                if (round.hasBothPlayersAnswered()) roundIndex++;
             }
             return roundIndex;
         }else return currentRound;
@@ -263,6 +253,6 @@ public class GameModel {
     }
 
     public void setActiveRound(Number index){
-        this.currentRound = (Number) ((int) index + 1);
+        this.currentRound = (Number) ((int) index );
     }
 }
