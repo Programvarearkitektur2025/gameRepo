@@ -79,42 +79,19 @@ public class GameService {
             public void onSuccess(Object data) {
                 if (data instanceof Map) {
                     Map<String, Object> existingData = new HashMap<>((Map<String, Object>) data);
-
-                    List<Map<String, Object>> existingRoundMaps = (List<Map<String, Object>>) existingData.get("games");
-                    List<Map<String, Object>> updatedRoundMaps = new ArrayList<>();
-
-                    // Reuse existing rounds if present, update only if different
-                    if (existingRoundMaps != null && !existingRoundMaps.isEmpty()) {
-                        int minSize = Math.min(existingRoundMaps.size(), newRounds.size());
-
-                        // Copy unchanged rounds
-                        for (int i = 0; i < minSize; i++) {
-                            Map<String, Object> existingRound = existingRoundMaps.get(i);
-                            Map<String, Object> newRound = newRounds.get(i).toMap();
-
-                            // Replace only if round changed
-                            if (!existingRound.equals(newRound)) {
-                                updatedRoundMaps.add(newRound);
-                            } else {
-                                updatedRoundMaps.add(existingRound);
-                            }
-                        }
-
-                        // Add any additional new rounds (if there are more)
-                        for (int i = minSize; i < newRounds.size(); i++) {
-                            updatedRoundMaps.add(newRounds.get(i).toMap());
-                        }
-
-                    } else {
-                        // No existing rounds, just add all
-                        for (RoundModel round : newRounds) {
-                            updatedRoundMaps.add(round.toMap());
-                        }
+                    
+                    // Convert all rounds to maps
+                    List<Map<String, Object>> roundMaps = new ArrayList<>();
+                    for (RoundModel round : newRounds) {
+                        roundMaps.add(round.toMap());
                     }
-
-                    existingData.put("games", updatedRoundMaps);
+                    
+                    // Update the games list with the new rounds
+                    existingData.put("games", roundMaps);
+                    
+                    // Save the updated data
                     databaseManager.writeData(path, existingData);
-
+                    System.out.println("✅ Game state saved successfully");
                 } else {
                     System.err.println("⚠️ Unexpected data type when reading lobby: " + data.getClass().getSimpleName());
                 }
