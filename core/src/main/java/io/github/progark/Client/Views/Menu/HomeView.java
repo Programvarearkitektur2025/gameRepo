@@ -66,7 +66,7 @@ public class HomeView extends View {
                 controller.openTutorialPage();
             }
         });
-        stage.addActor(howToButton);
+
 
         Table mainLayout = new Table();
         mainLayout.setFillParent(true);
@@ -111,6 +111,8 @@ public class HomeView extends View {
 
         // Navigation bar
         navBar = new NavBar(stage, controller.getMain());
+        stage.addActor(howToButton);
+
 
         controller.getMain().getMusicManager().setVolume(1.0f);
 
@@ -173,7 +175,7 @@ public class HomeView extends View {
             Stack entry = createGameEntry(game);
             contentTable.add(entry)
                 .width(sectionWidth)
-                .height(avatarHeight) // ⬅️ Only the actual avatar size is clickable
+                .height(avatarHeight)
                 .center()
                 .padBottom(30)
                 .row();
@@ -211,32 +213,53 @@ public class HomeView extends View {
 
                     String displayName;
                     String opponent = game.getOpponent(currentUser);
+                    List<RoundModel> rounds = game.getGames();
+                    int totalRounds = game.getRounds();
+                    int playedRounds = 0;
 
-                    // ➤ Singleplayer
+                    for (RoundModel round : rounds) {
+                        if (round.getPlayerOneAnswers().size() > 0 || round.getPlayerTwoAnswers().size() > 0) {
+                            playedRounds++;
+                        }
+                    }
+
+                    // ✅ SKIP if game is finished
+                    if (!game.isMultiplayer()) {
+                        if (playedRounds >= totalRounds) continue;
+                    } else {
+                        // Only skip if both players are done with all rounds
+                        int completedByBoth = 0;
+                        for (RoundModel round : rounds) {
+                            if (round.hasBothPlayersAnswered()) {
+                                completedByBoth++;
+                            }
+                        }
+                        if (completedByBoth >= totalRounds) continue;
+                    }
+
+                    // ➤ SINGLEPLAYER DISPLAY
                     if (!game.isMultiplayer()) {
                         displayName = "You";
                         homeModel.getYourTurnGames().add(new HomeModel.GameEntry(gameId, displayName, game.getStatus()));
                         continue;
                     }
 
-                    // ➤ Waiting for opponent
+                    // ➤ WAITING FOR OPPONENT
                     if (opponent == null || opponent.isEmpty()) {
                         displayName = "Waiting for Player to join";
                         homeModel.getTheirTurnGames().add(new HomeModel.GameEntry(gameId, displayName, game.getStatus()));
                         continue;
                     }
 
+                    // ➤ MULTIPLAYER LOGIC
                     displayName = opponent;
-
-                    // ➤ Multiplayer: determine if it's your turn
-                    int currentRound = game.getCurrentRound().intValue(); // already adjusted to completed rounds
-                    List<RoundModel> allRounds = game.getGames();
-
+                    int currentRound = game.getCurrentRound().intValue();
                     boolean hasPlayed = false;
-                    if (currentRound >= 0 && currentRound < allRounds.size()) {
-                        RoundModel round = allRounds.get(currentRound);
-                        if (round != null) {
-                            hasPlayed = round.hasPlayerCompleted(currentUser);
+
+                    if (currentRound < rounds.size()) {
+                        RoundModel current = rounds.get(currentRound);
+                        if (current != null) {
+                            hasPlayed = current.hasPlayerCompleted(currentUser);
                         }
                     }
 
@@ -256,6 +279,7 @@ public class HomeView extends View {
             }
         });
     }
+
 
 
 
