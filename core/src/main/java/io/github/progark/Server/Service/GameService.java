@@ -79,16 +79,16 @@ public class GameService {
             public void onSuccess(Object data) {
                 if (data instanceof Map) {
                     Map<String, Object> existingData = new HashMap<>((Map<String, Object>) data);
-                    
+
                     // Convert all rounds to maps
                     List<Map<String, Object>> roundMaps = new ArrayList<>();
                     for (RoundModel round : newRounds) {
                         roundMaps.add(round.toMap());
                     }
-                    
+
                     // Update the games list with the new rounds
                     existingData.put("games", roundMaps);
-                    
+
                     // Save the updated data
                     databaseManager.writeData(path, existingData);
                     System.out.println("✅ Game state saved successfully");

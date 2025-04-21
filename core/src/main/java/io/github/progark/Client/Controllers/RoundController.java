@@ -22,6 +22,7 @@ public class RoundController extends Controller {
     private Main main;
     private AuthService authService;
     private boolean roundAlreadyProcessed = false;
+    private int roundIndex;
 
 
     public RoundController(GameModel gameModel, DatabaseManager databaseManager, Main main, AuthService authService) {
@@ -31,7 +32,7 @@ public class RoundController extends Controller {
         this.main = main;
         this.authService = authService;
 
-        int roundIndex = (int) parentGameModel.getCurrentRound();
+        roundIndex = (int) parentGameModel.getCurrentRound();
 
         Object roundRaw = parentGameModel.getGames().get(roundIndex);
 
@@ -50,6 +51,9 @@ public class RoundController extends Controller {
         }
 
         this.gameView = new RoundView(this);
+        for (RoundModel round : parentGameModel.getGames()){
+            System.out.println("Rounds constructor: " + round.getQuestion());
+        }
         enter();
     }
 
@@ -73,7 +77,6 @@ public class RoundController extends Controller {
                 boolean success = submitAnswer(currentPlayer, answer);
                 if (success) {
                     // 💡 Ensure the updated roundModel is saved back to the game list
-                    int roundIndex = (int) parentGameModel.getCurrentRound();
                     parentGameModel.getGames().set(roundIndex, roundModel);
 
                     gameView.updateScore(getCurrentPlayerScore(currentPlayer));
@@ -227,6 +230,11 @@ public class RoundController extends Controller {
     }
 
     public void endRoundEarly() {
+        for (RoundModel round: parentGameModel.getGames())
+        {
+            System.out.println("Round from endRoundEarly: " + round.getQuestion());
+        }
+
         authService.getLoggedInUsername(new DataCallback() {
             @Override
             public void onSuccess(Object data) {
@@ -234,7 +242,6 @@ public class RoundController extends Controller {
                 roundModel.markPlayerCompleted(username);
                 roundModel.setTimeRemaining(0);
 
-                int roundIndex = (int) parentGameModel.getCurrentRound();
                 parentGameModel.getGames().set(roundIndex, roundModel);
 
                 if (bothPlayersHavePlayed(roundModel)) {
@@ -242,7 +249,6 @@ public class RoundController extends Controller {
 
                     awardPointToRoundWinner();
 
-                    parentGameModel.setCurrentRound(parentGameModel.getCurrentRound().intValue() + 1);
                 }
 
                 gameService.setNewGameRounds(parentGameModel, parentGameModel.getGames());
