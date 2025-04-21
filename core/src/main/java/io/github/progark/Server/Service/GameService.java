@@ -240,4 +240,48 @@ public class GameService {
             }
         });
     }
+
+    public void loadExistingRoundsFromFirebase(GameModel gameModel, DataCallback callback) {
+        String path = "lobbies/" + gameModel.getLobbyCode();
+
+        databaseManager.readData(path, new DataCallback() {
+            @Override
+            public void onSuccess(Object data) {
+                if (!(data instanceof Map)) {
+                    callback.onFailure(new Exception("Invalid data format: Expected Map."));
+                    return;
+                }
+
+                Map<String, Object> lobbyData = (Map<String, Object>) data;
+                Object gamesObj = lobbyData.get("games");
+
+                if (!(gamesObj instanceof List)) {
+                    callback.onFailure(new Exception("Missing or invalid 'games' list in lobby data."));
+                    return;
+                }
+
+                List<?> gameList = (List<?>) gamesObj;
+                List<RoundModel> rounds = new ArrayList<>();
+
+                for (Object obj : gameList) {
+                    if (obj instanceof Map) {
+                        try {
+                            RoundModel round = RoundModel.fromMap((Map<String, Object>) obj);
+                            rounds.add(round);
+                        } catch (Exception e) {
+                            System.err.println("⚠️ Failed to parse round: " + e.getMessage());
+                        }
+                    }
+                }
+
+                callback.onSuccess(rounds);
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                callback.onFailure(e);
+            }
+        });
+    }
+
 }

@@ -27,7 +27,7 @@ public class CreateGameService {
             lobby.setLobbyCode(lobbyCode);
             lobby.setPlayerOne(username);
             lobby.setPlayerTwo(null);
-            lobby.setDifficulty(1);
+            lobby.setDifficulty(difficulty);
             lobby.setStatus(multiplayer ? "waiting" : "started");
             lobby.setCreatedAt(new Timestamp(System.currentTimeMillis()));
             lobby.setRounds(rounds);
