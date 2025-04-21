@@ -15,6 +15,7 @@ public class GameModel {
     private String status;
     private Timestamp createdAt;
     private int rounds;
+    private boolean leaderboardUpdated = false;
     private boolean multiplayer;
 
     private Number playerOnePoints;
@@ -137,6 +138,14 @@ public class GameModel {
 
     public Number getPlayerOnePoints() {
         return playerOnePoints;
+    }
+
+    public boolean isLeaderboardUpdated() {
+        return leaderboardUpdated;
+    }
+
+    public void setLeaderboardUpdated(boolean leaderboardUpdated) {
+        this.leaderboardUpdated = leaderboardUpdated;
     }
 
     public Number getPlayerTwoPoints() {

@@ -24,6 +24,8 @@ public class GameController extends Controller {
     private Main main;
     private GameService gameService;
     private Task syncTask;
+    private boolean leaderboardAlreadyUpdated = false;
+
 
     public GameController(DatabaseManager databaseManager, Main main, GameModel gameModel) {
         this.gameModel = gameModel;
@@ -67,7 +69,6 @@ public class GameController extends Controller {
         final boolean loadViewImmediately = true;
 
         if (loadViewImmediately) {
-            // Transition first, then update once round is fetched
             main.useRoundController(gameModel);
         }
         stopGameSyncing();
@@ -168,14 +169,29 @@ public class GameController extends Controller {
         });
 
     }
-    public int getCurrentRoundIndex(){
+
+
+    public int getCurrentRoundIndex() {
         List<RoundModel> games = getGames();
-        int roundIndex=0;
-        for (RoundModel round : games){
-            if (round.hasBothPlayersAnswered()) roundIndex++;
+        int roundIndex = 0;
+
+        for (RoundModel round : games) {
+            if (round.hasBothPlayersAnswered()) {
+                roundIndex++;
+            }
         }
+
+        // 👇 Trigger leaderboard update ONCE when all rounds are complete
+        if (roundIndex == gameModel.getRounds() && !gameModel.isLeaderboardUpdated()) {
+            updateLeaderBoard();
+            gameModel.setLeaderboardUpdated(true); // You'll need to add this flag to avoid repeat updates
+        }
+
         return roundIndex;
     }
+
+
+
 
     public void startGameSyncing() {
         if (syncTask != null) return;
@@ -196,6 +212,11 @@ public class GameController extends Controller {
                                 gameView.onRoundsUpdated(); // optional refresh
                             }
                         }
+                        if (allRoundsCompleted() && !leaderboardAlreadyUpdated) {
+                            leaderboardAlreadyUpdated = true;
+                            updateLeaderBoard(); // 🎯 Only runs once
+                        }
+
                     }
 
                     @Override
@@ -213,4 +234,14 @@ public class GameController extends Controller {
             syncTask = null;
         }
     }
+
+    private boolean allRoundsCompleted() {
+        for (RoundModel round : gameModel.getGames()) {
+            if (!round.hasBothPlayersAnswered()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 }

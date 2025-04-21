@@ -161,9 +161,18 @@ public class LeaderboardService {
                 Object existingVal = leaderboard.getOrDefault(winner, 0);
                 int existingScore = existingVal instanceof Number ? ((Number) existingVal).intValue() : 0;
 
-                if (winnerPoints > existingScore) {
-                    leaderboard.put(winner, winnerPoints);
-                }
+                incrementUserScore(winner, new DataCallback() {
+                    @Override
+                    public void onSuccess(Object data) {
+                        System.out.println("🏅 Leaderboard updated for winner: " + winner);
+                    }
+
+                    @Override
+                    public void onFailure(Exception e) {
+                        System.err.println("❌ Failed to increment leaderboard for winner: " + e.getMessage());
+                    }
+                });
+
 
                 databaseManager.writeData(LEADERBOARD_DOC, leaderboard);
             }

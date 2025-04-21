@@ -212,7 +212,6 @@ public class GameService {
                 }
 
                 List<?> gamesList = (List<?>) gamesObj;
-                // Firebase storage is 0-indexed
                 int currentIndex = (int) gameModel.getCurrentRound()-1;
 
                 if (currentIndex < 0 || currentIndex >= gamesList.size()) {

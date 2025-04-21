@@ -212,11 +212,12 @@ public class RoundController extends Controller {
         int p2Score = roundModel.getPlayerTwoScore();
 
         if (p1Score > p2Score) {
-            int currentPoints = parentGameModel.getPlayerOnePoints().intValue();
-            parentGameModel.setPlayerOnePoints(currentPoints + 1);
+            Number currentPoints = parentGameModel.getPlayerOnePoints();
+            parentGameModel.setPlayerOnePoints(currentPoints.intValue() + 1);
+
         } else if (p2Score > p1Score) {
-            int currentPoints = parentGameModel.getPlayerTwoPoints().intValue();
-            parentGameModel.setPlayerTwoPoints(currentPoints + 1);
+            Number currentPoints = parentGameModel.getPlayerTwoPoints();
+            parentGameModel.setPlayerTwoPoints(currentPoints.intValue() + 1);
         } else {
             System.out.println("🤝 Round is a tie. No points awarded.");
         }

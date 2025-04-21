@@ -33,6 +33,9 @@ public class GameView extends View {
     private List<RoundModel> playedRounds;
     private boolean initialized = false;
 
+    private boolean leaderboardButtonAdded = false;
+
+
     public GameView(GameController controller){
         super();
         this.controller = controller;
@@ -91,6 +94,11 @@ public class GameView extends View {
         addNavigationButtons();
         if (!playedRounds.isEmpty()) showRoundResult(displayedRoundIndex);
         addPlayRoundButtonIfAvailable(); // this is now guarded inside
+        if (playedRounds.size() == controller.getRounds() && !leaderboardButtonAdded) {
+            addShowLeaderboardButton();
+            leaderboardButtonAdded = true;
+        }
+
     }
 
 
@@ -141,18 +149,44 @@ public class GameView extends View {
 
     private void initializePlayedRounds() {
         resultTable = new Table();
-        if (playedRounds == null) playedRounds = new ArrayList<>();
-        else playedRounds.clear();
+        playedRounds = new ArrayList<>();
 
-        for (Object obj : controller.getGames()) {
-            RoundModel round = parseRound(obj);
-            if (round == null) continue;
+        controller.whoAmI(new DataCallback() {
+            @Override
+            public void onSuccess(Object data) {
+                String username = ((UserModel) data).getUsername();
 
-            boolean hasP1 = round.getPlayerOneAnswers() != null && !round.getPlayerOneAnswers().isEmpty();
-            boolean hasP2 = round.getPlayerTwoAnswers() != null && !round.getPlayerTwoAnswers().isEmpty();
-            if (hasP1 || hasP2) playedRounds.add(round);
-        }
+                for (Object obj : controller.getGames()) {
+                    RoundModel round = parseRound(obj);
+                    if (round == null) continue;
+
+
+                    if (round.hasBothPlayersAnswered()) {
+                        playedRounds.add(round);
+                    }
+                }
+
+                if (!playedRounds.isEmpty()) {
+                    displayedRoundIndex = 0;
+                    showRoundResult(displayedRoundIndex);
+                }
+
+                // 🔥 Important: Move leaderboard check here (if multiplayer)
+                if (controller.isMultiplayer() && playedRounds.size() == controller.getRounds() && !leaderboardButtonAdded) {
+                    addShowLeaderboardButton();
+                    leaderboardButtonAdded = true;
+                }
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                System.err.println("❌ Could not fetch current user for round filtering.");
+            }
+        });
     }
+
+
+
 
     private RoundModel parseRound(Object obj) {
         if (obj instanceof RoundModel) {
@@ -166,6 +200,14 @@ public class GameView extends View {
     }
 
     private void addResultScrollBox() {
+        if (resultTable == null) {
+            resultTable = new Table();
+        }
+
+        if (resultTable.getChildren().size == 0) {
+            resultTable.add(new Label("No rounds played yet.", new Label.LabelStyle(smallFont, Color.GRAY))).pad(30);
+        }
+
         ScrollPane scrollPane = new ScrollPane(resultTable);
         scrollPane.setScrollingDisabled(true, false);
         scrollPane.setFadeScrollBars(false);
@@ -177,6 +219,7 @@ public class GameView extends View {
         resultBox.setPosition((Gdx.graphics.getWidth() - 850f) / 2f, 550f);
         stage.addActor(resultBox);
     }
+
 
     private void addNavigationButtons() {
         Table navButtons = new Table();
@@ -485,32 +528,66 @@ public class GameView extends View {
 
 
     public void onRoundsUpdated() {
-        // Clear the currently displayed rounds and reload from the controller
-        if (playedRounds == null) {
-            playedRounds = new ArrayList<>();
-        } else {
-            playedRounds.clear();
-        }
+        playedRounds = new ArrayList<>();
 
-        // Rebuild playedRounds list from the controller's current game state
-        for (Object obj : controller.getGames()) {
-            RoundModel round = parseRound(obj);
-            if (round == null) continue;
+        controller.whoAmI(new DataCallback() {
+            @Override
+            public void onSuccess(Object data) {
+                String username = ((UserModel) data).getUsername();
 
-            boolean hasP1 = round.getPlayerOneAnswers() != null && !round.getPlayerOneAnswers().isEmpty();
-            boolean hasP2 = round.getPlayerTwoAnswers() != null && !round.getPlayerTwoAnswers().isEmpty();
+                for (Object obj : controller.getGames()) {
+                    RoundModel round = parseRound(obj);
+                    if (round == null) continue;
 
-            if (hasP1 || hasP2) {
-                playedRounds.add(round);
+
+                    if (round.hasBothPlayersAnswered()) {
+                        playedRounds.add(round);
+                    }
+                }
+
+                if (!playedRounds.isEmpty() && displayedRoundIndex < playedRounds.size()) {
+                    showRoundResult(displayedRoundIndex);
+                }
+
+                if (controller.isMultiplayer()) {
+                    addPlayRoundButtonIfAvailable();
+
+                    if (playedRounds.size() == controller.getRounds() && !leaderboardButtonAdded) {
+                        addShowLeaderboardButton();
+                        leaderboardButtonAdded = true;
+                    }
+                }
             }
-        }
 
-        showRoundResult(displayedRoundIndex);
-
-        if (controller.isMultiplayer()) {
-            addPlayRoundButtonIfAvailable();
-        }
+            @Override
+            public void onFailure(Exception e) {
+                System.err.println("❌ Could not fetch current user to filter updated rounds.");
+            }
+        });
     }
+
+
+    private void addShowLeaderboardButton() {
+        TextureRegionDrawable showLeaderBoardUp = new TextureRegionDrawable(showLeaderBoardTexture);
+        Button.ButtonStyle showLeaderBoardStyle = new Button.ButtonStyle();
+        showLeaderBoardStyle.up = showLeaderBoardUp;
+
+        Button showLeaderBoard = new Button(showLeaderBoardStyle);
+        showLeaderBoard.setSize(850f, 200);
+        showLeaderBoard.setPosition(Gdx.graphics.getWidth() / 2 - showLeaderBoard.getWidth() / 2, 320);
+        showLeaderBoard.setDisabled(false);
+
+        showLeaderBoard.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                controller.goToLeaderBoard();
+            }
+        });
+
+        stage.addActor(showLeaderBoard);
+    }
+
+
 
     public void update() {}
 
