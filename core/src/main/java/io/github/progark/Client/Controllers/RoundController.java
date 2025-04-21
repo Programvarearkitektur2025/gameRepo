@@ -138,6 +138,50 @@ public class RoundController extends Controller {
             main.useGameController(parentGameModel);
 
 
+            for (RoundModel round: parentGameModel.getGames())
+            {
+                System.out.println("Round from endRoundEarly: " + round.getQuestion());
+            }
+
+            authService.getLoggedInUsername(new DataCallback() {
+                @Override
+                public void onSuccess(Object data) {
+                    String username = (String) data;
+                    roundModel.markPlayerCompleted(username);
+                    roundModel.setTimeRemaining(0);
+
+
+                    if (Objects.equals(username, roundModel.playerOneUsername)) {
+                        if (roundModel.getPlayerOneAnswers().isEmpty()) {
+                            roundModel.submitAnswer(roundModel.playerOneUsername, "No answer");
+                        }
+                    }
+
+                    if (Objects.equals(username, roundModel.playerTwoUsername)) {
+                        if (roundModel.getPlayerTwoAnswers().isEmpty()) {
+                            roundModel.submitAnswer(roundModel.playerTwoUsername, "No answer");
+                        }
+                    }
+
+
+                    parentGameModel.getGames().set(roundIndex, roundModel);
+
+                    if (bothPlayersHavePlayed(roundModel)) {
+                        roundAlreadyProcessed = true;
+
+                        awardPointToRoundWinner();
+
+                    }
+
+                    gameService.setNewGameRounds(parentGameModel, parentGameModel.getGames());
+                }
+
+                @Override
+                public void onFailure(Exception e) {
+                    System.err.println("❌ Failed to fetch username to mark player as completed: " + e.getMessage());
+                    gameView.showMessage("Unable to end round. Failed to fetch current player.");
+                }
+            });
             /*
             fetchLatestRoundThenSave(() -> {
                 int roundIndex = parentGameModel.getCurrentRound().intValue();
