@@ -160,8 +160,7 @@ public class GameView extends View {
                     RoundModel round = parseRound(obj);
                     if (round == null) continue;
 
-
-                    if (round.hasBothPlayersAnswered()) {
+                    if (isRoundPlayed(round)) {
                         playedRounds.add(round);
                     }
                 }
@@ -171,11 +170,11 @@ public class GameView extends View {
                     showRoundResult(displayedRoundIndex);
                 }
 
-                // 🔥 Important: Move leaderboard check here (if multiplayer)
-                if (controller.isMultiplayer() && playedRounds.size() == controller.getRounds() && !leaderboardButtonAdded) {
+                if (controller.isMultiplayer() && allRoundsFullyCompleted() && !leaderboardButtonAdded) {
                     addShowLeaderboardButton();
                     leaderboardButtonAdded = true;
                 }
+
             }
 
             @Override
@@ -185,6 +184,16 @@ public class GameView extends View {
         });
     }
 
+
+    private boolean allRoundsFullyCompleted() {
+        List<RoundModel> rounds = controller.getGames();
+        for (RoundModel round : rounds) {
+            if (!round.hasBothPlayersAnswered()) {
+                return false;
+            }
+        }
+        return true;
+    }
 
 
 
@@ -327,47 +336,33 @@ public class GameView extends View {
             playedRounds.clear();
         }
 
-
         // USERNAME AND PROFILE PIC
         addPlayerScoreRow();
-
 
         // RESULT TABLE AND ANSWERS
         resultTable = new Table();
         playedRounds.clear();
 
-        for (Object obj : controller.getGames()) {
-            RoundModel round;
-
-            if (obj instanceof RoundModel) {
-                round = (RoundModel) obj;
-            } else if (obj instanceof Map) {
-                round = RoundModel.fromMap((Map<String, Object>) obj);
-            } else {
-                System.err.println("⚠️ Unknown round object type: " + obj.getClass().getSimpleName());
-                continue;
-            }
-
+        List<RoundModel> allRounds = controller.getGames();
+        for (RoundModel round : allRounds) {
             boolean hasP1 = round.getPlayerOneAnswers() != null && !round.getPlayerOneAnswers().isEmpty();
             if (hasP1) {
                 playedRounds.add(round);
             }
         }
 
-
         // SCROLL PANE
         addResultScrollBox();
 
-
         // NAV BUTTONS
         addNavigationButtons();
-
 
         // ROUND RESULTS
         if (!playedRounds.isEmpty()) {
             showRoundResult(displayedRoundIndex);
         }
 
+        // If there are rounds left to play
         if (playedRounds.size() != controller.getRounds()) {
             TextureRegionDrawable nextRoundEnabled;
             TextureRegionDrawable nextRoundDisabled;
@@ -393,25 +388,39 @@ public class GameView extends View {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
                     if (!nextRound.isDisabled()) {
-                        int currentRoundIndex = playedRounds.size();
-
                         List<RoundModel> rounds = controller.getGames();
-                        if (currentRoundIndex >= rounds.size()) currentRoundIndex = rounds.size() - 1;
 
-                        controller.setActiveRoundIndex(currentRoundIndex);
+                        int nextIndex = -1;
+                        for (int i = 0; i < rounds.size(); i++) {
+                            RoundModel round = rounds.get(i);
+                            boolean isPlayed = round.getPlayerOneAnswers() != null && !round.getPlayerOneAnswers().isEmpty();
+                            if (!isPlayed) {
+                                nextIndex = i;
+                                break;
+                            }
+                        }
+
+                        // Fallback to last round (safety)
+                        if (nextIndex == -1) {
+                            nextIndex = rounds.size() - 1;
+                        }
+
+                        controller.setActiveRoundIndex(nextIndex);
                         controller.goToRoundSingleplayer();
                     }
                 }
             });
+
             stage.addActor(nextRound);
         } else {
+            // All rounds played: Show leaderboard
             TextureRegionDrawable showLeaderBoardUp = new TextureRegionDrawable(showLeaderBoardTexture);
             Button.ButtonStyle showLeaderBoardStyle = new Button.ButtonStyle();
             showLeaderBoardStyle.up = showLeaderBoardUp;
             Button showLeaderBoard = new Button(showLeaderBoardStyle);
             showLeaderBoard.setSize(850f, 200);
             showLeaderBoard.setPosition(Gdx.graphics.getWidth() / 2 - showLeaderBoard.getWidth() / 2, 320);
-            showLeaderBoard.setDisabled(false); // No multiplayer check needed
+            showLeaderBoard.setDisabled(false);
 
             showLeaderBoard.addListener(new ClickListener() {
                 @Override
@@ -419,9 +428,11 @@ public class GameView extends View {
                     controller.goToLeaderBoard();
                 }
             });
+
             stage.addActor(showLeaderBoard);
         }
     }
+
 
     private void commonInitialize(){
         controller.checkForRounds();
@@ -454,21 +465,17 @@ public class GameView extends View {
         RoundModel round = playedRounds.get(index);
         int roundNumber = index + 1;
 
-        // Label styles
         Label.LabelStyle headerStyle = new Label.LabelStyle(smallFont, Color.BLACK);
         Label.LabelStyle answerStyle = new Label.LabelStyle(answerFont, Color.BLACK);
 
-        // Create separate tables for Player 1 and Player 2
         Table playerOneTable = new Table();
         Table playerTwoTable = new Table();
 
         playerOneTable.align(Align.left);
         playerTwoTable.align(Align.left);
 
-        // Create a table for displaying the round number and player scores
         resultTable.add(new Label("ROUND " + roundNumber, headerStyle)).colspan(2).padBottom(40).row();
 
-        // Add the answers for Player 1 to its table
         for (Map.Entry<String, Integer> entry : round.getPlayerOneAnswers().entrySet()) {
             Table row = new Table();
             Label answer = new Label(entry.getKey(), answerStyle);
@@ -483,10 +490,8 @@ public class GameView extends View {
         playerOneTable.add(new Label(round.getPlayerOneScore() + " pts", headerStyle)).padBottom(10).padTop(40).row();
 
 
-        // Add Player 2 score if multiplayer
         if (controller.isMultiplayer()) {
 
-            // Add the answers for Player 2 to its table
             for (Map.Entry<String, Integer> entry : round.getPlayerTwoAnswers().entrySet()) {
                 Table row = new Table();
                 Label answer = new Label(entry.getKey(), answerStyle);
@@ -501,28 +506,23 @@ public class GameView extends View {
             playerTwoTable.add(new Label(round.getPlayerTwoScore() + " pts", headerStyle)).padBottom(10).padTop(40).row();
         }
 
-        // Create a parent table to hold both Player 1 and Player 2 tables side by side
         Table sideBySideTable = new Table();
         sideBySideTable.setWidth(1000);
         sideBySideTable.setHeight(2000);
-        sideBySideTable.add(playerOneTable).padRight(500);  // Add Player 1 table with some padding on the right
-        sideBySideTable.add(playerTwoTable);  // Add Player 2 table
+        sideBySideTable.add(playerOneTable).padRight(500);
+        sideBySideTable.add(playerTwoTable);
 
-        // Add the sideBySideTable to the resultTable
         resultTable.add(sideBySideTable).padTop(10).row();
 
 
-        // Scroll pane setup
         ScrollPane scrollPane = new ScrollPane(resultTable);
-        scrollPane.setScrollingDisabled(false, true);  // Allow vertical scrolling
-        scrollPane.setFadeScrollBars(false);  // Disable scroll bar fading
-
-        // Set the scroll pane size and position
+        scrollPane.setScrollingDisabled(false, true);
+        scrollPane.setFadeScrollBars(false);
         Stack resultBox = new Stack();
         resultBox.add(new Image(new TextureRegionDrawable(textFieldTexture)));
         resultBox.add(scrollPane);
         resultBox.setSize(850f, 1200f);
-        resultBox.setPosition((Gdx.graphics.getWidth() - 850f) / 2f, 550f);  // Adjust position to be centered
+        resultBox.setPosition((Gdx.graphics.getWidth() - 850f) / 2f, 550f);
         stage.addActor(resultBox);
     }
 
@@ -539,8 +539,7 @@ public class GameView extends View {
                     RoundModel round = parseRound(obj);
                     if (round == null) continue;
 
-
-                    if (round.hasBothPlayersAnswered()) {
+                    if (isRoundPlayed(round)) {
                         playedRounds.add(round);
                     }
                 }
@@ -565,6 +564,15 @@ public class GameView extends View {
             }
         });
     }
+
+    private boolean isRoundPlayed(RoundModel round) {
+        if (controller.isMultiplayer()) {
+            return round.hasBothPlayersAnswered();
+        } else {
+            return round.getPlayerOneAnswers() != null && !round.getPlayerOneAnswers().isEmpty();
+        }
+    }
+
 
 
     private void addShowLeaderboardButton() {
