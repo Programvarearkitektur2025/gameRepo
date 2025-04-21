@@ -25,7 +25,7 @@ import io.github.progark.Server.database.DataCallback;
 public class HomeView extends View {
 
     private final Skin skin;
-    private final Texture backgroundTexture, yourTurnTexture, theirTurnTexture, joinGameTexture,
+    private Texture backgroundTexture, yourTurnTexture, theirTurnTexture, joinGameTexture,
         createGameTexture, avatarTexture, navBarTexture, howToButtonTexture, transparentTexture;
 
     private final HomeController controller;
@@ -38,7 +38,12 @@ public class HomeView extends View {
         this.controller = controller;
 
         skin = new Skin(Gdx.files.internal("uiskin.json"));
-        backgroundTexture = new Texture(Gdx.files.internal("Background2.png"));
+        enter();
+    }
+
+    @Override
+    protected void initialize() {
+        this.backgroundTexture = new Texture(Gdx.files.internal("Background2.png"));
         yourTurnTexture = new Texture(Gdx.files.internal("yourTurn.png"));
         theirTurnTexture = new Texture(Gdx.files.internal("theirTurn.png"));
         joinGameTexture = new Texture(Gdx.files.internal("joinGame2.png"));
@@ -49,11 +54,6 @@ public class HomeView extends View {
         transparentTexture = new Texture(Gdx.files.internal("Transparent.png"));
 
         background = new Image(backgroundTexture);
-        enter();
-    }
-
-    @Override
-    protected void initialize() {
         stage.addActor(background);
 
         // How To Play button
