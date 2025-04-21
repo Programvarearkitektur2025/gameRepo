@@ -22,8 +22,8 @@ import io.github.progark.Server.database.DataCallback;
 
 public class HomeView extends View {
 
-    private final Skin skin;
-    private final Texture backgroundTexture, yourTurnTexture, theirTurnTexture, joinGameTexture,
+    private Skin skin;
+    private Texture backgroundTexture, yourTurnTexture, theirTurnTexture, joinGameTexture,
         createGameTexture, avatarTexture, navBarTexture, howToButtonTexture, transparentTexture;
 
     private final HomeController controller;
@@ -34,8 +34,12 @@ public class HomeView extends View {
     public HomeView(HomeController controller) {
         super();
         this.controller = controller;
+    }
 
+    @Override
+    protected void initialize() {
         skin = new Skin(Gdx.files.internal("uiskin.json"));
+
         backgroundTexture = new Texture(Gdx.files.internal("Background2.png"));
         yourTurnTexture = new Texture(Gdx.files.internal("yourTurn.png"));
         theirTurnTexture = new Texture(Gdx.files.internal("theirTurn.png"));
@@ -47,11 +51,6 @@ public class HomeView extends View {
         transparentTexture = new Texture(Gdx.files.internal("Transparent.png"));
 
         background = new Image(backgroundTexture);
-        enter();
-    }
-
-    @Override
-    protected void initialize() {
         stage.addActor(background);
 
         // How To Play button
@@ -196,7 +195,6 @@ public class HomeView extends View {
                     String status = game.getStatus();
                     HomeModel.GameEntry gameEntry = new HomeModel.GameEntry(gameId, opponent, status);
 
-                    // Refactored logic: determine turn based on whether player has played the current round
                     int currentRound = game.getCurrentRound().intValue() - 1;
                     boolean hasPlayed = false;
 
@@ -228,15 +226,15 @@ public class HomeView extends View {
     @Override
     public void dispose() {
         super.dispose();
-        backgroundTexture.dispose();
-        yourTurnTexture.dispose();
-        theirTurnTexture.dispose();
-        joinGameTexture.dispose();
-        createGameTexture.dispose();
-        avatarTexture.dispose();
-        navBarTexture.dispose();
-        howToButtonTexture.dispose();
-        transparentTexture.dispose();
+        if (backgroundTexture != null) backgroundTexture.dispose();
+        if (yourTurnTexture != null) yourTurnTexture.dispose();
+        if (theirTurnTexture != null) theirTurnTexture.dispose();
+        if (joinGameTexture != null) joinGameTexture.dispose();
+        if (createGameTexture != null) createGameTexture.dispose();
+        if (avatarTexture != null) avatarTexture.dispose();
+        if (navBarTexture != null) navBarTexture.dispose();
+        if (howToButtonTexture != null) howToButtonTexture.dispose();
+        if (transparentTexture != null) transparentTexture.dispose();
         if (navBar != null) navBar.dispose();
     }
 }

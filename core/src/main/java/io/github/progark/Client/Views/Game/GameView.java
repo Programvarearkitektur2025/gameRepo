@@ -223,9 +223,7 @@ public class GameView extends View {
 
                 if (currentRoundIndex < allRounds.size()) {
                     RoundModel currentRound = allRounds.get(currentRoundIndex);
-                    System.out.println("Have both players answered: "+ currentRound.hasBothPlayersAnswered());
                     boolean haveIAnswered = currentRound.hasPlayerCompleted(myUsername);
-                    System.out.println("Have I answered: " + haveIAnswered);
                     if (!haveIAnswered) {
                         Button playRoundButton = createPlayRoundButton(currentRoundIndex);
                         stage.addActor(playRoundButton);
@@ -259,7 +257,6 @@ public class GameView extends View {
 
         return playRoundButton;
     }
-
 
 
     private void initializeSingleplayer() {
