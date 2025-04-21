@@ -49,6 +49,25 @@ public class RoundController extends Controller {
             roundModel.playerTwoUsername = parentGameModel.getPlayerTwo();
         }
 
+        authService.getLoggedInUsername(new DataCallback() {
+            @Override
+            public void onSuccess(Object data) {
+                String username = (String) data;
+
+                // ✅ Reset timer only for players who haven't played yet
+                if (!roundModel.hasPlayerCompleted(username)) {
+                    System.out.println("🔁 Resetting timer to 30 for " + username);
+                    roundModel.setTimeRemaining(30);
+                }
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                System.err.println("❌ Could not fetch user to check timer reset: " + e.getMessage());
+            }
+        });
+
+
         this.gameView = new RoundView(this);
         for (RoundModel round : parentGameModel.getGames()){
             System.out.println("Rounds constructor: " + round.getQuestion());
@@ -133,23 +152,27 @@ public class RoundController extends Controller {
         gameView.updateTimeRemaining(roundModel.getTimeRemaining());
 
         if (roundModel.isTimeUp() && !roundAlreadyProcessed) {
-            roundAlreadyProcessed = true;
-            gameView.showGameOver();
-            main.useGameController(parentGameModel);
-
-
-            for (RoundModel round: parentGameModel.getGames())
-            {
-                System.out.println("Round from endRoundEarly: " + round.getQuestion());
-            }
-
             authService.getLoggedInUsername(new DataCallback() {
                 @Override
                 public void onSuccess(Object data) {
                     String username = (String) data;
+
+                    // 🧠 Only process end-of-round logic if this player has already played
+                    if (!roundModel.hasPlayerCompleted(username)) {
+                        // Let the player stay and still play
+                        return;
+                    }
+
+                    roundAlreadyProcessed = true;
+                    gameView.showGameOver();
+                    main.useGameController(parentGameModel);
+
+                    for (RoundModel round : parentGameModel.getGames()) {
+                        System.out.println("Round from endRoundEarly: " + round.getQuestion());
+                    }
+
                     roundModel.markPlayerCompleted(username);
                     roundModel.setTimeRemaining(0);
-
 
                     if (Objects.equals(username, roundModel.playerOneUsername)) {
                         if (roundModel.getPlayerOneAnswers().isEmpty()) {
@@ -163,14 +186,11 @@ public class RoundController extends Controller {
                         }
                     }
 
-
                     parentGameModel.getGames().set(roundIndex, roundModel);
 
                     if (bothPlayersHavePlayed(roundModel)) {
                         roundAlreadyProcessed = true;
-
                         awardPointToRoundWinner();
-
                     }
 
                     gameService.setNewGameRounds(parentGameModel, parentGameModel.getGames());
@@ -182,35 +202,9 @@ public class RoundController extends Controller {
                     gameView.showMessage("Unable to end round. Failed to fetch current player.");
                 }
             });
-            /*
-            fetchLatestRoundThenSave(() -> {
-                int roundIndex = parentGameModel.getCurrentRound().intValue();
-                parentGameModel.getGames().set(roundIndex, roundModel);
-
-                if (parentGameModel.isMultiplayer()) {
-                    if (bothPlayersHavePlayed(roundModel)) {
-                        // Save the final state before awarding points and incrementing round
-                        gameService.setNewGameRounds(parentGameModel, parentGameModel.getGames());
-                        awardPointToRoundWinner();
-                        parentGameModel.setCurrentRound(parentGameModel.getCurrentRound().intValue() + 1);
-                        // Save again with the new round number
-                        gameService.setNewGameRounds(parentGameModel, parentGameModel.getGames());
-                    } else {
-                        gameService.setNewGameRounds(parentGameModel, parentGameModel.getGames());
-                        return;
-                    }
-                } else {
-                    parentGameModel.setPlayerOnePoints(parentGameModel.getPlayerOnePoints().intValue() + roundModel.getPlayerOneScore());
-                    parentGameModel.setCurrentRound(parentGameModel.getCurrentRound().intValue() + 1);
-                    gameService.setNewGameRounds(parentGameModel, parentGameModel.getGames());
-                }
-
-                returnToGameView(roundModel);
-            });
-
-             */
         }
     }
+
 
 
     private void awardPointToRoundWinner() {
