@@ -26,7 +26,7 @@ public class RoundView extends View {
     private boolean initialized = false;
 
     private final Texture backgroundTexture;
-    private final Texture backButtonTexture;
+    private final Texture quitTexture;
 
     private Label timerLabel;
     private Label scoreLabel;
@@ -45,7 +45,7 @@ public class RoundView extends View {
 
         this.skin = new Skin(Gdx.files.internal("uiskin.json"));
         this.backgroundTexture = new Texture(Gdx.files.internal("game_background.png"));
-        this.backButtonTexture = new Texture(Gdx.files.internal("backButtonBlue.png"));
+        this.quitTexture = new Texture(Gdx.files.internal("Quit.png"));
 
         FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("OpenSans.ttf"));
 
@@ -86,10 +86,10 @@ public class RoundView extends View {
 
         // Top bar
         Table topBar = new Table();
-        ImageButton backButton = new ImageButton(new TextureRegionDrawable(backButtonTexture));
-        backButton.setSize(100, 100);
-        backButton.setPosition(30, Gdx.graphics.getHeight() - 130);
-        backButton.addListener(new ClickListener() {
+        ImageButton quitButton = new ImageButton(new TextureRegionDrawable(quitTexture));
+        quitButton.setSize(100, 100);
+        quitButton.setPosition(30, Gdx.graphics.getHeight() - 130);
+        quitButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 forceEndRoundEarly();
@@ -100,7 +100,7 @@ public class RoundView extends View {
         timerLabelTop.setFontScale(1.5f);
         this.timerLabel = timerLabelTop;
 
-        topBar.add(backButton).left().padRight(20);
+        topBar.add(quitButton).left().padRight(20);
         topBar.add(timerLabelTop).expandX().center();
         root.add(topBar).expandX().fillX().row();
 
@@ -238,7 +238,7 @@ public class RoundView extends View {
     @Override
     public void dispose() {
         if (backgroundTexture != null) backgroundTexture.dispose();
-        if (backButtonTexture != null) backButtonTexture.dispose();
+        if (quitTexture != null) quitTexture.dispose();
         if (skin != null) skin.dispose();
         if (smallFont != null) smallFont.dispose();
         if (largeFont != null) largeFont.dispose();
