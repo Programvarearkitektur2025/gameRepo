@@ -28,7 +28,7 @@ public class GameView extends View {
     private final BitmapFont smallFont, largerFont, answerFont;
     private final GameController controller;
     private Image background;
-    private int displayedRoundIndex;
+    private int displayedRoundIndex = 0;
     private Table resultTable;
     private List<RoundModel> playedRounds;
     private boolean initialized = false;
@@ -68,8 +68,6 @@ public class GameView extends View {
 
         background = new Image(backgroundTexture);
 
-        this.displayedRoundIndex = controller.getCurrentRoundIndex();
-
     }
 
     @Override
@@ -86,13 +84,15 @@ public class GameView extends View {
 
     private void initializeMultiplayer() {
         commonInitialize();
+        addLobbyCodeLabel();
         addPlayerScoreRow();
         initializePlayedRounds();
         addResultScrollBox();
         addNavigationButtons();
         if (!playedRounds.isEmpty()) showRoundResult(displayedRoundIndex);
-        addPlayRoundButtonIfAvailable();
+        addPlayRoundButtonIfAvailable(); // this is now guarded inside
     }
+
 
     // PROFILES AND SCORE
     private void addPlayerScoreRow() {
@@ -108,6 +108,19 @@ public class GameView extends View {
         }
         stage.addActor(scoreRow);
     }
+
+    private void addLobbyCodeLabel() {
+        String lobbyCode = controller.getLobbyCode();
+        Label.LabelStyle style = new Label.LabelStyle(largerFont, skin.getColor("white"));
+        Label lobbyLabel = new Label("Lobby Code: " + lobbyCode, style);
+
+        lobbyLabel.setPosition(
+            (Gdx.graphics.getWidth() - lobbyLabel.getWidth()) / 2f,
+            Gdx.graphics.getHeight() - 150
+        );
+        stage.addActor(lobbyLabel);
+    }
+
 
     // PROFILE PIC AND USERNAME
     private Table createPlayerProfile(String playerName) {
@@ -211,8 +224,17 @@ public class GameView extends View {
 
                 int currentRoundIndex = controller.getCurrentRoundIndex();
                 List<RoundModel> allRounds = controller.getGames();
-                System.out.println("CurrentRound is: " + currentRoundIndex);
 
+                // 👇 NEW: Check that both players exist
+                String playerOne = controller.getPlayerOne();
+                String playerTwo = controller.getPlayerTwo();
+                boolean bothPlayersPresent = playerOne != null && playerTwo != null
+                    && !playerOne.isEmpty() && !playerTwo.isEmpty();
+
+                if (!bothPlayersPresent) {
+                    System.out.println("Waiting for a second player to join the game.");
+                    return; // Don't show button
+                }
 
                 if (currentRoundIndex < allRounds.size()) {
                     RoundModel currentRound = allRounds.get(currentRoundIndex);
@@ -230,6 +252,7 @@ public class GameView extends View {
             }
         });
     }
+
 
     private Button createPlayRoundButton(int currentRoundIndex) {
         TextureRegionDrawable playRoundDrawable = new TextureRegionDrawable(playRoundTexture);
