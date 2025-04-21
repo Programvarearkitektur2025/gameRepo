@@ -89,6 +89,9 @@ public class GameService {
 
                     // Update the games list with the new rounds
                     existingData.put("games", roundMaps);
+                    existingData.put("playerOnePoints", gameModel.getPlayerOnePoints());
+                    existingData.put("playerTwoPoints", gameModel.getPlayerTwoPoints());
+                    existingData.put("currentRound", gameModel.getCurrentRound());
 
                     // Save the updated data
                     databaseManager.writeData(path, existingData);

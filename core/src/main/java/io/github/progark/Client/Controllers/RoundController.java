@@ -30,7 +30,7 @@ public class RoundController extends Controller {
         this.main = main;
         this.authService = authService;
 
-        roundIndex = (int) parentGameModel.getCurrentRound();
+        roundIndex = (int) parentGameModel.getCurrentRound() - 1;
 
 
         Object roundRaw = parentGameModel.getGames().get(roundIndex);
