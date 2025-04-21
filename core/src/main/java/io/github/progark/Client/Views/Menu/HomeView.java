@@ -8,6 +8,8 @@ import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.Scaling;
 
 import java.util.List;
 import java.util.Map;
@@ -22,8 +24,8 @@ import io.github.progark.Server.database.DataCallback;
 
 public class HomeView extends View {
 
-    private Skin skin;
-    private Texture backgroundTexture, yourTurnTexture, theirTurnTexture, joinGameTexture,
+    private final Skin skin;
+    private final Texture backgroundTexture, yourTurnTexture, theirTurnTexture, joinGameTexture,
         createGameTexture, avatarTexture, navBarTexture, howToButtonTexture, transparentTexture;
 
     private final HomeController controller;
@@ -34,12 +36,8 @@ public class HomeView extends View {
     public HomeView(HomeController controller) {
         super();
         this.controller = controller;
-    }
 
-    @Override
-    protected void initialize() {
         skin = new Skin(Gdx.files.internal("uiskin.json"));
-
         backgroundTexture = new Texture(Gdx.files.internal("Background2.png"));
         yourTurnTexture = new Texture(Gdx.files.internal("yourTurn.png"));
         theirTurnTexture = new Texture(Gdx.files.internal("theirTurn.png"));
@@ -51,6 +49,11 @@ public class HomeView extends View {
         transparentTexture = new Texture(Gdx.files.internal("Transparent.png"));
 
         background = new Image(backgroundTexture);
+        enter();
+    }
+
+    @Override
+    protected void initialize() {
         stage.addActor(background);
 
         // How To Play button
@@ -70,7 +73,7 @@ public class HomeView extends View {
         mainLayout.top().padTop(30);
         stage.addActor(mainLayout);
 
-        mainLayout.add(new Image(yourTurnTexture)).left().padBottom(20).row();
+
 
         // Game buttons
         Table buttonTable = new Table();
@@ -119,64 +122,72 @@ public class HomeView extends View {
         });
     }
 
-    private Table createGameEntry(HomeModel.GameEntry game) {
-        Table row = new Table(skin);
-        row.setBackground(skin.newDrawable("white"));
 
-        float avatarSize = Gdx.graphics.getWidth() * 0.12f;
+
+    private Stack createGameEntry(HomeModel.GameEntry game) {
+        float avatarSize = Gdx.graphics.getWidth() * 1f;
+
         Image avatar = new Image(new TextureRegionDrawable(new TextureRegion(avatarTexture)));
-        avatar.setSize(avatarSize, avatarSize);
+        avatar.setScaling(Scaling.fit);
 
         String opponent = game.getOpponentName() != null ? game.getOpponentName() : "Waiting for Player to join";
         Label nameLabel = new Label(opponent, skin);
-        nameLabel.setFontScale(1.5f);
+        nameLabel.setFontScale(3f);
         nameLabel.setColor(0, 0, 0, 1);
+        nameLabel.setAlignment(Align.center);
 
-        row.add(avatar).size(avatarSize).pad(20);
-        row.add(nameLabel).left().expandX();
+        Stack stack = new Stack();
+        stack.setSize(avatarSize, avatarSize);
+        stack.add(avatar);
+        stack.add(nameLabel);
 
-        return row;
+        // ONLY the image+text combo is clickable now
+        stack.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                controller.getGameToOpen(game.getGameId());
+            }
+        });
+
+        return stack;
     }
 
     public void updateGameLists(HomeModel homeModel) {
         contentTable.clear();
-        float sectionWidth = Gdx.graphics.getWidth() * 0.9f;
-        float rowHeight = 120f;
+        float sectionWidth = Gdx.graphics.getWidth() * 1f;
+        float avatarAspectRatio = 2703f / 551f;
+        float avatarHeight = sectionWidth / avatarAspectRatio;
 
-        Label yourTurnLabel = new Label("Your turn", skin);
-        yourTurnLabel.setFontScale(1.5f);
-        yourTurnLabel.setColor(0.4f, 0.6f, 0.2f, 1);
-        contentTable.add(yourTurnLabel).left().pad(20).row();
+        // "Your turn" section header
+        Image yourTurnHeader = new Image(yourTurnTexture);
+        contentTable.add(yourTurnHeader).left().padTop(30).padBottom(20).row();
 
         for (HomeModel.GameEntry game : homeModel.getYourTurnGames()) {
-            Table entry = createGameEntry(game);
-            entry.setTouchable(Touchable.enabled);
-            entry.addListener(new ClickListener() {
-                @Override
-                public void clicked(InputEvent event, float x, float y) {
-                    controller.getGameToOpen(game.getGameId());
-                }
-            });
-            contentTable.add(entry).width(sectionWidth).height(rowHeight).padBottom(10).row();
+            Stack entry = createGameEntry(game);
+            contentTable.add(entry)
+                .width(sectionWidth)
+                .height(avatarHeight) // ⬅️ Only the actual avatar size is clickable
+                .center()
+                .padBottom(30)
+                .row();
         }
 
-        Label theirTurnLabel = new Label("Their turn", skin);
-        theirTurnLabel.setFontScale(1.5f);
-        theirTurnLabel.setColor(1.0f, 0.6f, 0.2f, 1);
-        contentTable.add(theirTurnLabel).left().padTop(40).padBottom(10).row();
+        // "Their turn" section header
+        Image theirTurnHeader = new Image(theirTurnTexture);
+        contentTable.add(theirTurnHeader).left().padTop(30).padBottom(20).row();
 
         for (HomeModel.GameEntry game : homeModel.getTheirTurnGames()) {
-            Table entry = createGameEntry(game);
-            entry.setTouchable(Touchable.enabled);
-            entry.addListener(new ClickListener() {
-                @Override
-                public void clicked(InputEvent event, float x, float y) {
-                    controller.getGameToOpen(game.getGameId());
-                }
-            });
-            contentTable.add(entry).width(sectionWidth).height(rowHeight).padBottom(10).row();
+            Stack entry = createGameEntry(game);
+            contentTable.add(entry)
+                .width(sectionWidth)
+                .height(avatarHeight)
+                .center()
+                .padBottom(30)
+                .row();
         }
     }
+
+
 
     public void renderGames(List<Map<String, Object>> rawGameList) {
         controller.getLoggedInUserHome(new DataCallback() {
@@ -192,24 +203,37 @@ public class HomeView extends View {
                     if (game == null) continue;
 
                     String opponent = game.getOpponent(currentUser);
-                    String status = game.getStatus();
-                    HomeModel.GameEntry gameEntry = new HomeModel.GameEntry(gameId, opponent, status);
+                    String displayName;
 
+                    if (!game.isMultiplayer()) {
+                        displayName = "You"; // Singleplayer: Always show "You"
+                        homeModel.getYourTurnGames().add(new HomeModel.GameEntry(gameId, displayName, game.getStatus()));
+                        continue;
+                    }
+
+                    if (opponent == null || opponent.isEmpty()) {
+                        displayName = "Waiting for Player to join";
+                        homeModel.getTheirTurnGames().add(new HomeModel.GameEntry(gameId, displayName, game.getStatus()));
+                        continue;
+                    }
+
+                    // Multiplayer logic: determine turn
                     int currentRound = game.getCurrentRound().intValue() - 1;
                     boolean hasPlayed = false;
 
-                    if (currentRound >= 0 && currentRound < game.getGames().size()) {
-                        Object roundObj = game.getGames().get(currentRound);
-                        if (roundObj instanceof Map) {
-                            RoundModel round = RoundModel.fromMap((Map<String, Object>) roundObj);
-                            hasPlayed = round.hasPlayerCompleted(currentUser);
-                        }
-                    }
+                    //if (currentRound >= 0 && currentRound < game.getGames().size()) {
+                        //RoundModel round = game.getGames().get(currentRound);
+                        //if (round != null && round.getHasPlayedList() != null) {
+                            //hasPlayed = round.getHasPlayedList().contains(currentUser);
+                        //}
+                    //}
+
+                    displayName = opponent;
 
                     if (!hasPlayed) {
-                        homeModel.getYourTurnGames().add(gameEntry);
+                        homeModel.getYourTurnGames().add(new HomeModel.GameEntry(gameId, displayName, game.getStatus()));
                     } else {
-                        homeModel.getTheirTurnGames().add(gameEntry);
+                        homeModel.getTheirTurnGames().add(new HomeModel.GameEntry(gameId, displayName, game.getStatus()));
                     }
                 }
 
@@ -223,18 +247,19 @@ public class HomeView extends View {
         });
     }
 
+
     @Override
     public void dispose() {
         super.dispose();
-        if (backgroundTexture != null) backgroundTexture.dispose();
-        if (yourTurnTexture != null) yourTurnTexture.dispose();
-        if (theirTurnTexture != null) theirTurnTexture.dispose();
-        if (joinGameTexture != null) joinGameTexture.dispose();
-        if (createGameTexture != null) createGameTexture.dispose();
-        if (avatarTexture != null) avatarTexture.dispose();
-        if (navBarTexture != null) navBarTexture.dispose();
-        if (howToButtonTexture != null) howToButtonTexture.dispose();
-        if (transparentTexture != null) transparentTexture.dispose();
+        backgroundTexture.dispose();
+        yourTurnTexture.dispose();
+        theirTurnTexture.dispose();
+        joinGameTexture.dispose();
+        createGameTexture.dispose();
+        avatarTexture.dispose();
+        navBarTexture.dispose();
+        howToButtonTexture.dispose();
+        transparentTexture.dispose();
         if (navBar != null) navBar.dispose();
     }
 }
