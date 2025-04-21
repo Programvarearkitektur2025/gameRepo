@@ -1,35 +1,54 @@
-# gameRepo
+# Think Fast Mobile Game 🎮
 
-A [libGDX](https://libgdx.com/) project generated with [gdx-liftoff](https://github.com/libgdx/gdx-liftoff).
+A sophisticated multiplayer mobile game built with LibGDX framework, enabling gameplay through lobby-based matchmaking. The game leverages modern architecture patterns and cloud infrastructure for a seamless multiplayer experience.
 
-This project was generated with a template including simple application launchers and an `ApplicationAdapter` extension that draws libGDX logo.
+## Features
 
-## Platforms
+### Authentication System
+- Secure user registration and login
+- Session management
+- Password encryption
+- Persistent user profiles
 
-- `core`: Main module with the application logic shared by all platforms.
-- `lwjgl3`: Primary desktop platform using LWJGL3; was called 'desktop' in older docs.
-- `android`: Android mobile platform. Needs Android SDK.
+### Multiplayer Functionality
+- Create private game lobbies
+- Join existing lobbies via lobby codes
+- Real-time player synchronization
+- Lobby management system
+  - Player roles (host/participant)
+  - Lobby status tracking
+  - Player limit management
 
-## Gradle
+### Technical Architecture
 
-This project uses [Gradle](https://gradle.org/) to manage dependencies.
-The Gradle wrapper was included, so you can run Gradle tasks using `gradlew.bat` or `./gradlew` commands.
-Useful Gradle tasks and flags:
+#### Client-Side (LibGDX)
+- **Controllers**
+  - `LoginController`: Handles user authentication flows and session management
+  - `JoinGameController`: Manages lobby operations and matchmaking
+  - `GameController`: Coordinates game state and player interactions
+  - `AuthController`: Provides authentication utilities and token management
 
-- `--continue`: when using this flag, errors will not stop the tasks from running.
-- `--daemon`: thanks to this flag, Gradle daemon will be used to run chosen tasks.
-- `--offline`: when using this flag, cached dependency archives will be used.
-- `--refresh-dependencies`: this flag forces validation of all dependencies. Useful for snapshot versions.
-- `android:lint`: performs Android project validation.
-- `build`: builds sources and archives of every project.
-- `cleanEclipse`: removes Eclipse project data.
-- `cleanIdea`: removes IntelliJ project data.
-- `clean`: removes `build` folders, which store compiled classes and built archives.
-- `eclipse`: generates Eclipse project data.
-- `idea`: generates IntelliJ project data.
-- `lwjgl3:jar`: builds application's runnable jar, which can be found at `lwjgl3/build/libs`.
-- `lwjgl3:run`: starts the application.
-- `test`: runs unit tests (if any).
+- **Views**
+  - `LoginView`: User authentication interface
+  - `JoinGameView`: Lobby creation and joining interface
+  - `GameView`: Main gameplay interface
+  - Custom UI components for enhanced user experience
 
-Note that most tasks that are not specific to a single project can be run with `name:` prefix, where the `name` should be replaced with the ID of a specific project.
-For example, `core:clean` removes `build` folder only from the `core` project.
+- **Services**
+  - `AuthService`: Authentication and session management
+  - `CreateGameService`: Lobby and game instance management
+  - `DatabaseManager`: Data persistence and state management
+
+#### Backend Infrastructure
+- Real-time database for game state synchronization
+- User authentication service
+- Lobby management system
+- Game state persistence
+
+## Development Setup
+
+### Prerequisites
+- Java Development Kit (JDK) 8 or higher
+- Android SDK (for mobile deployment)
+- Gradle 7.0 or higher
+- IDE with Android development support (Android Studio recommended)
