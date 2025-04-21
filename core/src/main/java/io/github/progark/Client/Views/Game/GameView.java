@@ -28,7 +28,7 @@ public class GameView extends View {
     private final BitmapFont smallFont, largerFont, answerFont;
     private final GameController controller;
     private Image background;
-    private int displayedRoundIndex;
+    private int displayedRoundIndex = 0;
     private Table resultTable;
     private List<RoundModel> playedRounds;
     private boolean initialized = false;
@@ -68,8 +68,6 @@ public class GameView extends View {
 
         background = new Image(backgroundTexture);
 
-        this.displayedRoundIndex = controller.getCurrentRoundIndex();
-
     }
 
     @Override
@@ -86,13 +84,15 @@ public class GameView extends View {
 
     private void initializeMultiplayer() {
         commonInitialize();
+        addLobbyCodeLabel();
         addPlayerScoreRow();
         initializePlayedRounds();
         addResultScrollBox();
         addNavigationButtons();
         if (!playedRounds.isEmpty()) showRoundResult(displayedRoundIndex);
-        addPlayRoundButtonIfAvailable();
+        addPlayRoundButtonIfAvailable(); // this is now guarded inside
     }
+
 
     // PROFILES AND SCORE
     private void addPlayerScoreRow() {
@@ -108,6 +108,19 @@ public class GameView extends View {
         }
         stage.addActor(scoreRow);
     }
+
+    private void addLobbyCodeLabel() {
+        String lobbyCode = controller.getLobbyCode();
+        Label.LabelStyle style = new Label.LabelStyle(largerFont, skin.getColor("white"));
+        Label lobbyLabel = new Label("Lobby Code: " + lobbyCode, style);
+
+        lobbyLabel.setPosition(
+            (Gdx.graphics.getWidth() - lobbyLabel.getWidth()) / 2f,
+            Gdx.graphics.getHeight() - 150
+        );
+        stage.addActor(lobbyLabel);
+    }
+
 
     // PROFILE PIC AND USERNAME
     private Table createPlayerProfile(String playerName) {
@@ -211,8 +224,17 @@ public class GameView extends View {
 
                 int currentRoundIndex = controller.getCurrentRoundIndex();
                 List<RoundModel> allRounds = controller.getGames();
-                System.out.println("CurrentRound is: " + currentRoundIndex);
 
+                // 👇 NEW: Check that both players exist
+                String playerOne = controller.getPlayerOne();
+                String playerTwo = controller.getPlayerTwo();
+                boolean bothPlayersPresent = playerOne != null && playerTwo != null
+                    && !playerOne.isEmpty() && !playerTwo.isEmpty();
+
+                if (!bothPlayersPresent) {
+                    System.out.println("Waiting for a second player to join the game.");
+                    return; // Don't show button
+                }
 
                 if (currentRoundIndex < allRounds.size()) {
                     RoundModel currentRound = allRounds.get(currentRoundIndex);
@@ -230,6 +252,7 @@ public class GameView extends View {
             }
         });
     }
+
 
     private Button createPlayRoundButton(int currentRoundIndex) {
         TextureRegionDrawable playRoundDrawable = new TextureRegionDrawable(playRoundTexture);
@@ -400,7 +423,7 @@ public class GameView extends View {
         playerTwoTable.align(Align.left);
 
         // Create a table for displaying the round number and player scores
-        resultTable.add(new Label("ROUND " + roundNumber, headerStyle)).colspan(2).padBottom(910).row();
+        resultTable.add(new Label("ROUND " + roundNumber, headerStyle)).colspan(2).padBottom(40).row();
 
         // Add the answers for Player 1 to its table
         for (Map.Entry<String, Integer> entry : round.getPlayerOneAnswers().entrySet()) {
@@ -414,9 +437,11 @@ public class GameView extends View {
             playerOneTable.add(row).left().padBottom(5).row();
         }
 
+        playerOneTable.add(new Label(round.getPlayerOneScore() + " pts", headerStyle)).padBottom(10).padTop(40).row();
+
+
         // Add Player 2 score if multiplayer
         if (controller.isMultiplayer()) {
-            playerTwoTable.add(new Label(round.getPlayerTwoScore() + " pts", headerStyle)).colspan(2).padBottom(10).row();
 
             // Add the answers for Player 2 to its table
             for (Map.Entry<String, Integer> entry : round.getPlayerTwoAnswers().entrySet()) {
@@ -429,18 +454,20 @@ public class GameView extends View {
                 row.add(pointLabel).right();
                 playerTwoTable.add(row).left().padBottom(5).row();
             }
+
+            playerTwoTable.add(new Label(round.getPlayerTwoScore() + " pts", headerStyle)).padBottom(10).padTop(40).row();
         }
 
         // Create a parent table to hold both Player 1 and Player 2 tables side by side
         Table sideBySideTable = new Table();
-        sideBySideTable.add(playerOneTable).padRight(50);  // Add Player 1 table with some padding on the right
+        sideBySideTable.setWidth(1000);
+        sideBySideTable.setHeight(2000);
+        sideBySideTable.add(playerOneTable).padRight(500);  // Add Player 1 table with some padding on the right
         sideBySideTable.add(playerTwoTable);  // Add Player 2 table
 
         // Add the sideBySideTable to the resultTable
         resultTable.add(sideBySideTable).padTop(10).row();
 
-        // POINTS LABEL
-        resultTable.add(new Label(round.getPlayerOneScore() + " pts", headerStyle)).colspan(2).padBottom(10).row();
 
         // Scroll pane setup
         ScrollPane scrollPane = new ScrollPane(resultTable);
