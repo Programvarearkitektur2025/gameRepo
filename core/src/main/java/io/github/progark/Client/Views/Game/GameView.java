@@ -29,7 +29,7 @@ public class GameView extends View {
     private final GameController controller;
     private Image background;
 
-    private int displayedRoundIndex = 0;
+    private int displayedRoundIndex;
     private Table resultTable;
     private List<RoundModel> playedRounds;
 
@@ -72,6 +72,8 @@ public class GameView extends View {
         generator.dispose();
 
         background = new Image(backgroundTexture);
+
+        this.displayedRoundIndex = controller.getCurrentRoundIndex();
 
     }
 
@@ -496,6 +498,36 @@ public class GameView extends View {
         }
     }
 
+    public void onRoundsUpdated() {
+        // Clear the currently displayed rounds and reload from the controller
+        if (playedRounds == null) {
+            playedRounds = new ArrayList<>();
+        } else {
+            playedRounds.clear();
+        }
+
+        // Rebuild playedRounds list from the controller's current game state
+        for (Object obj : controller.getGames()) {
+            RoundModel round = parseRound(obj);
+            if (round == null) continue;
+
+            boolean hasP1 = round.getPlayerOneAnswers() != null && !round.getPlayerOneAnswers().isEmpty();
+            boolean hasP2 = round.getPlayerTwoAnswers() != null && !round.getPlayerTwoAnswers().isEmpty();
+
+            if (hasP1 || hasP2) {
+                playedRounds.add(round);
+            }
+        }
+
+        showRoundResult(displayedRoundIndex);
+
+        // Update headline and optionally re-add play round button
+        updateHeadline();
+
+        if (controller.isMultiplayer()) {
+            addPlayRoundButtonIfAvailable();
+        }
+    }
 
     public void update() {}
 

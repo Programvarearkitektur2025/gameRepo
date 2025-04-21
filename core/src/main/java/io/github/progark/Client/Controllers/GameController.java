@@ -14,6 +14,8 @@ import io.github.progark.Server.Service.AuthService;
 import io.github.progark.Server.Service.GameService;
 import io.github.progark.Server.database.DataCallback;
 import io.github.progark.Server.database.DatabaseManager;
+import com.badlogic.gdx.utils.Timer;
+import com.badlogic.gdx.utils.Timer.Task;
 
 public class GameController extends Controller {
 
@@ -21,6 +23,7 @@ public class GameController extends Controller {
     private GameView gameView;
     private Main main;
     private GameService gameService;
+    private Task syncTask;
 
     public GameController(DatabaseManager databaseManager, Main main, GameModel gameModel) {
         this.gameModel = gameModel;
@@ -36,6 +39,7 @@ public class GameController extends Controller {
         if (gameView == null) {
             gameView = new GameView(this);
         }
+        startGameSyncing();
         gameView.enter();
     }
 
@@ -66,56 +70,12 @@ public class GameController extends Controller {
             // Transition first, then update once round is fetched
             main.useRoundController(gameModel);
         }
-
-        gameService.fetchCurrentRound(gameModel, new DataCallback() {
-            @Override
-            public void onSuccess(Object data) {
-                if (!(data instanceof RoundModel)) {
-                    System.err.println("Fetched data is not a RoundModel: " + (data != null ? data.getClass().getSimpleName() : "null"));
-                    return;
-                }
-
-                RoundModel round = (RoundModel) data;
-                int index = (int) gameModel.getCurrentRound();
-
-                // Defensive: Ensure games list is not null
-                List<RoundModel> rounds = gameModel.getGames();
-                if (rounds == null) {
-                    System.out.println("Games list was null, initializing a new one.");
-                    rounds = new ArrayList<>();
-                }
-
-                // Add or replace round
-                if (index >= 0 && index < rounds.size()) {
-                    System.out.println("Updating round at index " + index);
-                    rounds.set(index, round);
-                } else {
-                    System.out.println("Adding round at index " + index + " (list size: " + rounds.size() + ")");
-                    // Fill gaps if needed (avoid IndexOutOfBounds)
-                    while (rounds.size() < index) {
-                        rounds.add(null);
-                    }
-                    rounds.add(round);
-                }
-
-                gameModel.setGames(rounds);
-
-                if (!loadViewImmediately) {
-                    main.useRoundController(gameModel); // Only if we waited to transition
-                } else {
-                    System.out.println("Round data updated post-view load");
-                }
-            }
-
-            @Override
-            public void onFailure(Exception e) {
-                System.err.println("Failed to fetch current round: " + e.getMessage());
-            }
-        });
+        stopGameSyncing();
     }
 
 
     public void goToRoundSingleplayer(){
+        stopGameSyncing();
         main.useRoundController(gameModel);
     }
 
@@ -187,6 +147,7 @@ public class GameController extends Controller {
     }
 
     public void goToLeaderBoard(){
+        stopGameSyncing();
         main.useLeaderBoardController();
     }
 
@@ -214,5 +175,42 @@ public class GameController extends Controller {
             if (round.hasBothPlayersAnswered()) roundIndex++;
         }
         return roundIndex;
+    }
+
+    public void startGameSyncing() {
+        if (syncTask != null) return;
+
+        syncTask = Timer.schedule(new Task() {
+            @Override
+            public void run() {
+                gameService.loadExistingRoundsFromFirebase(gameModel, new DataCallback() {
+                    @Override
+                    public void onSuccess(Object data) {
+                        if (data instanceof List<?>) {
+                            @SuppressWarnings("unchecked")
+                            List<RoundModel> updatedRounds = (List<RoundModel>) data;
+                            gameModel.setGames(updatedRounds);
+                            System.out.println("✅ Synced game rounds from Firebase.");
+
+                            if (gameView != null) {
+                                gameView.onRoundsUpdated(); // optional refresh
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Exception e) {
+                        System.err.println("❌ Failed to sync rounds from Firebase: " + e.getMessage());
+                    }
+                });
+            }
+        }, 0, 3); // delay 0s, repeat every 3s
+    }
+
+    public void stopGameSyncing() {
+        if (syncTask != null) {
+            syncTask.cancel();
+            syncTask = null;
+        }
     }
 }
