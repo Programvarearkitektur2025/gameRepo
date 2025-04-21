@@ -81,19 +81,16 @@ public class GameService {
                 if (data instanceof Map) {
                     Map<String, Object> existingData = new HashMap<>((Map<String, Object>) data);
 
-                    // Convert all rounds to maps
                     List<Map<String, Object>> roundMaps = new ArrayList<>();
                     for (RoundModel round : newRounds) {
                         roundMaps.add(round.toMap());
                     }
 
-                    // Update the games list with the new rounds
+                    // 🧠 Save both the rounds AND updated game scores
                     existingData.put("games", roundMaps);
                     existingData.put("playerOnePoints", gameModel.getPlayerOnePoints());
                     existingData.put("playerTwoPoints", gameModel.getPlayerTwoPoints());
-                    existingData.put("currentRound", gameModel.getCurrentRound());
 
-                    // Save the updated data
                     databaseManager.writeData(path, existingData);
                     System.out.println("✅ Game state saved successfully");
                 } else {
@@ -107,6 +104,7 @@ public class GameService {
             }
         });
     }
+
 
     public void loadRoundsFromFirebase(GameModel gameModel, int totalRounds, DataCallback callback) {
         String path = "questions";
