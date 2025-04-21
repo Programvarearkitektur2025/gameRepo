@@ -135,6 +135,8 @@ public class RoundController extends Controller {
         if (roundModel.isTimeUp() && !roundAlreadyProcessed) {
             roundAlreadyProcessed = true;
             gameView.showGameOver();
+            main.useGameController(parentGameModel);
+
 
             /*
             fetchLatestRoundThenSave(() -> {
