@@ -96,7 +96,7 @@ public class RoundView extends View {
             }
         });
 
-        Label timerLabelTop = new Label("⏱ 60", new Label.LabelStyle(largeFont, Color.WHITE));
+        Label timerLabelTop = new Label("⏱ 30", new Label.LabelStyle(largeFont, Color.WHITE));
         timerLabelTop.setFontScale(1.5f);
         this.timerLabel = timerLabelTop;
 

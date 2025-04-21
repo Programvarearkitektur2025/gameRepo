@@ -2,6 +2,7 @@ package io.github.progark.Client.Controllers;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import io.github.progark.Client.Views.Game.RoundView;
 import io.github.progark.Main;
@@ -9,13 +10,11 @@ import io.github.progark.Server.Model.Game.GameModel;
 import io.github.progark.Server.Model.Game.RoundModel;
 import io.github.progark.Server.Service.AuthService;
 import io.github.progark.Server.Service.GameService;
-import io.github.progark.Server.Service.SolutionService;
 import io.github.progark.Server.database.DataCallback;
 import io.github.progark.Server.database.DatabaseManager;
 
 public class RoundController extends Controller {
     private GameService gameService;
-    private SolutionService solutionService;
     private RoundModel roundModel;
     private RoundView gameView;
     private GameModel parentGameModel;
@@ -26,13 +25,13 @@ public class RoundController extends Controller {
 
 
     public RoundController(GameModel gameModel, DatabaseManager databaseManager, Main main, AuthService authService) {
-        this.solutionService = new SolutionService(databaseManager);
         this.gameService = new GameService(databaseManager);
         this.parentGameModel = gameModel;
         this.main = main;
         this.authService = authService;
 
         roundIndex = (int) parentGameModel.getCurrentRound();
+
 
         Object roundRaw = parentGameModel.getGames().get(roundIndex);
 
@@ -198,35 +197,25 @@ public class RoundController extends Controller {
     public void updateTime(float delta) {
     }
 
-    public void getQuestionByID(String ID) {
-        solutionService.getQuestion(ID, new DataCallback() {
-            @Override
-            public void onSuccess(Object data) {
-            }
-
-            @Override
-            public void onFailure(Exception e) {
-                System.out.println("❌ Failed to fetch question: " + e.getMessage());
-            }
-        });
-    }
-
     public String getQuestion() {
         return roundModel.getQuestion();
     }
 
     private boolean bothPlayersHavePlayed(RoundModel round) {
         // Check if both players have been marked as completed
-        boolean p1Completed = round.hasPlayerCompleted(round.playerOneUsername);
-        boolean p2Completed = round.hasPlayerCompleted(round.playerTwoUsername);
 
         // For multiplayer, both players must have completed
         if (parentGameModel.isMultiplayer()) {
+
+            boolean p1Completed = round.hasPlayerCompleted(round.playerOneUsername);
+            boolean p2Completed = round.hasPlayerCompleted(round.playerTwoUsername);
+
             return p1Completed && p2Completed;
         }
 
         // For single player, only player one needs to complete
-        return p1Completed;
+
+        return round.hasPlayerCompleted(round.playerOneUsername);
     }
 
     public void endRoundEarly() {
@@ -241,6 +230,20 @@ public class RoundController extends Controller {
                 String username = (String) data;
                 roundModel.markPlayerCompleted(username);
                 roundModel.setTimeRemaining(0);
+
+                if (Objects.equals(username, roundModel.playerOneUsername)) {
+                    if (roundModel.getPlayerOneAnswers().isEmpty()) {
+                        roundModel.submitAnswer(roundModel.playerOneUsername, "No answer");
+                    }
+                }
+
+                if (Objects.equals(username, roundModel.playerTwoUsername)) {
+                    if (roundModel.getPlayerTwoAnswers().isEmpty()) {
+                        roundModel.submitAnswer(roundModel.playerTwoUsername, "No answer");
+                    }
+                }
+
+
 
                 parentGameModel.getGames().set(roundIndex, roundModel);
 

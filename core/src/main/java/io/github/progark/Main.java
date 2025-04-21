@@ -14,7 +14,6 @@ import io.github.progark.Client.Controllers.LeaderboardController;
 import io.github.progark.Client.Controllers.LoginController;
 import io.github.progark.Client.Controllers.RegistrationController;
 import io.github.progark.Client.Controllers.SettingsController;
-import io.github.progark.Client.Controllers.SolutionController;
 import io.github.progark.Client.Controllers.TutorialController;
 import io.github.progark.Client.Controllers.UserController;
 import io.github.progark.Server.Model.Game.GameModel;
@@ -114,10 +113,6 @@ public class Main extends Game {
     }
     public MusicManager getMusicManager() {
         return musicManager;
-    }
-
-    public void useSolutionController() {
-        controllerManager.setController(new SolutionController(this));
     }
 
     public void useResultsController() {

@@ -144,7 +144,8 @@ public class CreateGameView extends View {
             public void clicked(InputEvent event, float x, float y) {
                 int rounds = selectedRounds + 1;
                 boolean isMultiplayer = selectedMode == 1;
-                controller.createLobby(selectedDifficulty, rounds, isMultiplayer, new DataCallback() {
+                int difficulty = selectedDifficulty + 1;
+                controller.createLobby(difficulty, rounds, isMultiplayer, new DataCallback() {
                     @Override
                     public void onSuccess(Object data) {
                         GameModel ourGame = (GameModel) data;

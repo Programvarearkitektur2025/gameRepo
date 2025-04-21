@@ -14,7 +14,7 @@ public class RoundModel {
 
     private int playerOneScore = 0;
     private int playerTwoScore = 0;
-    private float timeRemaining = 60f;
+    private float timeRemaining = 30f;
 
     private final QuestionModel question;
 
