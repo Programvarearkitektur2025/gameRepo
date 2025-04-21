@@ -11,13 +11,12 @@ import com.badlogic.gdx.scenes.scene2d.*;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 
 import io.github.progark.Client.Views.View;
 import io.github.progark.Client.Controllers.RoundController;
-import io.github.progark.Server.Model.Game.RoundModel;
-import io.github.progark.Server.Service.AuthService;
 
 public class RoundView extends View {
 
@@ -27,15 +26,18 @@ public class RoundView extends View {
 
     private final Texture backgroundTexture;
     private final Texture quitTexture;
+    private final Texture textFieldTexture;
+    private final Texture enterTexture;
+    private final Texture rectangleTexture;
 
     private Label timerLabel;
     private Label scoreLabel;
     private Label categoryLabel;
     private TextField inputField;
-    private TextButton submitButton;
+    private ImageButton submitButton;
 
     private Table answerContainer;
-    private BitmapFont smallFont, largeFont;
+    private BitmapFont smallFont, largeFont, extraLargeFont;
 
     private String question = "No question available";
 
@@ -46,16 +48,23 @@ public class RoundView extends View {
         this.skin = new Skin(Gdx.files.internal("uiskin.json"));
         this.backgroundTexture = new Texture(Gdx.files.internal("game_background.png"));
         this.quitTexture = new Texture(Gdx.files.internal("Quit.png"));
+        this.textFieldTexture = new Texture(Gdx.files.internal("LargeRectangle.png"));
+        this.enterTexture = new Texture(Gdx.files.internal("Enter.png"));
+        this.rectangleTexture = new Texture(Gdx.files.internal("Rectangle.png"));
 
         FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("OpenSans.ttf"));
 
         FreeTypeFontGenerator.FreeTypeFontParameter smallParam = new FreeTypeFontGenerator.FreeTypeFontParameter();
-        smallParam.size = 20;
+        smallParam.size = 35;
         this.smallFont = generator.generateFont(smallParam);
 
         FreeTypeFontGenerator.FreeTypeFontParameter largeParam = new FreeTypeFontGenerator.FreeTypeFontParameter();
-        largeParam.size = 32;
+        largeParam.size = 50;
         this.largeFont = generator.generateFont(largeParam);
+
+        FreeTypeFontGenerator.FreeTypeFontParameter extraLargeParam = new FreeTypeFontGenerator.FreeTypeFontParameter();
+        extraLargeParam.size = 55;
+        this.extraLargeFont = generator.generateFont(extraLargeParam);
 
         generator.dispose();
 
@@ -81,14 +90,14 @@ public class RoundView extends View {
 
         Table root = new Table();
         root.setFillParent(true);
-        root.top().pad(20);
+        root.top().padTop(20);
         stage.addActor(root);
 
         // Top bar
         Table topBar = new Table();
         ImageButton quitButton = new ImageButton(new TextureRegionDrawable(quitTexture));
-        quitButton.setSize(100, 100);
-        quitButton.setPosition(30, Gdx.graphics.getHeight() - 130);
+        quitButton.setSize(260, 260);
+        quitButton.setPosition(100, Gdx.graphics.getHeight() - 150);
         quitButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -96,45 +105,63 @@ public class RoundView extends View {
             }
         });
 
-        Label timerLabelTop = new Label("⏱ 60", new Label.LabelStyle(largeFont, Color.WHITE));
+        Label timerLabelTop = new Label("Seconds left: ⏱ 60", new Label.LabelStyle(extraLargeFont, Color.WHITE));
         timerLabelTop.setFontScale(1.5f);
         this.timerLabel = timerLabelTop;
 
-        topBar.add(quitButton).left().padRight(20);
-        topBar.add(timerLabelTop).expandX().center();
+        topBar.add(quitButton).left().padRight(10).padLeft(80).height(260).width(260);
+        topBar.add(timerLabelTop).expandX().padRight(85);
         root.add(topBar).expandX().fillX().row();
 
         // Score label
         scoreLabel = new Label("Score: 0", new Label.LabelStyle(largeFont, Color.WHITE));
         scoreLabel.setAlignment(Align.center);
-        root.add(scoreLabel).padTop(10).row();
+        root.add(scoreLabel).padTop(10).padBottom(40).row();
 
-        // Category / Question
-        categoryLabel = new Label(question, new Label.LabelStyle(largeFont, Color.WHITE));
-        categoryLabel.setAlignment(Align.center);
-        root.add(categoryLabel).padTop(20).padBottom(20).row();
-
-        // Answer list
+        // Answer list with background and category inside
         answerContainer = new Table();
-        ScrollPane scrollPane = new ScrollPane(answerContainer, skin);
+        ScrollPane scrollPane = new ScrollPane(answerContainer);
         scrollPane.setFadeScrollBars(false);
         scrollPane.setScrollingDisabled(true, false);
-        root.add(scrollPane).expand().fill().padBottom(20).row();
+
+        // Stack with background and overlay (category at top)
+        Stack answerStack = new Stack();
+        Image backgroundImage = new Image(new TextureRegionDrawable(textFieldTexture));
+        Table overlayTable = new Table();
+        overlayTable.top().padTop(10);
+
+        categoryLabel = new Label(question, new Label.LabelStyle(largeFont, Color.DARK_GRAY));
+        categoryLabel.setWrap(true);
+        categoryLabel.setAlignment(Align.center);
+        overlayTable.add(categoryLabel).width(800).padTop(10).padBottom(10).center().row();
+        overlayTable.add(scrollPane).expand().fill();
+
+        answerStack.add(backgroundImage);
+        answerStack.add(overlayTable);
+
+        root.add(answerStack).expand().fill().padBottom(20).width(900).row();
 
         // Input row
         Table inputRow = new Table();
-        inputField = new TextField("", skin);
+
+        Drawable inputBackground = new TextureRegionDrawable(rectangleTexture);
+
+        TextField.TextFieldStyle textFieldStyle = new TextField.TextFieldStyle();
+        textFieldStyle.font = smallFont;
+        textFieldStyle.fontColor = Color.BLACK;
+        textFieldStyle.background = inputBackground;
+        textFieldStyle.cursor = skin.newDrawable("white", Color.GRAY);
+
+        inputField = new TextField("", textFieldStyle);
         inputField.setMessageText("Answer...");
-        inputField.setStyle(skin.get(TextField.TextFieldStyle.class));
-        inputField.getStyle().font = smallFont;
+        inputField.setAlignment(Align.left);
 
-        submitButton = new TextButton("Submit", skin);
-        submitButton.getLabel().setFontScale(1.5f);
-        submitButton.setHeight(80);
+        submitButton = new ImageButton(new TextureRegionDrawable(enterTexture));
+        submitButton.setSize(245, 245);
 
-        submitButton.addListener(new ChangeListener() {
+        submitButton.addListener(new ClickListener() {
             @Override
-            public void changed(ChangeEvent event, Actor actor) {
+            public void clicked(InputEvent event, float x, float y) {
                 submitInputSafely();
             }
         });
@@ -145,9 +172,9 @@ public class RoundView extends View {
             }
         });
 
-        inputRow.add(inputField).expandX().fillX().padRight(10).height(80);
-        inputRow.add(submitButton).width(160).height(80);
-        root.add(inputRow).fillX().padBottom(10).row();
+        inputRow.add(inputField).width(620).height(120).padRight(30).padBottom(460);
+        inputRow.add(submitButton).width(245).height(245).padBottom(465);
+        root.add(inputRow).padBottom(460).row();
 
         stage.setKeyboardFocus(inputField);
         Gdx.input.setOnscreenKeyboardVisible(true);
@@ -197,8 +224,8 @@ public class RoundView extends View {
                 Table row = new Table();
                 row.left();
 
-                Label.LabelStyle answerStyle = new Label.LabelStyle(largeFont, Color.WHITE);
-                Label.LabelStyle pointStyle = new Label.LabelStyle(largeFont, points > 0 ? Color.GREEN : Color.LIGHT_GRAY);
+                Label.LabelStyle answerStyle = new Label.LabelStyle(smallFont, Color.BLACK);
+                Label.LabelStyle pointStyle = new Label.LabelStyle(smallFont, points > 0 ? Color.GREEN : Color.LIGHT_GRAY);
 
                 Label answerLabel = new Label(answer, answerStyle);
                 Label pointLabel = new Label((points > 0 ? "+" : "") + points, pointStyle);
@@ -217,7 +244,7 @@ public class RoundView extends View {
 
     public void updateTimeRemaining(float time) {
         if (timerLabel != null) {
-            timerLabel.setText("⏱ " + (int) time);
+            timerLabel.setText("Seconds left: ⏱ " + (int) time);
         }
     }
 
@@ -239,9 +266,13 @@ public class RoundView extends View {
     public void dispose() {
         if (backgroundTexture != null) backgroundTexture.dispose();
         if (quitTexture != null) quitTexture.dispose();
+        if (textFieldTexture != null) textFieldTexture.dispose();
+        if (enterTexture != null) enterTexture.dispose();
+        if (rectangleTexture != null) rectangleTexture.dispose();
         if (skin != null) skin.dispose();
         if (smallFont != null) smallFont.dispose();
         if (largeFont != null) largeFont.dispose();
+        if (extraLargeFont != null) extraLargeFont.dispose();
         super.dispose();
     }
 }
