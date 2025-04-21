@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import io.github.progark.Server.Model.Game.GameModel;
 import io.github.progark.Server.Model.Game.LeaderboardModel;
 import io.github.progark.Server.database.DataCallback;
 import io.github.progark.Server.database.DatabaseManager;
@@ -45,14 +46,6 @@ public class LeaderboardService {
             }
         });
     }
-
-
-
-    public AuthService getAuthService() {
-        return this.authService;
-    }
-
-
 
     public void loadLeaderboard(DataCallback callback) {
         databaseManager.readData(LEADERBOARD_DOC, new DataCallback() {
@@ -132,4 +125,55 @@ public class LeaderboardService {
             }
         });
     }
+
+    public void updateLeaderBoard(GameModel gameModel) {
+        String playerOne = gameModel.getPlayerOne();
+        String playerTwo = gameModel.getPlayerTwo();
+        int playerOnePoints = gameModel.getPlayerOnePoints().intValue();
+        int playerTwoPoints = gameModel.getPlayerTwoPoints().intValue();
+
+        // Determine the winner
+        String winner;
+        int winnerPoints;
+
+        if (playerOnePoints > playerTwoPoints) {
+            winner = playerOne;
+            winnerPoints = playerOnePoints;
+        } else if (playerTwoPoints > playerOnePoints) {
+            winner = playerTwo;
+            winnerPoints = playerTwoPoints;
+        } else {
+            // It's a tie, don't update the leaderboard
+            return;
+        }
+
+        databaseManager.readData(LEADERBOARD_DOC, new DataCallback() {
+            @Override
+            public void onSuccess(Object data) {
+                Map<String, Object> leaderboard;
+
+                if (data instanceof Map) {
+                    leaderboard = (Map<String, Object>) data;
+                } else {
+                    leaderboard = new HashMap<>();
+                }
+
+                Object existingVal = leaderboard.getOrDefault(winner, 0);
+                int existingScore = existingVal instanceof Number ? ((Number) existingVal).intValue() : 0;
+
+                if (winnerPoints > existingScore) {
+                    leaderboard.put(winner, winnerPoints);
+                }
+
+                databaseManager.writeData(LEADERBOARD_DOC, leaderboard);
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                System.err.println("Failed to read leaderboard: " + e.getMessage());
+            }
+        });
+    }
+
+
 }

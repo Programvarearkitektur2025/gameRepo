@@ -48,7 +48,6 @@ public class LeaderboardController extends Controller {
             public void onSuccess(Object data) {
                 if (data instanceof LeaderboardModel) {
                     leaderboardModel = (LeaderboardModel) data;
-                    System.out.println(leaderboardModel);
                     for (Map.Entry<String, Integer> entry : leaderboardModel.getUserScore().entrySet()) {
                         System.out.println(entry);
                     }
@@ -118,7 +117,7 @@ public class LeaderboardController extends Controller {
 
 
     public void loadUsername(String userId) {
-        leaderboardService.getAuthService().getUsernameFromUserId(userId, new DataCallback() {
+        authService.getUsernameFromUserId(userId, new DataCallback() {
             @Override
             public void onSuccess(Object data) {
                 if (data instanceof String) {

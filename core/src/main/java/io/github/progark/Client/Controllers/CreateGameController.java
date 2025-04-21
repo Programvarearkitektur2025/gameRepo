@@ -28,9 +28,6 @@ public class CreateGameController extends Controller {
         this.createGameService = new CreateGameService(databaseManager);
     }
 
-
-
-
     @Override
     public void enter() {
         createGameView.enter();
@@ -49,8 +46,11 @@ public class CreateGameController extends Controller {
         main.useHomeController();
     }
 
+    public void viewGamePage(GameModel gameModel){
+        main.useGameController(gameModel);
+    }
 
-    public void createLobby(int difficulty, int rounds, boolean multiplayer) {
+    public void createLobby(int difficulty, int rounds, boolean multiplayer, DataCallback callBack) {
         authService.getCurrentUser(new DataCallback() {
             @Override
             public void onSuccess(Object userObj) {
@@ -61,7 +61,15 @@ public class CreateGameController extends Controller {
                     public void onSuccess(Object result) {
                         GameModel createdLobby = (GameModel) result;
 
-                        // Set internal model to match
+                        if (!multiplayer) {
+                            createdLobby.setPlayerTwo("");
+                            createdLobby.setStatus("full");
+
+                            lobbyModel.setPlayerTwo("");
+                            lobbyModel.setStatus("full");
+                        }
+
+
                         lobbyModel.setLobbyCode(createdLobby.getLobbyCode());
                         lobbyModel.setPlayerOne(createdLobby.getPlayerOne());
                         lobbyModel.setPlayerTwo(createdLobby.getPlayerTwo());
@@ -70,20 +78,35 @@ public class CreateGameController extends Controller {
                         lobbyModel.setCreatedAt(createdLobby.getCreatedAt());
                         lobbyModel.setRounds(createdLobby.getRounds());
                         lobbyModel.setMultiplayer(createdLobby.isMultiplayer());
-                        main.useGameController(createdLobby);
+                        lobbyModel.setCurrentRound(1);
+
+                        if (callBack != null) {
+                            callBack.onSuccess(createdLobby);
+                        }
                     }
 
                     @Override
                     public void onFailure(Exception e) {
                         System.out.println("Failed to create lobby: " + e.getMessage());
+                        if (callBack != null) {
+                            callBack.onFailure(e);
+                        }
                     }
                 });
             }
 
             @Override
             public void onFailure(Exception e) {
-                System.out.println("Failed to fetch user for lobby: " + e.getMessage());
+                System.out.println("Failed to get current user: " + e.getMessage());
+                if (callBack != null) {
+                    callBack.onFailure(e);
+                }
             }
         });
+    }
+
+
+    public GameModel getLobby() {
+        return lobbyModel;
     }
 }

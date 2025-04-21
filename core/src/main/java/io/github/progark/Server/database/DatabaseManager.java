@@ -11,5 +11,6 @@ public interface DatabaseManager {
     //void deleteData(String key, dataCallback callback);
     void subscribeToDocument(String documentKey, DataCallback callback);
 
+    void writeQuestion(String collectionPath, Map<String, Object> data);
 
 }

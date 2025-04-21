@@ -1,5 +1,7 @@
 package io.github.progark.Client.Controllers;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -19,43 +21,61 @@ public class HomeController extends Controller {
     private HomeView view;
     private final AuthService authService;
     private final Main main;
-    private HomeService homeService;
-    private GameService gameService;
+    private final HomeService homeService;
+    private final GameService gameService;
+    private final DatabaseManager databaseManager;
+    private final Map<String, GameModel> loadedGames = new HashMap<>();
+
 
     public HomeController(AuthService authService, Main main, DatabaseManager databaseManager) {
         this.authService = authService;
         this.main = main;
+        this.databaseManager = databaseManager;
         this.model = new HomeModel();
         this.view = new HomeView(this);
         this.homeService = new HomeService(databaseManager);
         this.gameService = new GameService(databaseManager);
     }
+
     @Override
     public void enter() {
-        // When this controller becomes active, we can perform actions like checking user status.
-        //checkUserStatus();
         view.enter();
     }
 
     @Override
     public void update(float delta) {
-        // Update the view (and possibly perform other periodic logic)
         view.update(delta);
-        //view.handleInput();
         view.render();
     }
+
+    public void storeLoadedGame(String gameId, GameModel game) {
+        loadedGames.put(gameId, game);
+    }
+
+    public boolean isMultiplayer(String gameId) {
+        GameModel game = loadedGames.get(gameId);
+        return game != null && game.isMultiplayer();
+    }
+
 
     @Override
     public void dispose() {
         view.dispose();
     }
 
-    public void ViewJoinGamePage(){
+    public void ViewJoinGamePage() {
         main.useJoinGameController();
     }
-    public void ViewCreateGamePage(){
+
+    public void ViewCreateGamePage() {
         main.useCreateGameController();
     }
+
+    public void ViewGamePage(GameModel gameLobby) {
+
+        main.useGameController(gameLobby);
+    }
+
     public Main getMain() {
         return main;
     }
@@ -80,19 +100,24 @@ public class HomeController extends Controller {
         main.useSettingsController();
     }
 
-    public void getRelevantGames(DataCallback callback){
-        // This is not completely architectural correct as this is a service task, not a controller task.
+    public void getLoggedInUserHome(DataCallback callback) {
+        authService.getLoggedInUsername(callback);
+    }
+
+    public void getRelevantGames(DataCallback callback) {
         authService.getCurrentUser(new DataCallback() {
             @Override
             public void onSuccess(Object userObj) {
                 UserModel user = (UserModel) userObj;
 
-
                 gameService.getRelevantGames(user, new DataCallback() {
                     @Override
-                    public void onSuccess(Object result) {
-                        List<Map<String, GameModel>> createdLobby = (List<Map<String, GameModel>>) result;
-                        callback.onSuccess(createdLobby);
+                    public void onSuccess(Object data) {
+                        if (data instanceof List) {
+                            callback.onSuccess(data);
+                        } else {
+                            callback.onFailure(new Exception("Unexpected data format from GameService"));
+                        }
                     }
 
                     @Override
@@ -104,7 +129,27 @@ public class HomeController extends Controller {
 
             @Override
             public void onFailure(Exception e) {
-                System.out.println("Failed to fetch user for lobby: " + e.getMessage());
+                callback.onFailure(new Exception("Failed to fetch logged-in user: " + e.getMessage()));
+            }
+        });
+    }
+
+    // Used for entry click → Game page
+    public void getGameToOpen(String lobbyCode) {
+        homeService.getGameByLobbyCode(lobbyCode, new DataCallback() {
+            @Override
+            public void onSuccess(Object result) {
+                if (result instanceof Map) {
+                    GameModel game = GameModel.fromMap(lobbyCode, (Map<String, Object>) result);
+                    main.useGameController(game);
+                } else {
+                    System.out.println("Invalid game data format from getGameToOpen.");
+                }
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                System.out.println("Failed to fetch game: " + e.getMessage());
             }
         });
     }

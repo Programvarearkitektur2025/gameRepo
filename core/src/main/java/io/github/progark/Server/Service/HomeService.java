@@ -33,7 +33,6 @@ public class HomeService {
                     return;
                 }
                 Map<String,Object> lobbyMap = (Map<String,Object>) data;
-                System.out.println(lobbyMap);
             }
 
             @Override
@@ -42,6 +41,12 @@ public class HomeService {
             }
         });
     }
+
+    public void getGameByLobbyCode(String lobbyCode, DataCallback callback) {
+        databaseManager.readData("lobbies/" + lobbyCode, callback);
+    }
+
+
 
     public void loadUserGames(String userId, DataCallback callback) {
 /*        String gamesPath = "games/";

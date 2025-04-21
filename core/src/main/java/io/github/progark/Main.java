@@ -6,6 +6,7 @@ import com.badlogic.gdx.Gdx;
 import io.github.progark.Client.Controllers.ControllerManager;
 import io.github.progark.Client.Controllers.CreateGameController;
 import io.github.progark.Client.Controllers.GameController;
+import io.github.progark.Client.Controllers.ResultsController;
 import io.github.progark.Client.Controllers.RoundController;
 import io.github.progark.Client.Controllers.HomeController;
 import io.github.progark.Client.Controllers.JoinGameController;
@@ -17,6 +18,7 @@ import io.github.progark.Client.Controllers.SolutionController;
 import io.github.progark.Client.Controllers.TutorialController;
 import io.github.progark.Client.Controllers.UserController;
 import io.github.progark.Server.Model.Game.GameModel;
+import io.github.progark.Server.Model.Game.RoundModel;
 import io.github.progark.Server.Service.AuthService;
 import io.github.progark.Server.database.DatabaseManager;
 import io.github.progark.Client.Audio.MusicManager;
@@ -35,7 +37,6 @@ public class Main extends Game {
         }
         this.databaseManager = dbManager;
         this.authService = authManager;
-
     }
 
     @Override
@@ -119,4 +120,15 @@ public class Main extends Game {
         controllerManager.setController(new SolutionController(this));
     }
 
+    public void useResultsController() {
+        controllerManager.setController(new ResultsController(this));
+    }
+
+    public void useRoundController(GameModel gameModel) {
+        controllerManager.setController(new RoundController(gameModel,databaseManager, this, authService));
+    }
+
+    public void returnToGameControllerFromRound(RoundModel roundModel, GameModel gameModel){
+
+    }
 }

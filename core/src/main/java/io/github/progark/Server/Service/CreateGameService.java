@@ -2,10 +2,12 @@ package io.github.progark.Server.Service;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
 import io.github.progark.Server.Model.Game.GameModel;
+import io.github.progark.Server.Model.Game.RoundModel;
 import io.github.progark.Server.database.DataCallback;
 import io.github.progark.Server.database.DatabaseManager;
 
@@ -25,7 +27,7 @@ public class CreateGameService {
             lobby.setLobbyCode(lobbyCode);
             lobby.setPlayerOne(username);
             lobby.setPlayerTwo(null);
-            lobby.setDifficulty(difficulty);
+            lobby.setDifficulty(1);
             lobby.setStatus(multiplayer ? "waiting" : "started");
             lobby.setCreatedAt(new Timestamp(System.currentTimeMillis()));
             lobby.setRounds(rounds);
@@ -33,6 +35,7 @@ public class CreateGameService {
             lobby.setPlayerOnePoints(0);
             lobby.setPlayerTwoPoints(0);
             lobby.setGames(new java.util.ArrayList<>());
+            lobby.setCurrentRound(1);
 
             databaseManager.writeData("lobbies/" + lobbyCode, lobby);
             callback.onSuccess(lobby);
@@ -42,32 +45,49 @@ public class CreateGameService {
         }
     }
 
-    public void joinLobby(String lobbyCode, String username, DataCallback callback) {
+    public void joinLobby(String lobbyCode, String joiningUsername, DataCallback callback) {
         String path = "lobbies/" + lobbyCode;
 
         databaseManager.readData(path, new DataCallback() {
             @Override
-            public void onSuccess(Object result) {
-                if (!(result instanceof Map)) {
-                    callback.onFailure(new Exception("Invalid lobby format"));
+            public void onSuccess(Object data) {
+                if (!(data instanceof Map)) {
+                    callback.onFailure(new Exception("Lobby not found or invalid format."));
                     return;
                 }
 
-                @SuppressWarnings("unchecked")
-                Map<String, Object> dataMap = (Map<String, Object>) result;
+                Map<String, Object> lobbyMap = (Map<String, Object>) data;
+                GameModel game = GameModel.fromMap(lobbyCode, lobbyMap);
 
-                GameModel lobby = GameModel.fromMap(lobbyCode, dataMap);
-
-                if (lobby.isFull() || "started".equalsIgnoreCase(lobby.getStatus())) {
-                    callback.onFailure(new Exception("Lobby is full or already started"));
+                if (game.getPlayerTwo() != null && !game.getPlayerTwo().isEmpty()) {
+                    callback.onFailure(new Exception("Lobby already has a second player."));
                     return;
                 }
 
-                lobby.setPlayerTwo(username);
-                lobby.setStatus("started");
+                game.setPlayerTwo(joiningUsername);
 
-                databaseManager.writeData("lobbies/" + lobbyCode, lobby);
-                callback.onSuccess(lobby);
+                // ✅ Convert any maps into proper RoundModels and update usernames
+                List<Object> updatedRounds = new ArrayList<>();
+                if (game.getGames() != null) {
+                    for (Object roundObj : game.getGames()) {
+                        if (roundObj instanceof RoundModel) {
+                            RoundModel round = (RoundModel) roundObj;
+                            round.setPlayerUsernames(game.getPlayerOne(), joiningUsername);
+                            updatedRounds.add(round);
+                        } else if (roundObj instanceof Map) {
+                            RoundModel round = RoundModel.fromMap((Map<String, Object>) roundObj);
+                            round.setPlayerUsernames(game.getPlayerOne(), joiningUsername);
+                            updatedRounds.add(round);
+                        }
+                    }
+                    game.setGames((List<RoundModel>) (List<?>) updatedRounds); // unchecked cast is safe here
+                }
+
+                // 🔁 Save updated GameModel
+                databaseManager.writeData(path, game.toMap());
+                System.out.println("✅ Updated game with joined player: " + joiningUsername);
+
+                callback.onSuccess(game);
             }
 
             @Override
@@ -76,6 +96,8 @@ public class CreateGameService {
             }
         });
     }
+
+
 
     private String generateLobbyCode() {
         Random rand = new Random();

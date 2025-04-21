@@ -75,12 +75,23 @@ public class AndroidDatabaseManager implements DatabaseManager {
             }
 
             if (snapshot != null && snapshot.exists()) {
-                String json = snapshot.getData().toString(); // You may serialize it better
+                String json = snapshot.getData().toString();
                 callback.onSuccess(json);
             } else {
                 callback.onFailure(new Exception("No data found"));
             }
         });
     }
+
+    public void writeQuestion(String collectionPath, Map<String, Object> data) {
+        FirebaseFirestore.getInstance()
+            .collection(collectionPath)
+            .add(data)
+            .addOnSuccessListener(documentReference ->
+                System.out.println("Added to " + collectionPath + ": " + documentReference.getId()))
+            .addOnFailureListener(e ->
+                System.err.println("Failed to write data: " + e.getMessage()));
+    }
+
 
 }

@@ -17,7 +17,7 @@ public class RoundService {
         this.databaseManager = databaseManager;
     }
 
-    public void fetchGame(String userId, String gameId, DataCallback callback) {
+   /* public void fetchGame(String userId, String gameId, DataCallback callback) {
         String gamePath = "games/" + userId + "/" + gameId;
         databaseManager.readData(gamePath, new DataCallback() {
             @Override
@@ -40,15 +40,15 @@ public class RoundService {
                 callback.onFailure(e);
             }
         });
-    }
+    }*/
 
     public void updateGameState(String userId, String gameId, RoundModel gameModel, DataCallback callback) {
         String gamePath = "games/" + userId + "/" + gameId;
 
         Map<String, Object> gameData = new HashMap<>();
-        gameData.put("score", gameModel.getScore());
+        gameData.put("score", gameModel.getPlayerOneScore());
         gameData.put("timeRemaining", gameModel.getTimeRemaining());
-        gameData.put("submittedAnswers", gameModel.getSubmittedAnswers());
+        gameData.put("submittedAnswers", gameModel.getPlayerOneAnswers());
         // Add other game state data as needed
 
         try {

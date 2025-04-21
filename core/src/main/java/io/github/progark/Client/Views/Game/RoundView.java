@@ -5,21 +5,29 @@ import java.util.Map;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.scenes.scene2d.*;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 
 import io.github.progark.Client.Views.View;
 import io.github.progark.Client.Controllers.RoundController;
+import io.github.progark.Server.Model.Game.RoundModel;
+import io.github.progark.Server.Service.AuthService;
 
 public class RoundView extends View {
 
     private final RoundController controller;
-    //private final Stage stage;
     private final Skin skin;
+    private boolean initialized = false;
+
     private final Texture backgroundTexture;
+    private final Texture backButtonTexture;
+
     private Label timerLabel;
     private Label scoreLabel;
     private Label categoryLabel;
@@ -27,76 +35,98 @@ public class RoundView extends View {
     private TextButton submitButton;
 
     private Table answerContainer;
-    private List<String> answers;
+    private BitmapFont smallFont, largeFont;
 
+    private String question = "No question available";
 
+    public RoundView(RoundController gameController) {
+        super();
+        this.controller = gameController != null ? gameController : throwControllerNull();
 
-    public RoundView(RoundController gameController){
-        super(); // This calls view constructor for standard initialization of view.
-        //GameService gameService = new GameService(game.getDatabaseManager());
+        this.skin = new Skin(Gdx.files.internal("uiskin.json"));
+        this.backgroundTexture = new Texture(Gdx.files.internal("game_background.png"));
+        this.backButtonTexture = new Texture(Gdx.files.internal("backButtonBlue.png"));
 
-        this.controller = gameController;
-        //this.game = game;
+        FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("OpenSans.ttf"));
 
-        // Initialize texture and skin here. This needs to be correct to planned UI
-        //backgroundTexture = new Texture(Gdx.files.internal("game_background.png"));
+        FreeTypeFontGenerator.FreeTypeFontParameter smallParam = new FreeTypeFontGenerator.FreeTypeFontParameter();
+        smallParam.size = 20;
+        this.smallFont = generator.generateFont(smallParam);
 
-        skin = new Skin(Gdx.files.internal("uiskin.json"));
+        FreeTypeFontGenerator.FreeTypeFontParameter largeParam = new FreeTypeFontGenerator.FreeTypeFontParameter();
+        largeParam.size = 32;
+        this.largeFont = generator.generateFont(largeParam);
 
-        //this.game = game;
+        generator.dispose();
 
-        backgroundTexture = new Texture(Gdx.files.internal("game_background.png"));
-        //skin = new Skin(Gdx.files.internal("uiskin.json"));
+        try {
+            String q = controller.getQuestion();
+            if (q != null && !q.trim().isEmpty()) {
+                this.question = q.trim();
+            }
+        } catch (Exception e) {
+            System.err.println("❌ Failed to retrieve question: " + e.getMessage());
+        }
+    }
 
-        // Initializing with dummy values, needs to be fixed.
-        //user1 = new UserModel("1","bastetest@test.com", "bastetest1");
-        //user2 = new UserModel("2","bastetest@test.com", "bastetest2");
+    private RoundController throwControllerNull() {
+        throw new IllegalArgumentException("RoundController cannot be null.");
     }
 
     @Override
     protected void initialize() {
+        if (initialized) return;
+        initialized = true;
         Gdx.input.setInputProcessor(stage);
 
-        // === Root table ===
         Table root = new Table();
         root.setFillParent(true);
         root.top().pad(20);
         stage.addActor(root);
 
-        // === TOP BAR ===
+        // Top bar
         Table topBar = new Table();
-        TextButton backButton = new TextButton("<", skin);
-        Label timerLabelTop = new Label("⏱ 60", skin); // You can update this every frame
+        ImageButton backButton = new ImageButton(new TextureRegionDrawable(backButtonTexture));
+        backButton.setSize(100, 100);
+        backButton.setPosition(30, Gdx.graphics.getHeight() - 130);
+        backButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                forceEndRoundEarly();
+            }
+        });
 
-        backButton.getLabel().setFontScale(2f);
-        timerLabelTop.setFontScale(2f);
+        Label timerLabelTop = new Label("⏱ 60", new Label.LabelStyle(largeFont, Color.WHITE));
+        timerLabelTop.setFontScale(1.5f);
+        this.timerLabel = timerLabelTop;
 
         topBar.add(backButton).left().padRight(20);
         topBar.add(timerLabelTop).expandX().center();
         root.add(topBar).expandX().fillX().row();
 
-        this.timerLabel = timerLabelTop; // Assign to use in update()
+        // Score label
+        scoreLabel = new Label("Score: 0", new Label.LabelStyle(largeFont, Color.WHITE));
+        scoreLabel.setAlignment(Align.center);
+        root.add(scoreLabel).padTop(10).row();
 
-        // === CATEGORY LABEL ===
-        categoryLabel = new Label("Mmmmmmmmmolly", skin);
-        categoryLabel.setFontScale(2.5f);
+        // Category / Question
+        categoryLabel = new Label(question, new Label.LabelStyle(largeFont, Color.WHITE));
         categoryLabel.setAlignment(Align.center);
         root.add(categoryLabel).padTop(20).padBottom(20).row();
 
-        // === ANSWER LIST (ScrollPane inside container) ===
+        // Answer list
         answerContainer = new Table();
         ScrollPane scrollPane = new ScrollPane(answerContainer, skin);
         scrollPane.setFadeScrollBars(false);
         scrollPane.setScrollingDisabled(true, false);
-
         root.add(scrollPane).expand().fill().padBottom(20).row();
 
-        // === INPUT ROW ===
+        // Input row
         Table inputRow = new Table();
-
         inputField = new TextField("", skin);
         inputField.setMessageText("Answer...");
-        inputField.getStyle().font.getData().setScale(1.5f);
+        inputField.setStyle(skin.get(TextField.TextFieldStyle.class));
+        inputField.getStyle().font = smallFont;
 
         submitButton = new TextButton("Submit", skin);
         submitButton.getLabel().setFontScale(1.5f);
@@ -105,134 +135,113 @@ public class RoundView extends View {
         submitButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                submitAnswer();
+                submitInputSafely();
             }
         });
 
         inputField.setTextFieldListener((field, c) -> {
-            if (c == '\r' || c == '\n') submitAnswer();
+            if (c == '\r' || c == '\n') {
+                submitInputSafely();
+            }
         });
 
         inputRow.add(inputField).expandX().fillX().padRight(10).height(80);
         inputRow.add(submitButton).width(160).height(80);
         root.add(inputRow).fillX().padBottom(10).row();
 
-        // Focus keyboard on start
         stage.setKeyboardFocus(inputField);
         Gdx.input.setOnscreenKeyboardVisible(true);
     }
 
-    /**
-     * Called from LibGDX automatically every frame.
-     */
+    private void submitInputSafely() {
+        if (inputField == null || controller == null) return;
+        String input = inputField.getText();
+        if (input != null && !input.trim().isEmpty()) {
+            inputField.setText("");
+            controller.handleAnswerSubmission(input);
+        }
+    }
 
-    /**
-     * Your custom update method called from render().
-     */
     @Override
     public void update(float delta) {
-        /*
-        controller.updateTime(delta);
-
-
-        if (controller.isTimeUp()) {
-            inputField.setDisabled(true);
-            submitButton.setDisabled(true);
-            timerLabel.setText("Time's up!");
-        } else {
-            timerLabel.setText("Time: " + (int) controller.getTimeRemaining());
+        if (controller != null) {
+            controller.updateGameState(delta);
         }
-
-
-
-       stage.act(delta);
-
-         */
+        stage.act(delta);
     }
 
-    private void submitAnswer() {
-        /*
-        String input = inputField.getText();
-        boolean accepted = controller.trySubmitAnswer(input);
-        if (accepted) {
-            updateUI();
-        }
-        inputField.setText("");
-        */
-
-        controller.getQuestionByID("C02rSsE1DU2E9gGPR4UC");
+    public void updateScore(int score) {
+        scoreLabel.setText("Score: " + score);
     }
 
-    private void updateUI() {
+    public void updateSubmittedAnswers(Map<String, Integer> submittedAnswers) {
+        if (answerContainer == null) {
+            System.err.println("❌ Tried to update submitted answers before initialization.");
+            return;
+        }
+
         answerContainer.clear();
 
-        Map<String, Integer> submittedAnswers = controller.getSubmittedAnswers();
+        if (submittedAnswers == null || submittedAnswers.isEmpty()) return;
 
-        submittedAnswers.forEach((answer, points) -> {
-            Table row = new Table();
+        for (Map.Entry<String, Integer> entry : submittedAnswers.entrySet()) {
+            String answer = entry.getKey();
+            Integer points = entry.getValue();
 
-            Label label = new Label(answer, skin);
-            label.setFontScale(1.5f);
-            label.setColor((points > 0) ? Color.GREEN : Color.LIGHT_GRAY);
+            if (answer == null || points == null) {
+                System.err.println("⚠️ Skipping null answer or points");
+                continue;
+            }
 
-            Label pointLabel = new Label((points > 0) ? ("+" + points) : ("" + points), skin);
-            pointLabel.setFontScale(1.5f);
-            pointLabel.setColor((points > 0) ? Color.GREEN : Color.LIGHT_GRAY);
+            try {
+                Table row = new Table();
+                row.left();
 
-            row.add(label).left().expandX();
-            row.add(pointLabel).right().padLeft(10);
+                Label.LabelStyle answerStyle = new Label.LabelStyle(largeFont, Color.WHITE);
+                Label.LabelStyle pointStyle = new Label.LabelStyle(largeFont, points > 0 ? Color.GREEN : Color.LIGHT_GRAY);
 
-            answerContainer.add(row).padBottom(10).row();
-        });
+                Label answerLabel = new Label(answer, answerStyle);
+                Label pointLabel = new Label((points > 0 ? "+" : "") + points, pointStyle);
+                pointLabel.setAlignment(Align.right);
+
+                row.add(answerLabel).expandX().left().padRight(20);
+                row.add(pointLabel).right();
+
+                answerContainer.add(row).fillX().padBottom(15).row();
+            } catch (Exception e) {
+                System.err.println("❌ Failed to layout row: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void updateTimeRemaining(float time) {
+        if (timerLabel != null) {
+            timerLabel.setText("⏱ " + (int) time);
+        }
+    }
+
+    public void showMessage(String displayMessage) {
+        if (displayMessage != null && !displayMessage.trim().isEmpty()) {
+        }
+    }
+
+    public void showGameOver() {
+        showMessage("⏱ Time's up!");
+    }
+
+    public void forceEndRoundEarly(){
+        controller.endRoundEarly();
+        controller.goToGame();
     }
 
     @Override
     public void dispose() {
-        // Clean up resources
-        if (backgroundTexture != null) {
-            backgroundTexture.dispose();
-        }
-        if (skin != null) {
-            skin.dispose();
-        }
-        // Dispose of other resources
-        super.dispose(); // Call parent's dispose to clean up stage and spriteBatch
+        if (backgroundTexture != null) backgroundTexture.dispose();
+        if (backButtonTexture != null) backButtonTexture.dispose();
+        if (skin != null) skin.dispose();
+        if (smallFont != null) smallFont.dispose();
+        if (largeFont != null) largeFont.dispose();
+        super.dispose();
     }
-
-    public void showMessage(String displayMessage){
-        // Logic for displaying error message
-        // Method should end with an call to the render method to render new UI
-    }
-    public void updateScore (int score){
-        // Logic for displaying score
-        // Method should end with an call to the render method to render new UI
-    }
-
-    public void updateSubmittedAnswers(Map<String,Integer> solution){
-        // Logic for updating submitted answers
-        // Method should end with an call to the render method to render new UI
-
-    }
-    public void updateTimeRemaining(float time){
-    // Logic for updating the time remaining
-    // Method should end with an call to the render method to render new UI
-    }
-
-    public void showGameOver(){
-    // Logic for displaying that the game is over.
-    // Method should end with an call to the render method to render new UI
-    }
-    /*
-    @Override
-    public void render(SpriteBatch sb) {
-
-    }
-    @Override
-    public void update(float delta) {
-    }
-    @Override
-    public void handleInput() {
-    }
-        */
-
 }
