@@ -233,6 +233,7 @@ public class RoundController extends Controller {
                 roundModel.markPlayerCompleted(username);
                 roundModel.setTimeRemaining(0);
 
+
                 if (Objects.equals(username, roundModel.playerOneUsername)) {
                     if (roundModel.getPlayerOneAnswers().isEmpty()) {
                         roundModel.submitAnswer(roundModel.playerOneUsername, "No answer");
@@ -244,7 +245,6 @@ public class RoundController extends Controller {
                         roundModel.submitAnswer(roundModel.playerTwoUsername, "No answer");
                     }
                 }
-
 
 
                 parentGameModel.getGames().set(roundIndex, roundModel);
