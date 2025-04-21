@@ -26,6 +26,9 @@ public class GameController extends Controller {
         this.gameModel = gameModel;
         this.main = main;
         this.gameService = new GameService(databaseManager);
+        for (RoundModel round : getGames()){
+            System.out.println("Round from GameController: " +round.getQuestion() );
+        }
     }
 
     @Override
