@@ -400,7 +400,7 @@ public class GameView extends View {
         playerTwoTable.align(Align.left);
 
         // Create a table for displaying the round number and player scores
-        resultTable.add(new Label("ROUND " + roundNumber, headerStyle)).colspan(2).padBottom(910).row();
+        resultTable.add(new Label("ROUND " + roundNumber, headerStyle)).colspan(2).padBottom(40).row();
 
         // Add the answers for Player 1 to its table
         for (Map.Entry<String, Integer> entry : round.getPlayerOneAnswers().entrySet()) {
@@ -414,9 +414,11 @@ public class GameView extends View {
             playerOneTable.add(row).left().padBottom(5).row();
         }
 
+        playerOneTable.add(new Label(round.getPlayerOneScore() + " pts", headerStyle)).padBottom(10).padTop(40).row();
+
+
         // Add Player 2 score if multiplayer
         if (controller.isMultiplayer()) {
-            playerTwoTable.add(new Label(round.getPlayerTwoScore() + " pts", headerStyle)).colspan(2).padBottom(10).row();
 
             // Add the answers for Player 2 to its table
             for (Map.Entry<String, Integer> entry : round.getPlayerTwoAnswers().entrySet()) {
@@ -429,18 +431,20 @@ public class GameView extends View {
                 row.add(pointLabel).right();
                 playerTwoTable.add(row).left().padBottom(5).row();
             }
+
+            playerTwoTable.add(new Label(round.getPlayerTwoScore() + " pts", headerStyle)).padBottom(10).padTop(40).row();
         }
 
         // Create a parent table to hold both Player 1 and Player 2 tables side by side
         Table sideBySideTable = new Table();
-        sideBySideTable.add(playerOneTable).padRight(50);  // Add Player 1 table with some padding on the right
+        sideBySideTable.setWidth(1000);
+        sideBySideTable.setHeight(2000);
+        sideBySideTable.add(playerOneTable).padRight(500);  // Add Player 1 table with some padding on the right
         sideBySideTable.add(playerTwoTable);  // Add Player 2 table
 
         // Add the sideBySideTable to the resultTable
         resultTable.add(sideBySideTable).padTop(10).row();
 
-        // POINTS LABEL
-        resultTable.add(new Label(round.getPlayerOneScore() + " pts", headerStyle)).colspan(2).padBottom(10).row();
 
         // Scroll pane setup
         ScrollPane scrollPane = new ScrollPane(resultTable);
