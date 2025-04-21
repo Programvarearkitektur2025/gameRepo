@@ -215,17 +215,21 @@ public class GameView extends View {
         controller.whoAmI(new DataCallback() {
             @Override
             public void onSuccess(Object data) {
+                if (stage == null) {
+                    Gdx.app.error("GameView", "Stage is null, skipping play button creation.");
+                    return;
+                }
+
                 UserModel user = (UserModel) data;
                 String myUsername = user.getUsername();
 
                 int currentRoundIndex = controller.getCurrentRoundIndex();
                 List<RoundModel> allRounds = controller.getGames();
-                System.out.println("CurrentRound is: " + currentRoundIndex);
-
 
                 if (currentRoundIndex < allRounds.size()) {
                     RoundModel currentRound = allRounds.get(currentRoundIndex);
                     boolean haveIAnswered = currentRound.hasPlayerCompleted(myUsername);
+
                     if (!haveIAnswered) {
                         Button playRoundButton = createPlayRoundButton(currentRoundIndex);
                         stage.addActor(playRoundButton);
@@ -235,10 +239,11 @@ public class GameView extends View {
 
             @Override
             public void onFailure(Exception e) {
-                System.err.println("❌ Could not determine current user: " + e.getMessage());
+                Gdx.app.error("GameView", "❌ Could not determine current user: " + e.getMessage());
             }
         });
     }
+
 
     private Button createPlayRoundButton(int currentRoundIndex) {
         TextureRegionDrawable playRoundDrawable = new TextureRegionDrawable(playRoundTexture);

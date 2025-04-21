@@ -100,7 +100,14 @@ public class HomeView extends View {
 
         // Content area
         contentTable = new Table();
-        mainLayout.add(contentTable).colspan(2).expand().fill().row();
+        contentTable.top().left().padTop(20);
+
+        ScrollPane scrollPane = new ScrollPane(contentTable);
+        scrollPane.setScrollingDisabled(true, false);
+        scrollPane.setFadeScrollBars(false);
+
+        mainLayout.add(scrollPane).colspan(2).expand().fill().row();
+
 
         // Navigation bar
         navBar = new NavBar(stage, controller.getMain());
@@ -202,33 +209,36 @@ public class HomeView extends View {
 
                     if (game == null) continue;
 
-                    String opponent = game.getOpponent(currentUser);
                     String displayName;
+                    String opponent = game.getOpponent(currentUser);
 
+                    // ➤ Singleplayer
                     if (!game.isMultiplayer()) {
-                        displayName = "You"; // Singleplayer: Always show "You"
+                        displayName = "You";
                         homeModel.getYourTurnGames().add(new HomeModel.GameEntry(gameId, displayName, game.getStatus()));
                         continue;
                     }
 
+                    // ➤ Waiting for opponent
                     if (opponent == null || opponent.isEmpty()) {
                         displayName = "Waiting for Player to join";
                         homeModel.getTheirTurnGames().add(new HomeModel.GameEntry(gameId, displayName, game.getStatus()));
                         continue;
                     }
 
-                    // Multiplayer logic: determine turn
-                    int currentRound = game.getCurrentRound().intValue() - 1;
-                    boolean hasPlayed = false;
-
-                    //if (currentRound >= 0 && currentRound < game.getGames().size()) {
-                        //RoundModel round = game.getGames().get(currentRound);
-                        //if (round != null && round.getHasPlayedList() != null) {
-                            //hasPlayed = round.getHasPlayedList().contains(currentUser);
-                        //}
-                    //}
-
                     displayName = opponent;
+
+                    // ➤ Multiplayer: determine if it's your turn
+                    int currentRound = game.getCurrentRound().intValue(); // already adjusted to completed rounds
+                    List<RoundModel> allRounds = game.getGames();
+
+                    boolean hasPlayed = false;
+                    if (currentRound >= 0 && currentRound < allRounds.size()) {
+                        RoundModel round = allRounds.get(currentRound);
+                        if (round != null) {
+                            hasPlayed = round.hasPlayerCompleted(currentUser);
+                        }
+                    }
 
                     if (!hasPlayed) {
                         homeModel.getYourTurnGames().add(new HomeModel.GameEntry(gameId, displayName, game.getStatus()));
@@ -246,6 +256,7 @@ public class HomeView extends View {
             }
         });
     }
+
 
 
     @Override
