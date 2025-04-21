@@ -1,6 +1,7 @@
 package io.github.progark.Server.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -143,7 +144,7 @@ public class GameService {
 
 
                 List<RoundModel> rounds = new ArrayList<>();
-
+                Collections.shuffle(validQuestions);
                 for (int i = 0; i < totalRounds; i++) {
                     Map<String, Object> questionDoc = validQuestions.get(i);
 
