@@ -110,7 +110,7 @@ cd gameRepo
 - **Molly Vangen**
 - **Baste Olafsen**
 - **Mauritz Skogøy**
-- **Stian Wilhelm**  
+- **Stian Wilhelmsen**  
 
 
 ---
