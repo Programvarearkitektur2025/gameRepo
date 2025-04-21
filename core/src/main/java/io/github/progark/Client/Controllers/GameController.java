@@ -160,7 +160,9 @@ public class GameController extends Controller {
     }
 
     public void initGameRounds() {
-
+        // Reset current round to 1 when initializing new game
+        gameModel.setCurrentRound(1);
+        
         gameService.loadRoundsFromFirebase(gameModel, gameModel.getRounds(), new DataCallback() {
             @Override
             public void onSuccess(Object data) {
@@ -175,7 +177,8 @@ public class GameController extends Controller {
     }
 
     public void setActiveRoundIndex(int index) {
-        gameModel.setActiveRound(index);
+        // Ensure index is non-negative
+        gameModel.setActiveRound(Math.max(0, index));
     }
 
 
@@ -204,12 +207,59 @@ public class GameController extends Controller {
         });
 
     }
+<<<<<<< HEAD
     public int getCurrentRoundIndex(){
         List<RoundModel> games = getGames();
         int roundIndex=0;
         for (RoundModel round : games){
             if (round.hasBothPlayersAnswered()) roundIndex++;
+=======
+    public int getCurrentRoundIndex() {
+        Number currentRound = gameModel.getCurrentRound();
+        if (currentRound == null || currentRound.intValue() < 1) {
+            gameModel.setCurrentRound(1);
+            return 0;
+>>>>>>> fc71632 (Checkpoint in an attempt to fix)
         }
-        return roundIndex;
+        return currentRound.intValue() - 1;
+    }
+
+    public boolean canProceedToNextRound() {
+        int currentRoundIndex = getCurrentRoundIndex();
+        if (currentRoundIndex >= gameModel.getGames().size()) {
+            return false;
+        }
+        RoundModel currentRound = gameModel.getGames().get(currentRoundIndex);
+        if (currentRound == null) {
+            return false;
+        }
+        
+        // Explicitly check if both players have completed the round
+        boolean playerOneCompleted = currentRound.hasPlayerCompleted(gameModel.getPlayerOne());
+        boolean playerTwoCompleted = currentRound.hasPlayerCompleted(gameModel.getPlayerTwo());
+        
+        System.out.println("Player one completed: " + playerOneCompleted);
+        System.out.println("Player two completed: " + playerTwoCompleted);
+        
+        return playerOneCompleted && playerTwoCompleted;
+    }
+
+    public void proceedToNextRound() {
+        int currentRound = gameModel.getCurrentRound().intValue();
+        if (currentRound < gameModel.getRounds()) {
+            // Only increment the round number
+            gameModel.setCurrentRound(currentRound + 1);
+            System.out.println("Proceeding to round " + gameModel.getCurrentRound());
+            
+            // Save the game state with the new round number
+            saveGameState();
+        } else {
+            System.out.println("Game is finished!");
+        }
+    }
+
+    private void saveGameState() {
+        // Only save the current state, don't modify any rounds
+        gameService.setNewGameRounds(gameModel, gameModel.getGames());
     }
 }
