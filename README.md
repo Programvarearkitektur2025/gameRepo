@@ -4,6 +4,19 @@
 
 ---
 
+## 🎞️ Images from the Game
+
+<img width="150" alt="singleplayer-results" src="https://github.com/user-attachments/assets/f0226ed0-4a06-47bf-ba6d-fd38f92f80af" />
+<img width="150" alt="settings" src="https://github.com/user-attachments/assets/146fe008-6558-48d6-a20a-0120084f316f" />
+<img width="150" alt="roundview" src="https://github.com/user-attachments/assets/bff38041-3649-49b7-ba3c-c2ac737c3f32" />
+<img width="150" alt="login" src="https://github.com/user-attachments/assets/f4ff51f8-701f-40c0-b53a-7dd1ba772f79" />
+<img width="150" alt="leaderboard" src="https://github.com/user-attachments/assets/3e6ab29d-655a-4f2d-9492-a9371440c887" />
+<img width="150" alt="join-game" src="https://github.com/user-attachments/assets/a820c1d4-faba-494e-aaf1-6758d5a0e349" />
+<img width="150" alt="howtoplay" src="https://github.com/user-attachments/assets/b35ad639-8f03-4c18-a991-c0a69386515e" />
+<img width="150" alt="homepage" src="https://github.com/user-attachments/assets/11310aef-f09d-4283-952c-8066293cfb94" />
+<img width="150" alt="create-game" src="https://github.com/user-attachments/assets/14a135f5-b31c-43b8-867d-c73a759311da" />
+
+
 ## 🎮 Features
 
 ### 👤 Authentication
