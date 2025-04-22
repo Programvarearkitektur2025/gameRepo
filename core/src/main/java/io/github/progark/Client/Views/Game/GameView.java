@@ -214,7 +214,7 @@ public class GameView extends View {
         }
 
         if (resultTable.getChildren().size == 0) {
-            resultTable.add(new Label("No rounds played yet.", new Label.LabelStyle(smallFont, Color.GRAY))).pad(30);
+            resultTable.add(new Label("No rounds completed yet.", new Label.LabelStyle(smallFont, Color.GRAY))).pad(30);
         }
 
         ScrollPane scrollPane = new ScrollPane(resultTable);
