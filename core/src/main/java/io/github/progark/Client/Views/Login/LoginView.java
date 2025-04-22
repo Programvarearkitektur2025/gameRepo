@@ -13,7 +13,12 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 
 import io.github.progark.Client.Controllers.LoginController;
 import io.github.progark.Client.Views.View;
-
+/*
+ * LoginView.java
+ * This class is responsible for displaying the login view in the application.
+ * It handles the rendering of the login screen, including the logo, background, and input fields.  
+ * It also manages user interactions with the login and registration buttons.
+ */
 public class LoginView extends View {
     private LoginController controller;
     private final Skin skin;
@@ -24,7 +29,6 @@ public class LoginView extends View {
     public LoginView(LoginController loginController) {
         super();
         this.controller = loginController;
-        // Load resources
         skin = new Skin(Gdx.files.internal("uiskin.json"));
         backgroundTexture = new Texture(Gdx.files.internal("Background_1.png"));
         logoTexture = new Texture(Gdx.files.internal("ThinkFastLogo.png"));
@@ -35,7 +39,6 @@ public class LoginView extends View {
 
     @Override
     protected void initialize() {
-        // Set up UI
         background.setFillParent(true);
         stage.addActor(background);
 
@@ -43,23 +46,19 @@ public class LoginView extends View {
         table.setFillParent(true);
         stage.addActor(table);
 
-        // Welcome Label
         Label titleLabel = new Label("Welcome back!", skin);
         titleLabel.setFontScale(4f);
 
-        // Username Field
         TextField usernameField = new TextField("", skin);
         usernameField.setMessageText("Email");
         usernameField.getStyle().font.getData().setScale(2f);
 
-        // Password Field
         TextField passwordField = new TextField("", skin);
         passwordField.setMessageText("Password");
         passwordField.setPasswordMode(true);
         passwordField.setPasswordCharacter('*');
         passwordField.getStyle().font.getData().setScale(2f);
 
-        // Login Button
         TextButton loginButton = new TextButton("Log in", skin);
         loginButton.getLabel().setFontScale(3f);
         statusLabel = new Label("", skin);
@@ -67,7 +66,6 @@ public class LoginView extends View {
 
         setupLoginButton(loginButton, usernameField, passwordField);
 
-        // Register Button
         TextButton registerButton = new TextButton("New? Register user here", skin);
         registerButton.getLabel().setFontScale(2.5f);
         registerButton.setSize(400, 200);
@@ -82,7 +80,6 @@ public class LoginView extends View {
 
 
 
-        // Add UI Elements to Table
         table.add(logo).size(600, 600).padBottom(20).row();
         table.add(titleLabel).padBottom(30).row();
         table.add(usernameField).width(500).height(100).padBottom(20).row();
@@ -113,7 +110,6 @@ public class LoginView extends View {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 controller.ViewRegisterPage();
-                // game.getViewManager().setView(() -> new RegistrationView(game, authService));
             }
         });
     }

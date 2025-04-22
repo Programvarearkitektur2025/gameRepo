@@ -2,12 +2,16 @@ package io.github.progark.Client.Audio;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
-
+/*
+ * MusicManager.java
+ * This class is responsible for managing the background music in the application.
+ * It handles playing, stopping, and adjusting the volume of the music.
+ */
 public class MusicManager {
 
     private Music currentMusic;
     private String currentTrack = "";
-    private float volume = 1.0f; // default max
+    private float volume = 1.0f; 
 
     public void play(String fileName) {
         if (currentTrack.equals(fileName) && currentMusic != null && currentMusic.isPlaying()) return;
@@ -16,7 +20,7 @@ public class MusicManager {
 
         currentMusic = Gdx.audio.newMusic(Gdx.files.internal(fileName));
         currentMusic.setLooping(true);
-        currentMusic.setVolume(volume); // apply volume
+        currentMusic.setVolume(volume); 
         currentMusic.play();
         currentTrack = fileName;
     }

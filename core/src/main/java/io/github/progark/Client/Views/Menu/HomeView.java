@@ -21,7 +21,13 @@ import io.github.progark.Server.Model.Game.HomeModel;
 import io.github.progark.Client.Views.Components.NavBar;
 import io.github.progark.Server.Model.Game.RoundModel;
 import io.github.progark.Server.database.DataCallback;
-
+/*
+ * HomeView.java
+ * This class is responsible for displaying the home view in the application.
+ * It handles the rendering of the home screen, including the background, game buttons, and user games.
+ * It also manages user interactions with the game buttons and navigation bar.
+ * The view interacts with the HomeController to perform operations related to the home screen.
+ */
 public class HomeView extends View {
 
     private final Skin skin;
@@ -132,7 +138,12 @@ public class HomeView extends View {
     }
 
 
-
+/*
+ * createGameEntry
+ * This method creates a game entry for the game list.
+ * It uses a Stack to combine the avatar and name label into a single clickable element.
+ * The avatar is displayed as an image, and the name label shows the opponent's name.
+ */
     private Stack createGameEntry(HomeModel.GameEntry game) {
         float avatarSize = Gdx.graphics.getWidth() * 1f;
 
@@ -161,6 +172,13 @@ public class HomeView extends View {
         return stack;
     }
 
+    /*
+     * updateGameLists
+     * This method updates the game lists displayed on the home screen.
+     * It clears the existing content table and populates it with the new game entries.
+     * It creates two sections: "Your turn" and "Their turn", each with its own header.
+     * The game entries are created using the createGameEntry method.
+     */
     public void updateGameLists(HomeModel homeModel) {
         contentTable.clear();
         float sectionWidth = Gdx.graphics.getWidth() * 1f;
@@ -197,7 +215,12 @@ public class HomeView extends View {
     }
 
 
-
+/*
+ * renderGames
+ * This method processes the raw game list and updates the game lists displayed on the home screen.
+ * It fetches the current user and determines the game status for each entry.
+ * It categorizes the games into "Your turn" and "Their turn" based on the game status.
+ */
     public void renderGames(List<Map<String, Object>> rawGameList) {
         controller.getLoggedInUserHome(new DataCallback() {
             @Override
@@ -223,11 +246,9 @@ public class HomeView extends View {
                         }
                     }
 
-                    // ✅ SKIP if game is finished
                     if (!game.isMultiplayer()) {
                         if (playedRounds >= totalRounds) continue;
                     } else {
-                        // Only skip if both players are done with all rounds
                         int completedByBoth = 0;
                         for (RoundModel round : rounds) {
                             if (round.hasBothPlayersAnswered()) {
@@ -237,21 +258,18 @@ public class HomeView extends View {
                         if (completedByBoth >= totalRounds) continue;
                     }
 
-                    // ➤ SINGLEPLAYER DISPLAY
                     if (!game.isMultiplayer()) {
                         displayName = "You";
                         homeModel.getYourTurnGames().add(new HomeModel.GameEntry(gameId, displayName, game.getStatus()));
                         continue;
                     }
 
-                    // ➤ WAITING FOR OPPONENT
                     if (opponent == null || opponent.isEmpty()) {
                         displayName = "Waiting for Player to join";
                         homeModel.getTheirTurnGames().add(new HomeModel.GameEntry(gameId, displayName, game.getStatus()));
                         continue;
                     }
 
-                    // ➤ MULTIPLAYER LOGIC
                     displayName = opponent;
                     int currentRound = game.getCurrentRound().intValue();
                     boolean hasPlayed = false;

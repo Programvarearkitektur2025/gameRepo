@@ -17,7 +17,15 @@ import io.github.progark.Client.Controllers.CreateGameController;
 import io.github.progark.Client.Views.View;
 import io.github.progark.Server.Model.Game.GameModel;
 import io.github.progark.Server.database.DataCallback;
-
+/*
+ * CreateGameView.java
+ * This class is responsible for displaying the create game view in the application.
+ * It handles the rendering of the game creation screen, including the background, buttons, and labels.
+ * It also manages user interactions with the game mode, difficulty, and rounds selection.
+ * The view interacts with the CreateGameController to perform operations related to game creation.
+ * The view is designed to be user-friendly and visually appealing, with a focus on providing a smooth user experience.
+ * The view uses textures for buttons and labels, and it employs a table layout for organizing UI elements.
+ */
 public class CreateGameView extends View {
 
     private final Skin skin;
@@ -28,12 +36,10 @@ public class CreateGameView extends View {
     private final Image background;
     private final BitmapFont font;
 
-    // Textures
     private Texture singleGrey, singleWhite, multiGrey, multiWhite;
     private Texture easyGrey, easyWhite, mediumGrey, mediumWhite, hardGrey, hardWhite;
     private Texture oneGrey, oneWhite, twoGrey, twoWhite, threeGrey, threeWhite;
 
-    // State
     private int selectedMode = 0;
     private int selectedDifficulty = 0;
     private int selectedRounds = 0;
@@ -45,14 +51,12 @@ public class CreateGameView extends View {
         this.skin = new Skin(Gdx.files.internal("uiskin.json"));
         this.controller = createGameController;
 
-        // Background and Button
         this.backgroundTexture = new Texture(Gdx.files.internal("Background2.png"));
         this.startGameButtonTexture = new Texture(Gdx.files.internal("CreateGreen.png"));
         this.backButtonTexture = new Texture(Gdx.files.internal("backButtonBlue.png"));
         this.roundsToPlayTextTexture = new Texture(Gdx.files.internal("RoundsToPlayText.png"));
         this.background = new Image(backgroundTexture);
 
-        // Font
         FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("OpenSans.ttf"));
         FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
         parameter.size = 80;
@@ -65,7 +69,6 @@ public class CreateGameView extends View {
         background.setFillParent(true);
         stage.addActor(background);
 
-        // Back Button
         ImageButton backButton = new ImageButton(new TextureRegionDrawable(backButtonTexture));
         backButton.setPosition(30, Gdx.graphics.getHeight() - 100); // Adjust position
         backButton.setSize(80, 80);
@@ -77,7 +80,6 @@ public class CreateGameView extends View {
         });
         stage.addActor(backButton);
 
-        // Main layout
         Table table = new Table();
         table.setFillParent(true);
         table.top().padTop(100);
@@ -187,6 +189,13 @@ public class CreateGameView extends View {
         threeWhite = new Texture("ThreeRoundsWhite.png");
     }
 
+    /*
+     * addToggleLogic
+     * This method adds toggle logic to the provided buttons.
+     * It sets up click listeners for each button to change their appearance
+     * and update the selected index.
+     * The onSelected consumer is called with the index of the selected button.
+     */
     private void addToggleLogic(ImageButton[] buttons, Texture[] whiteTextures, Texture[] greyTextures, IntConsumer onSelected) {
         for (int i = 0; i < buttons.length; i++) {
             final int index = i;

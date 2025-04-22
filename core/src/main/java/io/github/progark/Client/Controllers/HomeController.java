@@ -15,7 +15,12 @@ import io.github.progark.Server.Service.HomeService;
 import io.github.progark.Client.Views.Menu.HomeView;
 import io.github.progark.Server.database.DataCallback;
 import io.github.progark.Server.database.DatabaseManager;
-
+/*
+ *  HomeController.java
+ * This class is responsible for managing the home screen of the application.
+ * It handles user authentication, game navigation, and interaction with the home service.
+ * It also manages the loading and storing of game models.
+ */
 public class HomeController extends Controller {
     private HomeModel model;
     private HomeView view;
@@ -103,7 +108,11 @@ public class HomeController extends Controller {
     public void getLoggedInUserHome(DataCallback callback) {
         authService.getLoggedInUsername(callback);
     }
-
+/*
+ * getRelevantGames
+ * This method retrieves the relevant games for the logged-in user.
+ * It uses the AuthService to get the current user and then fetches the relevant games from the GameService.
+ */
     public void getRelevantGames(DataCallback callback) {
         authService.getCurrentUser(new DataCallback() {
             @Override
@@ -134,7 +143,11 @@ public class HomeController extends Controller {
         });
     }
 
-    // Used for entry click → Game page
+    /*
+     * getGameToOpen
+     * This method retrieves a game to open based on the provided lobby code.
+     * It uses the HomeService to fetch the game data and then updates the main controller with the game.
+     */
     public void getGameToOpen(String lobbyCode) {
         homeService.getGameByLobbyCode(lobbyCode, new DataCallback() {
             @Override

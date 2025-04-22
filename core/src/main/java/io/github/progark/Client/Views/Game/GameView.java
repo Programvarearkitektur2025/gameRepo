@@ -20,7 +20,16 @@ import io.github.progark.Client.Views.View;
 import io.github.progark.Server.Model.Game.RoundModel;
 import io.github.progark.Server.Model.Login.UserModel;
 import io.github.progark.Server.database.DataCallback;
-
+/*
+ * GameView.java
+ * This class is responsible for rendering the game view.
+ * It displays the game background, player scores, and round results.
+ * It also handles user interactions and navigation within the game.
+ * The view is initialized with the game controller and uses Scene2D for rendering.
+ * The view is designed to be flexible and can adapt to both single-player and multiplayer modes.
+ * The view includes features such as a scrollable results table, navigation buttons, and a leaderboard button.
+ * The view is responsible for displaying the game state and updating the UI based on user interactions.
+ */
 public class GameView extends View {
 
     private final Skin skin;
@@ -32,6 +41,9 @@ public class GameView extends View {
     private Table resultTable;
     private List<RoundModel> playedRounds;
     private boolean initialized = false;
+
+    private boolean leaderboardButtonAdded = false;
+
 
     public GameView(GameController controller){
         super();
@@ -81,7 +93,14 @@ public class GameView extends View {
         }
         initialized = true;
     }
-
+/*
+ * initializeMultiplayer
+ * This method initializes the multiplayer game view.
+ * It sets up the background, player scores, and round results.
+ * It also adds navigation buttons and a leaderboard button if all rounds are completed.
+ * The method is called when the game view is first created.
+ * It uses the controller to check for rounds and fetch the current user.
+ */
     private void initializeMultiplayer() {
         commonInitialize();
         addLobbyCodeLabel();
@@ -91,10 +110,13 @@ public class GameView extends View {
         addNavigationButtons();
         if (!playedRounds.isEmpty()) showRoundResult(displayedRoundIndex);
         addPlayRoundButtonIfAvailable(); // this is now guarded inside
+        if (playedRounds.size() == controller.getRounds() && !leaderboardButtonAdded) {
+            addShowLeaderboardButton();
+            leaderboardButtonAdded = true;
+        }
+
     }
 
-
-    // PROFILES AND SCORE
     private void addPlayerScoreRow() {
         Table scoreRow = new Table();
         if (controller.isMultiplayer()) {
@@ -141,18 +163,53 @@ public class GameView extends View {
 
     private void initializePlayedRounds() {
         resultTable = new Table();
-        if (playedRounds == null) playedRounds = new ArrayList<>();
-        else playedRounds.clear();
+        playedRounds = new ArrayList<>();
 
-        for (Object obj : controller.getGames()) {
-            RoundModel round = parseRound(obj);
-            if (round == null) continue;
+        controller.whoAmI(new DataCallback() {
+            @Override
+            public void onSuccess(Object data) {
+                String username = ((UserModel) data).getUsername();
 
-            boolean hasP1 = round.getPlayerOneAnswers() != null && !round.getPlayerOneAnswers().isEmpty();
-            boolean hasP2 = round.getPlayerTwoAnswers() != null && !round.getPlayerTwoAnswers().isEmpty();
-            if (hasP1 || hasP2) playedRounds.add(round);
-        }
+                for (Object obj : controller.getGames()) {
+                    RoundModel round = parseRound(obj);
+                    if (round == null) continue;
+
+                    if (isRoundPlayed(round)) {
+                        playedRounds.add(round);
+                    }
+                }
+
+                if (!playedRounds.isEmpty()) {
+                    displayedRoundIndex = 0;
+                    showRoundResult(displayedRoundIndex);
+                }
+
+                if (controller.isMultiplayer() && allRoundsFullyCompleted() && !leaderboardButtonAdded) {
+                    addShowLeaderboardButton();
+                    leaderboardButtonAdded = true;
+                }
+
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                System.err.println("❌ Could not fetch current user for round filtering.");
+            }
+        });
     }
+
+
+    private boolean allRoundsFullyCompleted() {
+        List<RoundModel> rounds = controller.getGames();
+        for (RoundModel round : rounds) {
+            if (!round.hasBothPlayersAnswered()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+
 
     private RoundModel parseRound(Object obj) {
         if (obj instanceof RoundModel) {
@@ -166,6 +223,14 @@ public class GameView extends View {
     }
 
     private void addResultScrollBox() {
+        if (resultTable == null) {
+            resultTable = new Table();
+        }
+
+        if (resultTable.getChildren().size == 0) {
+            resultTable.add(new Label("No rounds completed yet.", new Label.LabelStyle(smallFont, Color.GRAY))).pad(30);
+        }
+
         ScrollPane scrollPane = new ScrollPane(resultTable);
         scrollPane.setScrollingDisabled(true, false);
         scrollPane.setFadeScrollBars(false);
@@ -177,6 +242,7 @@ public class GameView extends View {
         resultBox.setPosition((Gdx.graphics.getWidth() - 850f) / 2f, 550f);
         stage.addActor(resultBox);
     }
+
 
     private void addNavigationButtons() {
         Table navButtons = new Table();
@@ -225,7 +291,6 @@ public class GameView extends View {
                 int currentRoundIndex = controller.getCurrentRoundIndex();
                 List<RoundModel> allRounds = controller.getGames();
 
-                // 👇 NEW: Check that both players exist
                 String playerOne = controller.getPlayerOne();
                 String playerTwo = controller.getPlayerTwo();
                 boolean bothPlayersPresent = playerOne != null && playerTwo != null
@@ -233,7 +298,7 @@ public class GameView extends View {
 
                 if (!bothPlayersPresent) {
                     System.out.println("Waiting for a second player to join the game.");
-                    return; // Don't show button
+                    return;
                 }
 
                 if (currentRoundIndex < allRounds.size()) {
@@ -284,47 +349,33 @@ public class GameView extends View {
             playedRounds.clear();
         }
 
-
         // USERNAME AND PROFILE PIC
         addPlayerScoreRow();
-
 
         // RESULT TABLE AND ANSWERS
         resultTable = new Table();
         playedRounds.clear();
 
-        for (Object obj : controller.getGames()) {
-            RoundModel round;
-
-            if (obj instanceof RoundModel) {
-                round = (RoundModel) obj;
-            } else if (obj instanceof Map) {
-                round = RoundModel.fromMap((Map<String, Object>) obj);
-            } else {
-                System.err.println("⚠️ Unknown round object type: " + obj.getClass().getSimpleName());
-                continue;
-            }
-
+        List<RoundModel> allRounds = controller.getGames();
+        for (RoundModel round : allRounds) {
             boolean hasP1 = round.getPlayerOneAnswers() != null && !round.getPlayerOneAnswers().isEmpty();
             if (hasP1) {
                 playedRounds.add(round);
             }
         }
 
-
         // SCROLL PANE
         addResultScrollBox();
 
-
         // NAV BUTTONS
         addNavigationButtons();
-
 
         // ROUND RESULTS
         if (!playedRounds.isEmpty()) {
             showRoundResult(displayedRoundIndex);
         }
 
+        // If there are rounds left to play
         if (playedRounds.size() != controller.getRounds()) {
             TextureRegionDrawable nextRoundEnabled;
             TextureRegionDrawable nextRoundDisabled;
@@ -350,25 +401,39 @@ public class GameView extends View {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
                     if (!nextRound.isDisabled()) {
-                        int currentRoundIndex = playedRounds.size();
-
                         List<RoundModel> rounds = controller.getGames();
-                        if (currentRoundIndex >= rounds.size()) currentRoundIndex = rounds.size() - 1;
 
-                        controller.setActiveRoundIndex(currentRoundIndex);
+                        int nextIndex = -1;
+                        for (int i = 0; i < rounds.size(); i++) {
+                            RoundModel round = rounds.get(i);
+                            boolean isPlayed = round.getPlayerOneAnswers() != null && !round.getPlayerOneAnswers().isEmpty();
+                            if (!isPlayed) {
+                                nextIndex = i;
+                                break;
+                            }
+                        }
+
+                        // Fallback to last round (safety)
+                        if (nextIndex == -1) {
+                            nextIndex = rounds.size() - 1;
+                        }
+
+                        controller.setActiveRoundIndex(nextIndex);
                         controller.goToRoundSingleplayer();
                     }
                 }
             });
+
             stage.addActor(nextRound);
         } else {
+            // All rounds played: Show leaderboard
             TextureRegionDrawable showLeaderBoardUp = new TextureRegionDrawable(showLeaderBoardTexture);
             Button.ButtonStyle showLeaderBoardStyle = new Button.ButtonStyle();
             showLeaderBoardStyle.up = showLeaderBoardUp;
             Button showLeaderBoard = new Button(showLeaderBoardStyle);
             showLeaderBoard.setSize(850f, 200);
             showLeaderBoard.setPosition(Gdx.graphics.getWidth() / 2 - showLeaderBoard.getWidth() / 2, 320);
-            showLeaderBoard.setDisabled(false); // No multiplayer check needed
+            showLeaderBoard.setDisabled(false);
 
             showLeaderBoard.addListener(new ClickListener() {
                 @Override
@@ -376,9 +441,11 @@ public class GameView extends View {
                     controller.goToLeaderBoard();
                 }
             });
+
             stage.addActor(showLeaderBoard);
         }
     }
+
 
     private void commonInitialize(){
         controller.checkForRounds();
@@ -411,21 +478,17 @@ public class GameView extends View {
         RoundModel round = playedRounds.get(index);
         int roundNumber = index + 1;
 
-        // Label styles
         Label.LabelStyle headerStyle = new Label.LabelStyle(smallFont, Color.BLACK);
         Label.LabelStyle answerStyle = new Label.LabelStyle(answerFont, Color.BLACK);
 
-        // Create separate tables for Player 1 and Player 2
         Table playerOneTable = new Table();
         Table playerTwoTable = new Table();
 
         playerOneTable.align(Align.left);
         playerTwoTable.align(Align.left);
 
-        // Create a table for displaying the round number and player scores
         resultTable.add(new Label("ROUND " + roundNumber, headerStyle)).colspan(2).padBottom(40).row();
 
-        // Add the answers for Player 1 to its table
         for (Map.Entry<String, Integer> entry : round.getPlayerOneAnswers().entrySet()) {
             Table row = new Table();
             Label answer = new Label(entry.getKey(), answerStyle);
@@ -440,10 +503,8 @@ public class GameView extends View {
         playerOneTable.add(new Label(round.getPlayerOneScore() + " pts", headerStyle)).padBottom(10).padTop(40).row();
 
 
-        // Add Player 2 score if multiplayer
         if (controller.isMultiplayer()) {
 
-            // Add the answers for Player 2 to its table
             for (Map.Entry<String, Integer> entry : round.getPlayerTwoAnswers().entrySet()) {
                 Table row = new Table();
                 Label answer = new Label(entry.getKey(), answerStyle);
@@ -458,59 +519,96 @@ public class GameView extends View {
             playerTwoTable.add(new Label(round.getPlayerTwoScore() + " pts", headerStyle)).padBottom(10).padTop(40).row();
         }
 
-        // Create a parent table to hold both Player 1 and Player 2 tables side by side
         Table sideBySideTable = new Table();
         sideBySideTable.setWidth(1000);
         sideBySideTable.setHeight(2000);
-        sideBySideTable.add(playerOneTable).padRight(500);  // Add Player 1 table with some padding on the right
-        sideBySideTable.add(playerTwoTable);  // Add Player 2 table
+        sideBySideTable.add(playerOneTable).padRight(300);
+        sideBySideTable.add(playerTwoTable).padLeft(50);
 
-        // Add the sideBySideTable to the resultTable
         resultTable.add(sideBySideTable).padTop(10).row();
 
 
-        // Scroll pane setup
         ScrollPane scrollPane = new ScrollPane(resultTable);
-        scrollPane.setScrollingDisabled(false, true);  // Allow vertical scrolling
-        scrollPane.setFadeScrollBars(false);  // Disable scroll bar fading
-
-        // Set the scroll pane size and position
+        scrollPane.setScrollingDisabled(false, true);
+        scrollPane.setFadeScrollBars(false);
         Stack resultBox = new Stack();
         resultBox.add(new Image(new TextureRegionDrawable(textFieldTexture)));
         resultBox.add(scrollPane);
         resultBox.setSize(850f, 1200f);
-        resultBox.setPosition((Gdx.graphics.getWidth() - 850f) / 2f, 550f);  // Adjust position to be centered
+        resultBox.setPosition((Gdx.graphics.getWidth() - 850f) / 2f, 550f);
         stage.addActor(resultBox);
     }
 
 
     public void onRoundsUpdated() {
-        // Clear the currently displayed rounds and reload from the controller
-        if (playedRounds == null) {
-            playedRounds = new ArrayList<>();
-        } else {
-            playedRounds.clear();
-        }
+        playedRounds = new ArrayList<>();
 
-        // Rebuild playedRounds list from the controller's current game state
-        for (Object obj : controller.getGames()) {
-            RoundModel round = parseRound(obj);
-            if (round == null) continue;
+        controller.whoAmI(new DataCallback() {
+            @Override
+            public void onSuccess(Object data) {
+                String username = ((UserModel) data).getUsername();
 
-            boolean hasP1 = round.getPlayerOneAnswers() != null && !round.getPlayerOneAnswers().isEmpty();
-            boolean hasP2 = round.getPlayerTwoAnswers() != null && !round.getPlayerTwoAnswers().isEmpty();
+                for (Object obj : controller.getGames()) {
+                    RoundModel round = parseRound(obj);
+                    if (round == null) continue;
 
-            if (hasP1 || hasP2) {
-                playedRounds.add(round);
+                    if (isRoundPlayed(round)) {
+                        playedRounds.add(round);
+                    }
+                }
+
+                if (!playedRounds.isEmpty() && displayedRoundIndex < playedRounds.size()) {
+                    showRoundResult(displayedRoundIndex);
+                }
+
+                if (controller.isMultiplayer()) {
+                    addPlayRoundButtonIfAvailable();
+
+                    if (playedRounds.size() == controller.getRounds() && !leaderboardButtonAdded) {
+                        addShowLeaderboardButton();
+                        leaderboardButtonAdded = true;
+                    }
+                }
             }
-        }
 
-        showRoundResult(displayedRoundIndex);
+            @Override
+            public void onFailure(Exception e) {
+                System.err.println("❌ Could not fetch current user to filter updated rounds.");
+            }
+        });
+    }
 
+    private boolean isRoundPlayed(RoundModel round) {
         if (controller.isMultiplayer()) {
-            addPlayRoundButtonIfAvailable();
+            return round.hasBothPlayersAnswered();
+        } else {
+            return round.getPlayerOneAnswers() != null && !round.getPlayerOneAnswers().isEmpty();
         }
     }
+
+
+
+    private void addShowLeaderboardButton() {
+        TextureRegionDrawable showLeaderBoardUp = new TextureRegionDrawable(showLeaderBoardTexture);
+        Button.ButtonStyle showLeaderBoardStyle = new Button.ButtonStyle();
+        showLeaderBoardStyle.up = showLeaderBoardUp;
+
+        Button showLeaderBoard = new Button(showLeaderBoardStyle);
+        showLeaderBoard.setSize(850f, 200);
+        showLeaderBoard.setPosition(Gdx.graphics.getWidth() / 2 - showLeaderBoard.getWidth() / 2, 320);
+        showLeaderBoard.setDisabled(false);
+
+        showLeaderBoard.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                controller.goToLeaderBoard();
+            }
+        });
+
+        stage.addActor(showLeaderBoard);
+    }
+
+
 
     public void update() {}
 

@@ -21,7 +21,13 @@ import io.github.progark.Client.Views.Components.NavBar;
 import io.github.progark.Client.Controllers.LeaderboardController;
 import io.github.progark.Server.Model.Game.LeaderboardModel;
 import io.github.progark.Server.database.DataCallback;
-
+/*
+ * LeaderBoardView.java
+ * This class is responsible for displaying the leaderboard view in the application.
+ * It handles the rendering of the leaderboard, user scores, and navigation.
+ * It also manages the loading of leaderboard data and user scores from the server.
+ * The view interacts with the LeaderboardController to perform operations related to the leaderboard.
+ */
 public class LeaderBoardView extends View {
 
     private final Texture backgroundTexture, backButtonTexture, userTexture, pointsTexture,
@@ -35,7 +41,6 @@ public class LeaderBoardView extends View {
         super();
         this.controller = controller;
 
-        // Laster ressurser
         this.backgroundTexture = new Texture(Gdx.files.internal("Background2.png"));
         this.backButtonTexture = new Texture(Gdx.files.internal("backButtonBlue.png"));
         this.userTexture = new Texture(Gdx.files.internal("User_Headline.png"));
@@ -45,24 +50,25 @@ public class LeaderBoardView extends View {
         this.yourPointsTexture = new Texture(Gdx.files.internal("Your_Points.png"));
         this.skin = new Skin(Gdx.files.internal("uiskin.json"));
 
-        // Font
         FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("OpenSans.ttf"));
         FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
         parameter.size = 70;
         font = generator.generateFont(parameter);
         generator.dispose();
 
-        enter(); // kaller initialize()
+        enter(); 
     }
-
+/*
+ * initialize
+ * This method is responsible for initializing the leaderboard view.
+ * It sets up the background, loads the leaderboard data, and displays the user's score.
+ * It also creates the navigation bar and sets up the leaderboard header and trophy image.  
+ */
     @Override
     protected void initialize() {
-        // Bakgrunn
         Image background = new Image(backgroundTexture);
         background.setFillParent(true);
         stage.addActor(background);
-
-        // Laster scoreboard (top-10)
         controller.loadLeaderboard(new DataCallback() {
             @Override
             public void onSuccess(Object data) {
@@ -79,11 +85,9 @@ public class LeaderBoardView extends View {
             }
         });
 
-        // Laster innlogget brukers egen score
         controller.loadOwnScore(new DataCallback() {
             @Override
             public void onSuccess(Object data) {
-                // Forventet at data er Map{ "username": <String>, "score": <Integer> }
                 if (data instanceof Map) {
                     @SuppressWarnings("unchecked")
                     Map<String,Object> userData = (Map<String,Object>) data;
@@ -91,7 +95,7 @@ public class LeaderBoardView extends View {
                     int score = (Integer) userData.get("score");
 
                     Gdx.app.postRunnable(() -> {
-                        showUserScore(username, score); // Viser i bunnen
+                        showUserScore(username, score); 
                     });
                 }
             }
@@ -101,22 +105,18 @@ public class LeaderBoardView extends View {
             }
         });
 
-        // Navbar
         navBar = new NavBar(stage, controller.getMain());
 
-        // Leaderboard header
         Image header = new Image(leaderboardHeader);
         header.setSize(600, 100);
         header.setPosition(170, Gdx.graphics.getHeight() - 250);
         stage.addActor(header);
 
-        // Trophy bilde
         Image trophy = new Image(trophyTexture);
         trophy.setSize(100, 100);
         trophy.setPosition(820, Gdx.graphics.getHeight() - 250);
         stage.addActor(trophy);
 
-        // User / Points overskrifter
         Image userHeadline = new Image(userTexture);
         userHeadline.setSize(200, 70);
         userHeadline.setPosition(50, Gdx.graphics.getHeight() - 450);
@@ -127,7 +127,6 @@ public class LeaderBoardView extends View {
         pointsHeadline.setPosition(Gdx.graphics.getWidth() - 300, Gdx.graphics.getHeight() - 450);
         stage.addActor(pointsHeadline);
 
-        // Tabell for scoreboard (ikke fylt her, fylles i populateLeaderboard())
         Table usernamesTable = new Table();
         usernamesTable.top().padTop(20);
         Table pointsTable = new Table();
@@ -139,15 +138,18 @@ public class LeaderBoardView extends View {
         stage.addActor(usernamesTable);
         stage.addActor(pointsTable);
 
-        // "Your points" label-bilde
         Image yourPointsLabel = new Image(yourPointsTexture);
         yourPointsLabel.setSize(450, 70);
         yourPointsLabel.setPosition(50, Gdx.graphics.getHeight() - 1850);
         stage.addActor(yourPointsLabel);
     }
 
-    /**
-     * Viser top-10 scoreboard i to kolonner (username -> points).
+    /*
+     * populateLeaderboard
+     * This method populates the leaderboard with user scores.
+     * It creates two tables: one for usernames and one for points.
+     * It iterates through the leaderboard data and adds each user's name and score to the respective tables.
+     * The tables are then added to the stage for rendering.
      */
     private void populateLeaderboard(LeaderboardModel model) {
         Map<String, Integer> leaderboard = model.getUserScore();
@@ -180,18 +182,19 @@ public class LeaderBoardView extends View {
             pointsTable.add(pointsLabel).left().width(200).padLeft(100).padTop(20).row();
         }
 
-        // Plasser tabellene
         usernamesTable.setPosition(50, Gdx.graphics.getHeight() - 480);
         pointsTable.setPosition(Gdx.graphics.getWidth() - 250, Gdx.graphics.getHeight() - 480);
 
-        // Legg til i stage
         stage.addActor(usernamesTable);
         stage.addActor(pointsTable);
     }
 
-    /**
-     * Viser brukerens egen score nederst på skjermen.
-     */
+/*
+ * showUserScore
+ * This method displays the user's score on the leaderboard.
+ * It creates labels for the username and score, sets their positions,
+ * and adds them to the stage for rendering.
+ */
     private void showUserScore(String username, int score) {
         Label.LabelStyle labelStyle = new Label.LabelStyle(font, skin.getColor("white"));
 

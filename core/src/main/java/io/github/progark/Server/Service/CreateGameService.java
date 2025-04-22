@@ -10,7 +10,16 @@ import io.github.progark.Server.Model.Game.GameModel;
 import io.github.progark.Server.Model.Game.RoundModel;
 import io.github.progark.Server.database.DataCallback;
 import io.github.progark.Server.database.DatabaseManager;
-
+/*
+ * CreateGameService.java
+ * This class is responsible for creating and managing game lobbies.
+ * It handles the creation of new lobbies, joining existing lobbies,
+ * and updating game models in the database.
+ * It also generates unique lobby codes for new lobbies.
+ * The service interacts with the DatabaseManager to perform operations related to game lobbies.
+ * The service provides methods for creating a lobby, joining a lobby,
+ * and generating a unique lobby code.
+ */
 public class CreateGameService {
 
     private final DatabaseManager databaseManager;
@@ -18,7 +27,14 @@ public class CreateGameService {
     public CreateGameService(DatabaseManager databaseManager) {
         this.databaseManager = databaseManager;
     }
-
+/*
+ * createLobby
+ * This method is responsible for creating a new game lobby.
+ * It retrieves the current user, creates a lobby with the specified parameters,
+ * and updates the lobby model with the created lobby's details.
+ * It also generates a unique lobby code for the new lobby.
+ * The method takes the username, difficulty level, number of rounds,
+ */
     public void createLobby(String username, int difficulty, int rounds, boolean multiplayer, DataCallback callback) {
         try {
             String lobbyCode = generateLobbyCode();
@@ -44,7 +60,13 @@ public class CreateGameService {
             callback.onFailure(e);
         }
     }
-
+/*
+ * joinLobby
+ * This method is responsible for joining an existing game lobby.
+ * It retrieves the lobby data from the database, checks if the lobby is available for joining,
+ * and updates the lobby model with the joining player's username.
+ * It also converts any maps into proper RoundModels and updates the usernames.
+ */
     public void joinLobby(String lobbyCode, String joiningUsername, DataCallback callback) {
         String path = "lobbies/" + lobbyCode;
 

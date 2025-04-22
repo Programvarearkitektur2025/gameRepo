@@ -11,7 +11,13 @@ import io.github.progark.Server.database.DataCallback;
 import io.github.progark.Server.database.DatabaseManager;
 
 import java.util.Map;
-
+/*
+ * JoinGameController.java
+ * This class is responsible for managing the joining of game lobbies.
+ * It handles user authentication, lobby joining, and navigation to the game page.
+ * It also manages the loading and storing of game models.
+ * The controller interacts with the CreateGameService to perform operations related to game lobbies.
+ */
 public class JoinGameController extends Controller {
 
     private final Main main;

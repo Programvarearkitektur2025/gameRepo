@@ -16,7 +16,14 @@ import com.badlogic.gdx.utils.Scaling;
 import io.github.progark.Client.Controllers.JoinGameController;
 import io.github.progark.Client.Views.View;
 import io.github.progark.Main;
-
+/*
+ * JoinGameView.java
+ * This class is responsible for displaying the join game view in the application.
+ * It handles the rendering of the join game screen, including the logo, background, and input fields.
+ * It also manages user interactions with the join game button and back button.
+ * The view interacts with the JoinGameController to perform operations related to joining a game.
+ * The view is initialized with a background image, input fields for the game PIN, and buttons for joining or going back.
+ */
 public class JoinGameView extends View {
     private final Skin skin;
     private final Texture backgroundTexture;
@@ -40,7 +47,6 @@ public class JoinGameView extends View {
         this.backButtonTexture = new Texture(Gdx.files.internal("backButtonBlue.png"));
         this.background = new Image(backgroundTexture);
 
-        // Font
         FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("OpenSans.ttf"));
         FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
         parameter.size = 60;
@@ -60,7 +66,6 @@ public class JoinGameView extends View {
 
         Label.LabelStyle labelStyle = new Label.LabelStyle(font, Color.WHITE);
 
-        // Back Button
         ImageButton backButton = new ImageButton(new TextureRegionDrawable(backButtonTexture));
         backButton.setPosition(30, Gdx.graphics.getHeight() - 100); // Adjust position
         backButton.setSize(80, 80);
@@ -72,7 +77,6 @@ public class JoinGameView extends View {
         });
         stage.addActor(backButton);
 
-        // Bakgrunn for input
         Drawable inputBackground = new TextureRegionDrawable(rectangleTexture);
 
         TextField.TextFieldStyle textFieldStyle = new TextField.TextFieldStyle();

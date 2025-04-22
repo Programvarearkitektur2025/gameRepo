@@ -10,8 +10,10 @@ import io.github.progark.Server.Model.Login.UserModel;
 import io.github.progark.Server.Service.AuthService; // Change to proper interface
 import io.github.progark.Server.database.DataCallback;
 
-
-public class FirebaseAuthManager implements AuthService { // Change interface
+/*
+Class for using for firebase authentication
+ */
+public class FirebaseAuthManager implements AuthService {
 
     private static FirebaseAuthManager authInstance;
     private FirebaseAuth auth;
@@ -26,7 +28,9 @@ public class FirebaseAuthManager implements AuthService { // Change interface
         }
         return authInstance;
     }
-
+/*
+ Function for registering a new user
+ */
     @Override
     public void signUp(String email, String password, String username, DataCallback callback) {
         auth.createUserWithEmailAndPassword(email, password)
@@ -37,13 +41,11 @@ public class FirebaseAuthManager implements AuthService { // Change interface
                         String uid = user.getUid();
                         UserModel userModel = new UserModel(uid, email, username);
 
-                        // Opprett bruker i "Users"
                         FirebaseFirestore.getInstance()
                             .collection("Users")
                             .document(uid)
                             .set(userModel)
                             .addOnSuccessListener(aVoid -> {
-                                // Legg brukernavn med score=0 til i "leaderboard" -> "Leaderboard - 2025"
                                 FirebaseFirestore.getInstance()
                                     .collection("leaderboard")
                                     .document("Leaderboard - 2025")
@@ -77,7 +79,9 @@ public class FirebaseAuthManager implements AuthService { // Change interface
     }
 
 
-
+/*
+Function for signing in
+ */
     @Override
     public void signIn(String email, String password, DataCallback dataCallback) {
         auth.signInWithEmailAndPassword(email, password)
@@ -101,12 +105,25 @@ public class FirebaseAuthManager implements AuthService { // Change interface
     public boolean isUserLoggedIn() {
         return auth.getCurrentUser() != null;
     }
-
+/*
+Function for getting the current user
+ */
+    @Override
+    public String getCurrentUserId() {
+        FirebaseUser user = auth.getCurrentUser();
+        return (user != null) ? user.getUid() : null;
+    }
+/*
+Function for getting the current user email
+    */
     @Override
     public String getCurrentUserEmail() {
         FirebaseUser user = auth.getCurrentUser();
         return (user != null) ? user.getEmail() : "No user logged in";
     }
+/*
+Function for getting the current user username
+    */
 
     @Override
     public String getCurrentUser(DataCallback callback) {
@@ -137,7 +154,13 @@ public class FirebaseAuthManager implements AuthService { // Change interface
             .addOnFailureListener(callback::onFailure);
         return uid;
     }
-
+/*
+ * Function for getting the username from userId
+ * @param userId The userId to get the username for
+ * @param callback The callback to handle the result
+ * @return The username of the user with the given userId
+ * @throws Exception If the userId is null or if the user document does not exist
+ */
     @Override
     public void getUsernameFromUserId(String userId, DataCallback callback) {
         FirebaseFirestore.getInstance()
@@ -150,7 +173,6 @@ public class FirebaseAuthManager implements AuthService { // Change interface
                     String username = documentSnapshot.getString("username");
 
                     if (username != null) {
-                        // Returner brukernavn som suksess
                         callback.onSuccess(username);
                     } else {
                         callback.onFailure(new Exception("User doc found, but 'username' field is null"));
@@ -161,6 +183,9 @@ public class FirebaseAuthManager implements AuthService { // Change interface
             })
             .addOnFailureListener(callback::onFailure);
     }
+    /*
+     * Function for getting the logged in username
+     */
     @Override
     public void getLoggedInUsername(DataCallback callback) {
         FirebaseUser firebaseUser = auth.getCurrentUser();

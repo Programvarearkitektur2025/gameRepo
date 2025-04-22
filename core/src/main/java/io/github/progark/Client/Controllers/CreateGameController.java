@@ -8,7 +8,11 @@ import io.github.progark.Server.Service.AuthService;
 import io.github.progark.Server.Service.CreateGameService;
 import io.github.progark.Server.database.DataCallback;
 import io.github.progark.Server.database.DatabaseManager;
-
+/*
+ * CreateGameController.java
+ * This class is responsible for managing the creation of game lobbies.
+ * It handles user authentication, lobby creation, and navigation to the game page.
+ */
 public class CreateGameController extends Controller {
 
     private final AuthService authService;
@@ -16,7 +20,6 @@ public class CreateGameController extends Controller {
     private CreateGameView createGameView;
     private DatabaseManager databaseManager;
     private final CreateGameService createGameService;
-    // private LobbyService lobbyService;
     private GameModel lobbyModel;
 
     public CreateGameController(AuthService authService, DatabaseManager databaseManager, Main main) {
@@ -49,7 +52,12 @@ public class CreateGameController extends Controller {
     public void viewGamePage(GameModel gameModel){
         main.useGameController(gameModel);
     }
-
+/*
+ * createLobby
+ * This method is responsible for creating a new game lobby.
+ * It retrieves the current user, creates a lobby with the specified parameters,
+ * and updates the lobby model with the created lobby's details.
+ */
     public void createLobby(int difficulty, int rounds, boolean multiplayer, DataCallback callBack) {
         authService.getCurrentUser(new DataCallback() {
             @Override
