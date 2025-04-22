@@ -291,7 +291,6 @@ public class GameView extends View {
                 int currentRoundIndex = controller.getCurrentRoundIndex();
                 List<RoundModel> allRounds = controller.getGames();
 
-                // 👇 NEW: Check that both players exist
                 String playerOne = controller.getPlayerOne();
                 String playerTwo = controller.getPlayerTwo();
                 boolean bothPlayersPresent = playerOne != null && playerTwo != null
@@ -299,7 +298,7 @@ public class GameView extends View {
 
                 if (!bothPlayersPresent) {
                     System.out.println("Waiting for a second player to join the game.");
-                    return; // Don't show button
+                    return;
                 }
 
                 if (currentRoundIndex < allRounds.size()) {
