@@ -509,8 +509,8 @@ public class GameView extends View {
         Table sideBySideTable = new Table();
         sideBySideTable.setWidth(1000);
         sideBySideTable.setHeight(2000);
-        sideBySideTable.add(playerOneTable).padRight(500);
-        sideBySideTable.add(playerTwoTable);
+        sideBySideTable.add(playerOneTable).padRight(300);
+        sideBySideTable.add(playerTwoTable).padLeft(50);
 
         resultTable.add(sideBySideTable).padTop(10).row();
 
