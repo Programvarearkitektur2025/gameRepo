@@ -4,7 +4,12 @@ import io.github.progark.Client.Views.Login.RegistrationView;
 import io.github.progark.Main;
 import io.github.progark.Server.Service.AuthService;
 import io.github.progark.Server.database.DataCallback;
-
+/*
+ * RegistrationController.java
+ * This class is responsible for managing the user registration process.
+ * It handles user authentication, navigation to the login page,
+ * and interaction with the AuthService.
+ */
 public class RegistrationController extends Controller {
     private final AuthService authService;
     private final Main main;
@@ -32,7 +37,13 @@ public class RegistrationController extends Controller {
     public void dispose() {
         view.dispose();
     }
-
+/*
+ * registerUser
+ * This method is responsible for registering a new user.
+ * It retrieves the user's email, password, and username from the view,
+ * and calls the AuthService to perform the sign-up operation.
+ * If the sign-up is successful, it navigates to the login page.
+ */
     public void registerUser(String email,String password, String username){
         authService.signUp(email, password, username, new DataCallback() {
             @Override

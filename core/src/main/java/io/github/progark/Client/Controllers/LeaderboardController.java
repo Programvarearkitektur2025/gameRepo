@@ -10,7 +10,13 @@ import io.github.progark.Server.Service.AuthService;
 import io.github.progark.Server.Service.LeaderboardService;
 import io.github.progark.Server.database.DataCallback;
 import io.github.progark.Server.database.DatabaseManager;
-
+/*
+ * LeaderboardController.java
+ * This class is responsible for managing the leaderboard functionality.
+ * It handles loading the leaderboard data, updating scores, and interacting with the leaderboard service.
+ * It also manages the view for displaying the leaderboard.
+ * The controller interacts with the LeaderboardService to perform operations related to the leaderboard.
+ */
 public class LeaderboardController extends Controller {
 
     private final LeaderBoardView view;
@@ -42,6 +48,12 @@ public class LeaderboardController extends Controller {
         view.dispose();
     }
 
+    /*
+     * loadLeaderboard
+     * This method is responsible for loading the leaderboard data.
+     * It retrieves the leaderboard data from the leaderboard service and updates the leaderboard model.
+     * It also sorts the leaderboard data in descending order based on user scores.
+     */
     public void loadLeaderboard(DataCallback dataCallback) {
         leaderboardService.loadLeaderboard(new DataCallback() {
             @Override
@@ -80,7 +92,11 @@ public class LeaderboardController extends Controller {
             }
         });
     }
-
+/*
+ * incrementScoreFor
+ * This method is responsible for incrementing the score for a specific user.
+ * It uses the leaderboard service to update the user's score in the database.
+ */
     public void incrementScoreFor(String userId) {
         leaderboardService.incrementUserScore(userId, new DataCallback() {
             @Override
@@ -94,6 +110,11 @@ public class LeaderboardController extends Controller {
             }
         });
     }
+    /*
+     * loadLoggedInUserScore
+     * This method is responsible for loading the score of the logged-in user.
+     * It retrieves the username of the logged-in user and then fetches the user's score from the leaderboard service.
+     */
     public void loadLoggedInUserScore(String username) {
         leaderboardService.getUserLeaderboardScore(username, new DataCallback() {
             @Override
@@ -123,8 +144,7 @@ public class LeaderboardController extends Controller {
                 if (data instanceof String) {
                     String username = (String) data;
                     System.out.println("Brukernavn for userId=" + userId + " er: " + username);
-                    // Her kan du evt. sette username i Model,
-                    // eller kalle en View-metode for å vise navnet
+
                 }
             }
 
@@ -136,19 +156,16 @@ public class LeaderboardController extends Controller {
     }
 
     public void loadOwnScore(DataCallback callback) {
-        // 1) Hent brukernavn fra innlogget bruker
         authService.getLoggedInUsername(new DataCallback() {
             @Override
             public void onSuccess(Object data) {
                 if (data instanceof String) {
                     String myUsername = (String) data;
-                    // 2) Hent scoren for myUsername
                     leaderboardService.getUserLeaderboardScore(myUsername, new DataCallback() {
                         @Override
                         public void onSuccess(Object scoreObj) {
                             if (scoreObj instanceof Integer) {
                                 int score = (Integer) scoreObj;
-                                // 3) Returner data
                                 Map<String,Object> result = new HashMap<>();
                                 result.put("username", myUsername);
                                 result.put("score", score);

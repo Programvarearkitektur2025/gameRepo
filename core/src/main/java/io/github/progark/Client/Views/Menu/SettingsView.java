@@ -11,7 +11,13 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import io.github.progark.Client.Controllers.SettingsController;
 import io.github.progark.Client.Views.Components.NavBar;
 import io.github.progark.Client.Views.View;
-
+/*
+ * SettingsView.java
+ * This class is responsible for displaying the settings view in the application.
+ * It handles the rendering of the settings screen, including the background, header, and music options.
+ * It also manages user interactions with the music selection buttons.
+ * The view interacts with the SettingsController to perform operations related to the settings.
+ */
 public class SettingsView extends View {
 
     private Texture backgroundTexture;
@@ -62,25 +68,21 @@ public class SettingsView extends View {
         table.top().padTop(100);
         stage.addActor(table);
 
-        // Add Header
         Image header = new Image(settingsHeaderTexture);
         table.add(header).padBottom(200).width(900).height(245).row();
 
-        // Buttons (initial states)
         jeopardyBtn = createButton(jeopardyOff, "jeopardy", "Jeopardy.mp3");
         edSheeranBtn = createButton(edSheeranOn, "ed", "ThinkingOutLoud.mp3"); // default on
         fixYouBtn = createButton(fixYouOff, "fixyou", "FixYou.mp3");
         giveYouUpBtn = createButton(giveYouUpOff, "giveyouup", "GiveYouUp.mp3");
         noMusicBtn = createButton(noMusicOff, "none", null);
 
-        // Layout all buttons
         table.add(jeopardyBtn).pad(30).width(500).height(160).row();
         table.add(edSheeranBtn).pad(30).width(500).height(160).row();
         table.add(fixYouBtn).pad(30).width(500).height(160).row();
         table.add(giveYouUpBtn).pad(30).width(500).height(160).row();
         table.add(noMusicBtn).pad(30).width(500).height(160).row();
 
-        // Default music if none playing
         if (!controller.getMain().getMusicManager().isPlaying()) {
             controller.getMain().getMusicManager().play("ThinkingOutLoud.mp3");
         }
@@ -119,27 +121,22 @@ public class SettingsView extends View {
     }
 
     private void updateButtons(String active) {
-        // Jeopardy
         jeopardyBtn.getStyle().imageUp = new TextureRegionDrawable(
             new TextureRegion(active.equals("jeopardy") ? jeopardyOn : jeopardyOff)
         );
 
-        // Ed Sheeran
         edSheeranBtn.getStyle().imageUp = new TextureRegionDrawable(
             new TextureRegion(active.equals("ed") ? edSheeranOn : edSheeranOff)
         );
 
-        // Fix You
         fixYouBtn.getStyle().imageUp = new TextureRegionDrawable(
             new TextureRegion(active.equals("fixyou") ? fixYouOn : fixYouOff)
         );
 
-        // Give You Up
         giveYouUpBtn.getStyle().imageUp = new TextureRegionDrawable(
             new TextureRegion(active.equals("giveyouup") ? giveYouUpOn : giveYouUpOff)
         );
 
-        // No Music
         noMusicBtn.getStyle().imageUp = new TextureRegionDrawable(
             new TextureRegion(active.equals("none") ? noMusicOn : noMusicOff)
         );

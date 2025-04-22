@@ -8,7 +8,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-
+/*
+ * HomeService.java
+ * This class is responsible for managing the home screen functionality.
+ * It handles loading user games, creating new games, and retrieving game information.
+ * It interacts with the DatabaseManager to perform operations related to game data.
+ * The service provides methods for generating unique game IDs, loading user games,
+ * creating new games, and retrieving game information by lobby code.
+ */
 public class HomeService {
     private final DatabaseManager databaseManager;
     private final Random random;
@@ -107,17 +114,21 @@ public class HomeService {
 
  */
     }
-
+/*
+ * createNewGame
+ * This method creates a new game in the database.
+ * It generates a unique game ID, sets the initial game data,
+ * and writes the data to the database.
+ */
     public void createNewGame(String userId, String opponentId, DataCallback callback) {
         String gameId = generateGameId();
         String gamePath = "games/" + gameId;
 
-        // Type definitions in java <3
         Map<String, Object> gameData = Map.of(
             "gameId", gameId,
             "creatorId", userId,
             "opponentId", opponentId,
-            "opponentName", "Opponent", // This should be fetched from user data
+            "opponentName", "Opponent",
             "opponentAvatar", "default_avatar.png",
             "status", "active",
             "isCreatorTurn", true,

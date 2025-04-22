@@ -4,7 +4,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 import io.github.progark.Client.Controllers.RoundController;
-
+/*
+ * QuestionModel.java
+ * This class represents a question in the game.
+ * It contains the question text, possible answers, and difficulty level.
+ * The class provides methods to get and set the question, answers, and difficulty level.
+ * It also includes a static method to create a QuestionModel instance from a map of data.
+ * The QuestionModel class is used to manage the questions in the game and is typically used in conjunction with the QuestionController and QuestionView classes.
+ */
 public class QuestionModel {
     public String question;
     private Map<String, Integer> answers;

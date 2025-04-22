@@ -19,6 +19,12 @@ import io.github.progark.Main;
 import io.github.progark.Server.Service.AuthService;
 import io.github.progark.Server.database.DataCallback;
 
+/*
+ * RegistrationView.java
+ * This class is responsible for displaying the registration view in the application.
+ * It handles the rendering of the registration screen, including the logo, background, and input fields.
+ * It also manages user interactions with the registration and back buttons.
+ */
 public class RegistrationView extends View {
     private RegistrationController controller;
     private final Skin skin;
@@ -32,7 +38,6 @@ public class RegistrationView extends View {
         this.controller = controller;
         this.skin = new Skin(Gdx.files.internal("uiskin.json"));
 
-        // Load textures
         this.backgroundTexture = new Texture(Gdx.files.internal("Background_1.png"));
         this.logoTexture = new Texture(Gdx.files.internal("ThinkFastLogo.png"));
 
@@ -42,36 +47,30 @@ public class RegistrationView extends View {
 
     @Override
     protected void initialize() {
-        // Set up background
         background.setFillParent(true);
         stage.addActor(background);
 
-        // Create main table
         Table table = new Table();
         table.setFillParent(true);
         stage.addActor(table);
         table.add(logo).size(600, 600).center().padLeft(150).padBottom(20).row();
 
-        // Title
         Label titleLabel = new Label("Create Account", skin);
         titleLabel.setFontScale(4f);
         table.add(titleLabel).colspan(2).expandX().center().padBottom(30).row();
 
-        // Username field
         TextField usernameField = new TextField("", skin);
         usernameField.setMessageText("Username");
         usernameField.setSize(500, 100);
         usernameField.getStyle().font.getData().setScale(2f);
         table.add(usernameField).colspan(2).width(500).height(100).padBottom(20).row();
 
-        // Email field
         TextField emailField = new TextField("", skin);
         emailField.setMessageText("Email");
         emailField.setSize(500, 100);
         emailField.getStyle().font.getData().setScale(2f);
         table.add(emailField).colspan(2).width(500).height(100).padBottom(20).row();
 
-        // Password field
         TextField passwordField = new TextField("", skin);
         passwordField.setMessageText("Password");
         passwordField.setPasswordMode(true);
@@ -80,7 +79,6 @@ public class RegistrationView extends View {
         passwordField.getStyle().font.getData().setScale(2f);
         table.add(passwordField).colspan(2).width(500).height(110).padBottom(30).row();
 
-        // Register button
         TextButton registerButton = new TextButton("Register", skin);
         registerButton.getLabel().setFontScale(2f);
         registerButton.setSize(500, 120);
@@ -88,7 +86,6 @@ public class RegistrationView extends View {
         table.add(registerButton).colspan(2).width(500).height(100).row();
 
 
-        // Back button
         TextButton backButton = new TextButton("Back to Login", skin);
         backButton.getLabel().setFontScale(2f);
         backButton.setSize(400, 80);
@@ -99,7 +96,6 @@ public class RegistrationView extends View {
         backButton.setStyle(clearStyle);
         table.add(backButton).colspan(2).width(400).height(80).padTop(20).row();
 
-        // Add button listeners
         registerButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {

@@ -4,7 +4,12 @@ import io.github.progark.Client.Views.Login.LoginView;
 import io.github.progark.Main;
 import io.github.progark.Server.Service.AuthService;
 import io.github.progark.Server.database.DataCallback;
-
+/*
+ * LoginController.java
+ * This class is responsible for managing the login process of users.
+ * It handles user authentication, navigation to the home page,
+ * and interaction with the AuthService.
+ */
 public class LoginController extends Controller {
     private final AuthService authService;
     private final Main main;
@@ -38,7 +43,13 @@ public class LoginController extends Controller {
     public void dispose() {
         view.dispose();
     }
-
+/*
+ * logInUser
+ * This method is responsible for logging in the user.
+ * It retrieves the user's email and password from the view,
+ * and calls the AuthService to perform the sign-in operation.
+ * If the sign-in is successful, it navigates to the home page.
+ */
     public void logInUser(String email, String password){
         authService.signIn(email, password, new DataCallback() {
             @Override

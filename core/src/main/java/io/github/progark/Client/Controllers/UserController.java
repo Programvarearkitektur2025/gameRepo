@@ -4,7 +4,12 @@ import io.github.progark.Client.Views.Menu.UserView;
 import io.github.progark.Main;
 import io.github.progark.Server.Model.Login.UserModel;
 import io.github.progark.Server.Service.AuthService;
-
+/*
+ * UserController.java
+ * This class is responsible for managing user interactions and authentication.
+ * It handles user sign-in, sign-out, and navigation to the login screen.
+ * The controller interacts with the AuthService to perform operations related to user authentication.
+ */
 public class UserController extends Controller {
 
     private final AuthService authService;

@@ -11,7 +11,15 @@ import io.github.progark.Server.database.DatabaseManager;
 import java.util.LinkedHashMap;
 
 
-
+/*
+ * LeaderboardService.java
+ * This class is responsible for managing the leaderboard functionality.
+ * It handles loading the leaderboard data, updating scores, and interacting with the leaderboard service.
+ * It also manages the view for displaying the leaderboard.
+ * The controller interacts with the LeaderboardService to perform operations related to the leaderboard.
+ * It provides methods for retrieving user scores, loading the leaderboard, and updating scores based on game results.
+ * The service interacts with the DatabaseManager to perform operations related to the leaderboard data.
+ */
 public class LeaderboardService {
 
     private final DatabaseManager databaseManager;
@@ -22,7 +30,12 @@ public class LeaderboardService {
         this.databaseManager = databaseManager;
         this.authService = authService;
     }
-
+/*
+ * getUserLeaderboardScore
+ * This method retrieves the leaderboard score for a given username.
+ * It reads the leaderboard data from the database and checks if the username exists in the data.
+ * If the username exists, it retrieves the score and returns it through the callback.
+ */
     public void getUserLeaderboardScore(String username, DataCallback callback) {
         databaseManager.readData(LEADERBOARD_DOC, new DataCallback() {
             @Override
@@ -46,7 +59,12 @@ public class LeaderboardService {
             }
         });
     }
-
+/*
+ * loadLeaderboard
+ * This method loads the leaderboard data from the database.
+ * It retrieves the leaderboard data, sorts it in descending order based on user scores,
+ * and returns the top 10 scores through the callback.
+ */
     public void loadLeaderboard(DataCallback callback) {
         databaseManager.readData(LEADERBOARD_DOC, new DataCallback() {
             @Override
@@ -89,9 +107,12 @@ public class LeaderboardService {
 
 
 
-    /**
-     * Øker scoren til en gitt userId med +1 i databasen.
-     */
+/*
+ * incrementUserScore
+ * This method increments the score for a specific user in the leaderboard.
+ * It reads the current leaderboard data, updates the score for the user,
+ * and writes the updated data back to the database.
+ */
     public void incrementUserScore(String userId, DataCallback callback) {
         databaseManager.readData(LEADERBOARD_DOC, new DataCallback() {
             @Override
@@ -125,14 +146,19 @@ public class LeaderboardService {
             }
         });
     }
-
+/*
+ * updateLeaderBoard
+ * This method updates the leaderboard based on the game results.
+ * It retrieves the game model, checks the scores of both players,
+ * and determines the winner.
+ * It then updates the leaderboard data in the database with the winner's score.
+ */
     public void updateLeaderBoard(GameModel gameModel) {
         String playerOne = gameModel.getPlayerOne();
         String playerTwo = gameModel.getPlayerTwo();
         int playerOnePoints = gameModel.getPlayerOnePoints().intValue();
         int playerTwoPoints = gameModel.getPlayerTwoPoints().intValue();
 
-        // Determine the winner
         String winner;
         int winnerPoints;
 
@@ -143,7 +169,6 @@ public class LeaderboardService {
             winner = playerTwo;
             winnerPoints = playerTwoPoints;
         } else {
-            // It's a tie, don't update the leaderboard
             return;
         }
 

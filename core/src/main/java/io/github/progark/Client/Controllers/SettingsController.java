@@ -2,7 +2,11 @@ package io.github.progark.Client.Controllers;
 
 import io.github.progark.Client.Views.Menu.SettingsView;
 import io.github.progark.Main;
-
+/*
+ * SettingsController.java
+ * This class is responsible for managing the settings screen of the application.
+ * It handles user interactions with the settings view and provides navigation back to the home screen.
+ */
 public class SettingsController extends Controller {
 
     private final Main main;

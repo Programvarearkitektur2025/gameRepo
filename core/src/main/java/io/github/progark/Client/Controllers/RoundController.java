@@ -12,7 +12,17 @@ import io.github.progark.Server.Service.AuthService;
 import io.github.progark.Server.Service.GameService;
 import io.github.progark.Server.database.DataCallback;
 import io.github.progark.Server.database.DatabaseManager;
-
+/*
+ * RoundController.java
+ * This class is responsible for managing the game rounds.
+ * It handles player interactions, answer submissions, and game state updates.
+ * It also manages the view for displaying the game round.
+ * The controller interacts with the GameService to perform operations related to game rounds.
+ * It also handles the timer for each round and updates the game state accordingly.
+ * The controller is responsible for merging round models and ensuring that the game state is consistent across all players.
+ * The controller also handles the end of the round and awards points to the winning player.
+ * The controller is responsible for managing the game view and updating it based on the game state.
+ */
 public class RoundController extends Controller {
     private GameService gameService;
     private RoundModel roundModel;
@@ -41,7 +51,6 @@ public class RoundController extends Controller {
             System.err.println("⚠️ Unknown round data type: " + roundRaw.getClass().getSimpleName());
         }
 
-        // Ensure player usernames are set correctly
         if (roundModel.playerOneUsername == null) {
             roundModel.playerOneUsername = parentGameModel.getPlayerOne();
         }
@@ -54,7 +63,6 @@ public class RoundController extends Controller {
             public void onSuccess(Object data) {
                 String username = (String) data;
 
-                // ✅ Reset timer only for players who haven't played yet
                 if (!roundModel.hasPlayerCompleted(username)) {
                     System.out.println("🔁 Resetting timer to 30 for " + username);
                     roundModel.setTimeRemaining(30);
@@ -78,7 +86,15 @@ public class RoundController extends Controller {
     public void setGameView(RoundView gameView) {
         this.gameView = gameView;
     }
-
+/*
+ * handleAnswerSubmission
+ * This method handles the submission of answers by the players.
+ * It checks if the answer is valid and if the player has already submitted an answer.
+ * If the answer is valid, it updates the game state and notifies the view.
+ * It also updates the scores and submitted answers for the current player.
+ * The method uses the AuthService to get the logged-in username and checks if the answer is valid.
+ * If the answer is valid, it updates the round model and notifies the view.
+ */
     public void handleAnswerSubmission(String input) {
         String answer = input.trim();
 
@@ -94,7 +110,6 @@ public class RoundController extends Controller {
 
                 boolean success = submitAnswer(currentPlayer, answer);
                 if (success) {
-                    // 💡 Ensure the updated roundModel is saved back to the game list
                     parentGameModel.getGames().set(roundIndex, roundModel);
 
                     gameView.updateScore(getCurrentPlayerScore(currentPlayer));
@@ -131,7 +146,11 @@ public class RoundController extends Controller {
             return 0;
         }
     }
-
+/*
+ * getCurrentPlayerAnswers
+ * This method retrieves the current player's answers based on their username.
+ * It checks if the username matches either player one or player two in the round model.
+ */
     public Map<String, Integer> getCurrentPlayerAnswers(String username) {
         if (username.equals(roundModel.playerOneUsername)) {
             return roundModel.getPlayerOneAnswers();
@@ -146,7 +165,16 @@ public class RoundController extends Controller {
     public void goToGame() {
         main.useGameController(parentGameModel);
     }
-
+/*
+ * updateGameState
+ * This method updates the game state based on the time elapsed since the last update.
+ * It checks if the time is up and if the round has already been processed.
+ * If the time is up and the round has not been processed, it fetches the logged-in username
+ * and checks if the player has already completed the round.
+ * If the player has not completed the round, it allows them to continue playing.
+ * If the player has completed the round, it processes the end of the round and awards points to the winner.
+ * It also updates the game view with the time remaining and shows the game over screen if necessary.
+ */
     public void updateGameState(float delta) {
         roundModel.updateTime(delta);
         gameView.updateTimeRemaining(roundModel.getTimeRemaining());
@@ -206,7 +234,13 @@ public class RoundController extends Controller {
     }
 
 
-
+/*
+ * awardPointToRoundWinner
+ * This method awards a point to the player who won the round.
+ * It compares the scores of both players and updates their points accordingly.
+ * If the scores are equal, it indicates a tie and no points are awarded.
+ * It uses the parent game model to update the points for each player.
+ */
     private void awardPointToRoundWinner() {
         int p1Score = roundModel.getPlayerOneScore();
         int p2Score = roundModel.getPlayerTwoScore();
@@ -228,7 +262,7 @@ public class RoundController extends Controller {
     }
 
     public int getScore() {
-        return roundModel.getPlayerOneScore(); // Might be obsolete in multiplayer
+        return roundModel.getPlayerOneScore(); 
     }
 
     public float getTimeRemaining() {
@@ -243,9 +277,7 @@ public class RoundController extends Controller {
     }
 
     private boolean bothPlayersHavePlayed(RoundModel round) {
-        // Check if both players have been marked as completed
 
-        // For multiplayer, both players must have completed
         if (parentGameModel.isMultiplayer()) {
 
             boolean p1Completed = round.hasPlayerCompleted(round.playerOneUsername);
@@ -254,11 +286,17 @@ public class RoundController extends Controller {
             return p1Completed && p2Completed;
         }
 
-        // For single player, only player one needs to complete
 
         return round.hasPlayerCompleted(round.playerOneUsername);
     }
-
+/*
+ * endRoundEarly
+ * This method is called to end the round early.
+ * It fetches the logged-in username and marks the player as completed.
+ * It also sets the time remaining to 0 and submits a default answer if the player has not answered yet.
+ * It updates the game model with the new round state and checks if both players have played.
+ * If both players have played, it awards points to the round winner.
+ */
     public void endRoundEarly() {
         for (RoundModel round: parentGameModel.getGames())
         {
@@ -306,34 +344,7 @@ public class RoundController extends Controller {
         });
     }
 
-    /*
-    private void fetchLatestRoundThenSave(Runnable onReadyToSave) {
-        gameService.fetchCurrentRound(parentGameModel, new DataCallback() {
-            @Override
-            public void onSuccess(Object data) {
-                if (data instanceof RoundModel) {
-                    int roundIndex = parentGameModel.getCurrentRound().intValue();
-
-                    mergeRoundModels((RoundModel) data, roundModel);
-                    parentGameModel.getGames().set(roundIndex, roundModel);
-                }
-                onReadyToSave.run();
-            }
-
-            @Override
-            public void onFailure(Exception e) {
-                System.err.println("⚠️ Could not fetch latest round before saving: " + e.getMessage());
-                // Proceed anyway (optional fallback)
-                onReadyToSave.run();
-            }
-        });
-
-    }
-
-     */
-
     private void mergeRoundModels(RoundModel latest, RoundModel local) {
-        // Merge player one's answers
         if (latest.getPlayerOneAnswers() != null) {
             for (Map.Entry<String, Integer> entry : latest.getPlayerOneAnswers().entrySet()) {
                 if (!local.getPlayerOneAnswers().containsKey(entry.getKey())) {
@@ -342,7 +353,6 @@ public class RoundController extends Controller {
             }
         }
 
-        // Merge player two's answers
         if (latest.getPlayerTwoAnswers() != null) {
             for (Map.Entry<String, Integer> entry : latest.getPlayerTwoAnswers().entrySet()) {
                 if (!local.getPlayerTwoAnswers().containsKey(entry.getKey())) {
@@ -351,7 +361,6 @@ public class RoundController extends Controller {
             }
         }
 
-        // Update scores to reflect all answers
         int p1Score = 0;
         for (Integer value : local.getPlayerOneAnswers().values()) {
             p1Score += value;
@@ -364,7 +373,6 @@ public class RoundController extends Controller {
         }
         local.setPlayerTwoScore(p2Score);
 
-        // Preserve the time remaining from the local model
         local.setTimeRemaining(Math.min(latest.getTimeRemaining(), local.getTimeRemaining()));
     }
 

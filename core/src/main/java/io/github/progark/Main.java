@@ -22,6 +22,17 @@ import io.github.progark.Server.database.DatabaseManager;
 import io.github.progark.Client.Audio.MusicManager;
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
+
+/*
+ * Main.java
+ * This is the main class of the application.
+ * It initializes the game, manages the controllers, and handles the rendering loop.
+ * It also manages the authentication and database services.
+ * The class extends the Game class from libGDX.
+ * It is responsible for creating the initial screen and managing the game state.
+ * The class also provides methods to switch between different controllers.
+ * It uses the ControllerManager to manage the current controller and handle user input.
+ */
 public class Main extends Game {
     private AuthService authService;
     private ControllerManager controllerManager;

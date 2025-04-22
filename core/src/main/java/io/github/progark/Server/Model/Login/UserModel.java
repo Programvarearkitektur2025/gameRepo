@@ -1,5 +1,11 @@
 package io.github.progark.Server.Model.Login;
-
+/*
+ * UserModel.java
+ * This class represents a user in the application.
+ * It contains the user's unique identifier (uid), email, and username.
+ * The class provides methods to get and set these attributes.
+ * The UserModel class is used to manage user data and is typically used in conjunction with the UserController and UserView classes.
+ */
 public class UserModel {
 
     private String uid;

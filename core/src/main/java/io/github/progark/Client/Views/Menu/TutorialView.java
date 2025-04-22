@@ -10,7 +10,12 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 
 import io.github.progark.Client.Controllers.TutorialController;
 import io.github.progark.Client.Views.View;
-
+/*
+ * TutorialView.java
+ * This class is responsible for displaying the tutorial view in the application.   
+ * It handles the rendering of the tutorial screen, including the background, tutorial image, and back button.
+ * It also manages user interactions with the back button.
+ */
 public class TutorialView extends View {
 
     private Texture backgroundTexture;

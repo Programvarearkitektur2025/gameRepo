@@ -4,7 +4,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+/*
+ * RoundModel.java
+ * This class represents a round in the game.
+ * It contains the question, player usernames, their answers, scores, and time remaining.
+ * The class provides methods to submit answers, check if players have completed the round, and manage the game state.
+ * The RoundModel class is used to manage the game rounds and is typically used in conjunction with the RoundController and RoundView classes.
+ * It is part of the server-side logic and is responsible for handling game data related to the rounds.
+ */
 public class RoundModel {
 
     private final Map<String, Integer> playerOneAnswers = new HashMap<>();

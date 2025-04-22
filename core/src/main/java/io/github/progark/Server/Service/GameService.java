@@ -12,7 +12,15 @@ import io.github.progark.Server.Model.Game.RoundModel;
 import io.github.progark.Server.Model.Login.UserModel;
 import io.github.progark.Server.database.DataCallback;
 import io.github.progark.Server.database.DatabaseManager;
-
+/*
+ * GameService.java
+ * This class is responsible for managing game-related operations.
+ * It handles loading game rounds, creating new games, and updating game states.
+ * It interacts with the DatabaseManager to perform CRUD operations on game data.
+ * The service also manages the game state and player interactions.
+ * It provides methods to fetch relevant games, set new game rounds, and update the leaderboard.
+ * The service is designed to be used by the GameController and other components of the application.
+ */
 public class GameService {
 
     private final DatabaseManager databaseManager;
@@ -20,6 +28,12 @@ public class GameService {
         this.databaseManager = databaseManager;
     }
 
+    /*
+     * getRelevantGames
+     * This method retrieves relevant games for a given user from the database.
+     * It filters the games based on the user's username and returns a list of relevant games.
+     * The method uses a callback to return the results asynchronously.
+     */
 
     public void getRelevantGames(UserModel user, DataCallback callback) {
         String path = "lobbies";
@@ -71,7 +85,12 @@ public class GameService {
         });
     }
 
-
+/*
+ * setNewGameRounds
+ * This method updates the game state in the database with new rounds.  
+ * It retrieves the existing game data, updates the rounds and scores,
+ * and writes the updated data back to the database.
+ */
     public void setNewGameRounds(GameModel gameModel, List<RoundModel> newRounds) {
         String path = "lobbies/" + gameModel.getLobbyCode();
 
@@ -105,7 +124,12 @@ public class GameService {
         });
     }
 
-
+/*
+ * loadRoundsFromFirebase
+ * This method loads game rounds from Firebase based on the specified difficulty level.
+ * It retrieves questions from the database, filters them based on difficulty,
+ * and creates RoundModel objects for the game.
+ */
     public void loadRoundsFromFirebase(GameModel gameModel, int totalRounds, DataCallback callback) {
         String path = "questions";
 
@@ -241,7 +265,12 @@ public class GameService {
             }
         });
     }
-
+/*
+ * loadExistingRoundsFromFirebase
+ * This method loads existing rounds from Firebase for a given game model.
+ * It retrieves the lobby data, checks for existing rounds,
+ * and converts them into RoundModel objects.
+ */
     public void loadExistingRoundsFromFirebase(GameModel gameModel, DataCallback callback) {
         String path = "lobbies/" + gameModel.getLobbyCode();
 

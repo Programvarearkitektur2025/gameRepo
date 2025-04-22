@@ -20,7 +20,16 @@ import io.github.progark.Client.Views.View;
 import io.github.progark.Server.Model.Game.RoundModel;
 import io.github.progark.Server.Model.Login.UserModel;
 import io.github.progark.Server.database.DataCallback;
-
+/*
+ * GameView.java
+ * This class is responsible for rendering the game view.
+ * It displays the game background, player scores, and round results.
+ * It also handles user interactions and navigation within the game.
+ * The view is initialized with the game controller and uses Scene2D for rendering.
+ * The view is designed to be flexible and can adapt to both single-player and multiplayer modes.
+ * The view includes features such as a scrollable results table, navigation buttons, and a leaderboard button.
+ * The view is responsible for displaying the game state and updating the UI based on user interactions.
+ */
 public class GameView extends View {
 
     private final Skin skin;
@@ -84,7 +93,14 @@ public class GameView extends View {
         }
         initialized = true;
     }
-
+/*
+ * initializeMultiplayer
+ * This method initializes the multiplayer game view.
+ * It sets up the background, player scores, and round results.
+ * It also adds navigation buttons and a leaderboard button if all rounds are completed.
+ * The method is called when the game view is first created.
+ * It uses the controller to check for rounds and fetch the current user.
+ */
     private void initializeMultiplayer() {
         commonInitialize();
         addLobbyCodeLabel();
@@ -101,8 +117,6 @@ public class GameView extends View {
 
     }
 
-
-    // PROFILES AND SCORE
     private void addPlayerScoreRow() {
         Table scoreRow = new Table();
         if (controller.isMultiplayer()) {

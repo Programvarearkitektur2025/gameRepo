@@ -5,7 +5,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+/*
+ * GameModel.java
+ * This class represents the game model in the application.
+ * It contains information about the game lobby, players, rounds, and game status.
+ * The class provides methods to create a game model from a map, check if the game is full,
+ * get opponent information, and convert the game model to a map for storage.
+ * It also includes methods to manage game rounds and player points.
+ * The class is designed to be used in conjunction with the GameService and DatabaseManager classes.
+ * The GameModel class is part of the server-side logic and is used to manage game data.
+ * It is responsible for handling the game state, player interactions, and synchronization with the database.
+ */
 public class GameModel {
 
     private String lobbyCode;
@@ -24,7 +34,16 @@ public class GameModel {
     private List<RoundModel> games;
     private Number currentRound;
 
-
+/*
+ * fromMap
+ * This method creates a GameModel instance from a map of data.
+ * It extracts the relevant fields from the map and sets them in the GameModel instance.
+ * The method handles different data types and provides default values for missing fields.
+ * It also converts timestamps and rounds into the appropriate format.
+ * The method is designed to be used when retrieving game data from the database.
+ * It ensures that the GameModel instance is populated with the correct data for further processing.
+ * The method is static and can be called without creating an instance of the GameModel class.
+ */
     public static GameModel fromMap(String lobbyCode, Map<String, Object> data) {
         GameModel lobby = new GameModel();
 

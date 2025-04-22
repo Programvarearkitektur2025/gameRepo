@@ -16,7 +16,13 @@ import io.github.progark.Client.Controllers.UserController;
 import io.github.progark.Client.Views.View;
 import io.github.progark.Client.Views.Components.NavBar;
 import io.github.progark.Server.Model.Login.UserModel;
-
+/*
+ * UserView.java
+ * This class is responsible for displaying the user view in the application.
+ * It handles the rendering of the user screen, including the background, profile icon, and logout button.
+ * It also manages user interactions with the logout button.
+ * The view interacts with the UserController to perform operations related to user management.
+ */
 public class UserView extends View {
 
     private final Texture backgroundTexture;
@@ -35,12 +41,10 @@ public class UserView extends View {
         this.controller = controller;
 
 
-        // Assets
         backgroundTexture = new Texture(Gdx.files.internal("Background2.png"));
         logoutButtonTexture = new Texture(Gdx.files.internal("logout.png"));
         personTexture = new Texture(Gdx.files.internal("Person.png"));
 
-        // Fonts
         FreeTypeFontGenerator gen = new FreeTypeFontGenerator(Gdx.files.internal("OpenSans.ttf"));
         FreeTypeFontGenerator.FreeTypeFontParameter usernameParams = new FreeTypeFontGenerator.FreeTypeFontParameter();
         usernameParams.size = 60;
@@ -56,7 +60,6 @@ public class UserView extends View {
 
     @Override
     protected void initialize() {
-        // Background
         Image bg = new Image(backgroundTexture);
         bg.setFillParent(true);
         stage.addActor(bg);
@@ -66,12 +69,10 @@ public class UserView extends View {
         table.top().padTop(200);
         stage.addActor(table);
 
-        // Person image
         Image profileIcon = new Image(personTexture);
         table.add(profileIcon).size(400).padTop(150).row();
 
 
-        // Logout button
         ImageButton logoutBtn = new ImageButton(new TextureRegionDrawable(new TextureRegion(logoutButtonTexture)));
         logoutBtn.addListener(new ClickListener() {
             @Override
@@ -81,7 +82,6 @@ public class UserView extends View {
         });
         table.add(logoutBtn).width(600).height(260).padTop(400).row();
 
-        // NavBar
         navBar = new NavBar(stage, controller.getMain());
     }
 
