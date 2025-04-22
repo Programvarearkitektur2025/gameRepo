@@ -108,8 +108,8 @@ Function for signing in
 /*
 Function for getting the current user
  */
-    @Override
-    public String getCurrentUserId() {
+@Override
+public String getCurrentUserId() {
         FirebaseUser user = auth.getCurrentUser();
         return (user != null) ? user.getUid() : null;
     }
