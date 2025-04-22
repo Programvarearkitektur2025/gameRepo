@@ -228,7 +228,7 @@ public class GameView extends View {
         }
 
         if (resultTable.getChildren().size == 0) {
-            resultTable.add(new Label("No rounds played yet.", new Label.LabelStyle(smallFont, Color.GRAY))).pad(30);
+            resultTable.add(new Label("No rounds completed yet.", new Label.LabelStyle(smallFont, Color.GRAY))).pad(30);
         }
 
         ScrollPane scrollPane = new ScrollPane(resultTable);
@@ -523,8 +523,8 @@ public class GameView extends View {
         Table sideBySideTable = new Table();
         sideBySideTable.setWidth(1000);
         sideBySideTable.setHeight(2000);
-        sideBySideTable.add(playerOneTable).padRight(500);
-        sideBySideTable.add(playerTwoTable);
+        sideBySideTable.add(playerOneTable).padRight(300);
+        sideBySideTable.add(playerTwoTable).padLeft(50);
 
         resultTable.add(sideBySideTable).padTop(10).row();
 
